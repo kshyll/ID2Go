@@ -1,0 +1,338 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="queue.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="queue.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+
+    <header class="topbar">
+      <span id="connection-badge" class="connection-badge">
+        Checking connection
+      </span>
+    </header>
+
+    <nav class="mode-tabs" aria-label="Queue view">
+      <button class="mode-tab active" data-view="student-view">
+        Student View
+      </button>
+      <button class="mode-tab" data-view="operator-view">
+        Personnel View
+      </button>
+    </nav>
+
+    <!-- STUDENT VIEW -->
+    <section id="student-view" class="view-panel active">
+
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">STUDENT PORTAL</p>
+          <h2>My Queue Status</h2>
+          <p class="muted">Check your appointment and follow the live queue.</p>
+        </div>
+        <span class="live-label"><i></i> Live queue</span>
+      </div>
+
+      <form id="student-lookup-form" class="lookup-form">
+        <label for="student-id-search">Student ID Number</label>
+
+        <div class="lookup-row">
+          <input
+            id="student-id-search"
+            type="text"
+            placeholder="Enter your student ID"
+            autocomplete="off"
+            required
+          >
+          <button class="btn btn-dark" type="submit">
+            Find Queue
+          </button>
+        </div>
+
+        <small>
+          Use the same student ID entered when you booked your appointment.
+        </small>
+      </form>
+
+      <div id="student-empty" class="empty-state">
+        <div class="empty-icon">⌕</div>
+        <h3>Find your appointment</h3>
+        <p>Enter your student ID number above to view your queue details.</p>
+      </div>
+
+      <div id="student-result" class="hidden">
+
+        <article class="queue-ticket">
+          <div class="ticket-top">
+            <span class="ticket-caption">YOUR QUEUE NUMBER</span>
+            <span id="student-status" class="status-pill">Waiting</span>
+          </div>
+
+          <div id="student-queue-number" class="queue-number">—</div>
+          <p id="student-service" class="ticket-service">
+            Appointment service
+          </p>
+
+          <div class="ticket-stats">
+            <div>
+              <span>Students ahead</span>
+              <strong id="students-ahead">—</strong>
+            </div>
+            <div>
+              <span>Assigned station</span>
+              <strong id="student-station">Not assigned</strong>
+            </div>
+          </div>
+        </article>
+
+        <article id="grace-card" class="grace-card hidden">
+          <div>
+            <p class="eyebrow">ACTION REQUIRED</p>
+            <h3>You have been temporarily skipped</h3>
+            <p>
+              Please report to the ID Office before your five-minute
+              grace period ends.
+            </p>
+          </div>
+          <div id="grace-countdown" class="countdown">05:00</div>
+        </article>
+
+        <section class="content-card">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">NOW SERVING</p>
+              <h3>Active ID Stations</h3>
+            </div>
+            <span class="live-dot">Updating</span>
+          </div>
+
+          <div id="station-list" class="station-grid"></div>
+        </section>
+
+        <section class="content-card appointment-card">
+          <p class="eyebrow">APPOINTMENT DETAILS</p>
+          <h3 id="student-name">Student</h3>
+
+          <div class="detail-grid">
+            <div>
+              <span>Date</span>
+              <strong id="student-date">—</strong>
+            </div>
+            <div>
+              <span>Time slot</span>
+              <strong id="student-time">—</strong>
+            </div>
+          </div>
+
+          <p id="student-message" class="muted small"></p>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- PERSONNEL VIEW -->
+    <section id="operator-view" class="view-panel">
+
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">AUTHORIZED PERSONNEL</p>
+          <h2>Live Queue Management</h2>
+          <p class="muted">
+            Monitor appointments and update queue progress.
+          </p>
+        </div>
+        <span class="live-label"><i></i> Live queue</span>
+      </div>
+
+      <!-- OPERATOR CONTROLS -->
+      <div class="operator-controls content-card">
+
+        <div class="control-field">
+          <label for="operator-date">Appointment date</label>
+          <input id="operator-date" type="date">
+        </div>
+
+        <div class="control-field">
+          <label for="station-select">Your station</label>
+          <select id="station-select">
+            <option value="Station 1">Station 1</option>
+            <option value="Station 2">Station 2</option>
+            <option value="Station 3">Station 3</option>
+            <option value="Station 4">Station 4</option>
+          </select>
+        </div>
+
+        <button id="refresh-queue" class="btn btn-light" type="button">
+          Refresh
+        </button>
+      </div>
+
+      <!-- QUEUE SUMMARY -->
+      <div class="summary-grid">
+        <article class="summary-card">
+          <span>Waiting</span>
+          <strong id="count-waiting">0</strong>
+        </article>
+
+        <article class="summary-card">
+          <span>Serving</span>
+          <strong id="count-serving">0</strong>
+        </article>
+
+        <article class="summary-card">
+          <span>Completed</span>
+          <strong id="count-completed">0</strong>
+        </article>
+
+        <article class="summary-card">
+          <span>Standby</span>
+          <strong id="count-skipped">0</strong>
+        </article>
+      </div>
+
+      <!-- CURRENT STATION -->
+      <section class="content-card">
+
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">CURRENT STATION</p>
+            <h3 id="current-station-title">Station 1</h3>
+          </div>
+          <span id="station-current-status" class="status-pill">
+            Available
+          </span>
+        </div>
+
+        <div id="current-student" class="current-student">
+          <span class="muted">
+            No student is currently being served at this station.
+          </span>
+        </div>
+
+        <div class="action-row">
+          <button id="call-next" class="btn btn-dark" type="button">
+            Call Next Student
+          </button>
+
+          <button
+            id="complete-current"
+            class="btn btn-light"
+            type="button"
+            disabled
+          >
+            Complete Service
+          </button>
+
+          <button
+            id="skip-current"
+            class="btn btn-outline"
+            type="button"
+            disabled
+          >
+            Temporarily Skip
+          </button>
+        </div>
+
+        <p class="helper-text">
+          Calling a student changes their status to Serving and assigns
+          your selected station.
+        </p>
+
+      </section>
+
+      <!-- 6. LIVE QUEUE MANAGEMENT -->
+      <section class="content-card">
+
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">CENTRALIZED QUEUE</p>
+            <h3>Live Queue</h3>
+          </div>
+
+          <span id="queue-date-label" class="muted small"></span>
+        </div>
+
+        <!-- SEARCH BAR AND STATION FILTER -->
+        <div class="queue-filters">
+
+          <input
+            type="search"
+            id="queue-search"
+            placeholder="Search student or queue..."
+            autocomplete="off"
+          >
+
+          <select id="queue-station-filter">
+            <option value="all">All Stations</option>
+            <option value="Station 1">Station 1</option>
+            <option value="Station 2">Station 2</option>
+            <option value="Station 3">Station 3</option>
+            <option value="Station 4">Station 4</option>
+          </select>
+
+        </div>
+
+        <!-- LIVE QUEUE TABLE -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Queue</th>
+                <th>Student</th>
+                <th>Station</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="queue-table-body">
+              <tr>
+                <td colspan="4" class="table-empty">
+                  Loading appointments...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- 5. STANDBY / GRACE PERIOD MANAGEMENT -->
+      <section class="content-card">
+
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">FIVE-MINUTE WINDOW</p>
+            <h3>Standby / Grace Period</h3>
+          </div>
+
+          <span id="standby-count" class="muted small">
+            0 students
+          </span>
+        </div>
+
+        <div id="standby-list" class="standby-list">
+          <p class="muted small">
+            No temporarily skipped students.
+          </p>
+        </div>
+
+      </section>
+
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer-note">
+      <strong>ID2Go</strong>
+      <span>Student ID Services Queue</span>
+    </footer>
+
+  </main>
+</body>
+</html>
+
