@@ -6,12 +6,14 @@
   <title>ID2GO - Book Appointment</title>
   <!-- Supabase JS Client Library -->
   <script src="https://rvmhhggglfgiripeaufw.supabase.co/rest/v1/"></script>
-  <link rel="stylesheet" href="booking.css">
+  <link rel="stylesheet" href="css/booking.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <script defer src="js/navigation.js"></script>
 </head>
 <body>
 
   <main class="mobile-container">
-    
+
     <!-- STEP 1: SELECT SERVICE -->
     <section id="step-1" class="step-card active">
       <header class="step-header">
@@ -21,7 +23,7 @@
 
       <div class="step-body">
         <h2 class="section-title">Choose ID Service</h2>
-        
+
         <div class="service-options">
           <label class="service-option selected">
             <input type="radio" name="id_service" value="First-Time ID Picture Taking" checked>
@@ -95,7 +97,7 @@
         <!-- Emergency Contact Section -->
         <div class="form-section-divider">
           <h3 class="subsection-title">Emergency Contact</h3>
-          
+
           <div class="form-group">
             <label for="emergencyName">Contact Name</label>
             <input type="text" id="emergencyName" name="emergencyName" placeholder="Enter contact name" required>
@@ -144,7 +146,7 @@
             <span id="calendar-month-year" class="cal-month-title"></span>
             <button type="button" id="next-month" class="cal-nav-btn">&gt;</button>
           </div>
-          
+
           <div class="calendar-grid">
             <div class="cal-day-header">S</div>
             <div class="cal-day-header">M</div>
@@ -256,6 +258,6 @@
 
   </main>
 
-  <script src="booking.js"></script>
+  <script src="js/booking.js"></script>
 </body>
 </html>
