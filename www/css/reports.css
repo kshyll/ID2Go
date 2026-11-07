@@ -1,60 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 .reports-shell {
-    max-width: 480px;
-    min-height: 100vh;
-    margin: auto;
-    background: #f7f8fa;
-    font-family: "Inter", Arial, sans-serif;
+    background: #f7f9fc;
+    color: #172b4d;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
 }
 
 .reports-header {
-    padding: 18px 20px 25px;
+    padding: calc(20px + env(safe-area-inset-top)) 22px 27px;
+    border-radius: 0 0 20px 20px;
     background: #102f5e;
-    color: white;
-}
-
-.reports-brand {
-    display: flex;
-    align-items: center;
-    gap: 11px;
+    box-shadow: none;
 }
 
 .reports-brand img {
-    width: 43px;
-    height: 49px;
-    object-fit: contain;
+    width: 44px;
+    height: 50px;
 }
 
 .reports-brand h1 {
-    margin: 0;
+    color: white;
     font: 400 20px Georgia, serif;
 }
 
 .reports-brand p {
-    margin: 4px 0 0;
-    color: #d7e2f0;
+    color: #dce8ff;
     font-size: 9px;
-    letter-spacing: 1.7px;
 }
 
 .reports-heading {
     margin-top: 28px;
 }
 
-.reports-heading span {
-    color: #d7e2f0;
-    font-size: 11px;
-}
-
 .reports-heading h2 {
-    margin: 8px 0;
-    font-size: 23px;
-    font-weight: 600;
-}
-
-.reports-heading p {
-    margin: 0;
-    color: #d7e2f0;
-    font-size: 12px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -.5px;
 }
 
 .reports-content {
@@ -63,246 +44,100 @@
 
 .reports-panel,
 .report-card {
+    border: 1px solid #e8edf5;
+    border-radius: 15px;
     background: white;
-    border: 1px solid #e2e6ec;
-    border-radius: 10px;
-    box-shadow: none;
+    box-shadow: 0 3px 10px rgba(20, 50, 100, .035);
 }
 
 .reports-panel {
-    padding: 20px;
+    padding: 19px;
     margin-bottom: 22px;
 }
 
 .reports-panel label {
-    display: block;
-    margin-bottom: 10px;
-    color: #1c2b40;
+    color: #172b4d;
     font-size: 12px;
-    font-weight: 600;
-}
-
-.date-controls {
-    display: flex;
-    gap: 10px;
+    font-weight: 700;
 }
 
 .date-controls input {
-    flex: 1;
-    min-width: 0;
-    padding: 11px;
-    border: 1px solid #e2e6ec;
-    border-radius: 8px;
-    background: white;
-    color: #1c2b40;
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+    color: #172b4d;
 }
 
 .date-controls button {
-    padding: 11px 16px;
-    border: none;
-    border-radius: 8px;
-    background: #102f5e;
+    border-radius: 10px;
+    background: #315ccb;
     color: white;
     font-size: 12px;
-    font-weight: 600;
-}
-
-.date-controls button:disabled {
-    opacity: 0.55;
-}
-
-.section-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin: 24px 0 13px;
-}
-
-.section-heading h2 {
-    margin: 0;
-    color: #1c2b40;
-    font-size: 15px;
     font-weight: 700;
 }
 
-.section-heading span {
-    color: #697789;
-    font-size: 11px;
-}
-
-#report-status {
-    color: #697789;
-    font-size: 12px;
-}
-
-#report-status.error {
-    color: #b42332;
-}
-
-.reports-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+.reports-content .section-heading h2 {
+    color: #172b4d;
+    font-size: 16px;
+    font-weight: 800;
 }
 
 .report-card {
-    min-width: 0;
     padding: 17px;
 }
 
-.report-card>span {
-    display: block;
-    color: #697789;
+.report-card span {
+    color: #78869d;
     font-size: 11px;
-    font-weight: 600;
 }
 
 .report-card strong {
-    display: block;
-    margin: 12px 0 8px;
     color: #102f5e;
-    font-size: 28px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-}
-
-.report-card small {
-    color: #8792a1;
-    font-size: 10px;
-    line-height: 1.5;
+    font-size: 29px;
+    font-weight: 800;
 }
 
 .quota-label {
-    margin: 0 0 10px;
-    color: #697789;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.quota-total {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 18px;
+    color: #78869d;
 }
 
 .quota-total strong {
     color: #102f5e;
-    font-size: 35px;
-    font-weight: 700;
-}
-
-.quota-total span {
-    color: #697789;
-    font-size: 13px;
+    font-size: 37px;
+    font-weight: 800;
 }
 
 .quota-progress {
-    width: 100%;
-    height: 8px;
-    overflow: hidden;
-    border-radius: 4px;
-    background: #e9edf3;
+    height: 9px;
+    border-radius: 6px;
+    background: #eaf2ff;
 }
 
 #quota-progress-fill {
-    width: 0;
-    height: 100%;
-    border-radius: 4px;
-    background: #102f5e;
-    transition: width 200ms ease;
-}
-
-.quota-progress-labels {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 10px;
-    color: #697789;
-    font-size: 11px;
-}
-
-.quota-statistics {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 22px;
+    border-radius: 6px;
+    background: #315ccb;
 }
 
 .quota-statistics>div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    padding: 14px 6px;
-    border: 1px solid #e2e6ec;
-    border-radius: 8px;
-    background: #f8f9fb;
-    text-align: center;
+    border: 1px solid #e8edf5;
+    border-radius: 11px;
+    background: #f7f9fc;
 }
 
 .quota-statistics strong {
-    color: #102f5e;
-    font-size: 21px;
-}
-
-.quota-statistics span {
-    color: #697789;
-    font-size: 10px;
-}
-
-.station-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 0;
-    border-bottom: 1px solid #e2e6ec;
-}
-
-.station-row:last-child {
-    border-bottom: 0;
+    color: #315ccb;
+    font-weight: 800;
 }
 
 .station-row strong {
-    color: #1c2b40;
-    font-size: 13px;
+    color: #172b4d;
 }
 
-.station-status {
-    color: #697789;
-    font-size: 12px;
-    text-transform: capitalize;
+#report-status {
+    color: #78869d;
 }
 
-.status-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    margin-right: 7px;
-    border-radius: 50%;
-    background: #9ca8bc;
-}
-
-.status-dot.available {
-    background: #258b35;
-}
-
-.status-dot.busy {
-    background: #d99a21;
-}
-
-.reports-muted,
-.reports-footer {
-    color: #697789;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.reports-footer {
-    text-align: center;
-    margin-top: 28px;
+#report-status.error {
+    color: #b42332;
 }
 
 @media (max-width: 350px) {
@@ -311,15 +146,7 @@
         padding-right: 13px;
     }
 
-    .report-card {
-        padding: 13px;
-    }
-
     .report-card strong {
         font-size: 25px;
-    }
-
-    .quota-statistics strong {
-        font-size: 18px;
     }
 }
