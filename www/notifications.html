@@ -23,7 +23,7 @@
         <header class="notifications-header">
             <div class="brand-row">
                 <img src="img/logo.png" alt="Xavier University">
-                <div>
+                <div class="brand-copy">
                     <h1>Xavier University</h1>
                     <p>STUDENT ID SERVICES</p>
                 </div>
@@ -32,47 +32,63 @@
 
         <main class="notifications-content">
             <a href="dashboard.html" class="back-link">
-                ← Back to Dashboard
+                <span aria-hidden="true">←</span>
+                Back to Dashboard
             </a>
 
-            <div class="page-heading">
-                <span class="eyebrow">STUDENT SERVICES</span>
+            <section class="page-intro">
+                <span class="page-eyebrow">STUDENT SERVICES</span>
                 <h2>Notifications</h2>
-                <p>Updates about your appointments and ID services.</p>
-            </div>
-
-            <div class="notifications-toolbar">
-                <div class="notifications-heading">
-                    <h3>My Notifications</h3>
-                    <span id="unread-badge" class="unread-badge" hidden>0</span>
-                </div>
-
-                <button id="mark-all-read" class="mark-all-button" type="button">
-                    Mark all as read
-                </button>
-            </div>
-
-            <div class="notification-filters">
-                <button type="button" class="filter-button active" data-filter="all">All</button>
-
-                <button type="button" class="filter-button" data-filter="unread">Unread</button>
-            </div>
-
-            <p id="notification-feedback" class="notification-feedback" role="status" aria-live="polite"></p>
-
-            <section id="notifications-list" class="notifications-list" aria-label="Student notifications">
+                <p>
+                    Stay updated on your appointments,
+                    queue status, and ID services.
+                </p>
             </section>
 
-            <div id="notifications-empty" class="empty-notifications" hidden>
-                <div class="empty-icon">✓</div>
-                <h3>No notifications</h3>
-                <p>
-                    Your appointment and queue updates
-                    will appear here.
-                </p>
-            </div>
-        </main>
+            <section class="notification-section">
+                <div class="notifications-toolbar">
+                    <div class="notifications-heading">
+                        <h3>My Notifications</h3>
+                        <span id="unread-badge" class="unread-badge" hidden>0</span>
+                    </div>
 
+                    <button id="mark-all-read" class="mark-all-button" type="button">
+                        Mark all as read
+                    </button>
+                </div>
+
+                <div class="notification-filters" role="group" aria-label="Filter notifications">
+                    <button type="button" class="filter-button active" data-filter="all">
+                        All
+                    </button>
+
+                    <button type="button" class="filter-button" data-filter="unread">
+                        Unread
+                    </button>
+                </div>
+
+                <p id="notification-feedback" class="notification-feedback" role="status" aria-live="polite"></p>
+
+                <section id="notifications-list" class="notifications-list" aria-label="Student notifications">
+                </section>
+
+                <div id="notifications-empty" class="empty-notifications" hidden>
+                    <div class="empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                            <path d="M10 21h4" />
+                        </svg>
+                    </div>
+
+                    <h3>No notifications yet</h3>
+                    <p>
+                        Appointment confirmations and queue
+                        updates will appear here.
+                    </p>
+                </div>
+            </section>
+        </main>
     </div>
 </body>
 
