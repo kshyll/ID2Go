@@ -36,10 +36,10 @@ button {
 }
 
 .app-shell {
+    width: 100%;
     max-width: 480px;
     min-height: 100vh;
     margin: 0 auto;
-    padding-bottom: calc(90px + env(safe-area-inset-bottom));
     background: var(--background);
 }
 
