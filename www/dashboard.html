@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#082658">
-
+    <meta name="theme-color" content="#102f5e">
     <title>ID2Go | Student Dashboard</title>
 
     <link rel="stylesheet" href="css/global.css">
@@ -21,15 +20,14 @@
         <header class="app-header">
             <div class="header-top">
                 <div class="brand">
-                    <img src="img/logo.png" alt="Xavier University">
-                    <div class="brand-text">
+                    <img src="img/logo.png" alt="Xavier University seal">
+                    <div>
                         <h1>Xavier University</h1>
                         <p>STUDENT ID SERVICES</p>
                     </div>
                 </div>
 
-                <button id="notification-button" class="icon-button notification-button" type="button"
-                    aria-label="Notifications">
+                <button id="notification-button" class="icon-button" type="button" aria-label="Notifications">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
@@ -37,116 +35,82 @@
                     </svg>
                 </button>
             </div>
-
-            <div class="welcome">
-                <p>Welcome back,</p>
-                <h2 id="welcome-name">Student!</h2>
-                <span>Your ID service dashboard</span>
-            </div>
         </header>
 
         <main class="dashboard-content">
 
+            <section class="welcome">
+                <p class="eyebrow">STUDENT DASHBOARD</p>
+                <h2>Welcome back, <span id="welcome-name">Student!</span></h2>
+                <p>Manage your ID services and appointments.</p>
+            </section>
+
             <section class="queue-card">
                 <div class="section-heading">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                        <circle cx="9" cy="8" r="3" />
-                        <path d="M3 19v-2a6 6 0 0 1 12 0v2" />
-                        <circle cx="18" cy="9" r="2" />
-                        <path d="M17 15a4 4 0 0 1 4 4" />
-                    </svg>
-                    <h2>MY QUEUE STATUS</h2>
+                    <h2>My Queue Status</h2>
+                    <span id="queue-status" class="status-pill">
+                        No Active Queue
+                    </span>
                 </div>
 
                 <div class="queue-content">
                     <div class="queue-number-block">
-                        <p>Your Queue Number</p>
+                        <p>QUEUE NUMBER</p>
                         <strong id="queue-number">—</strong>
                     </div>
 
                     <div class="queue-status-block">
-                        <span id="queue-status" class="status-pill">
-                            No Active Queue
-                        </span>
                         <p id="students-ahead">
                             Queue details will appear here
                         </p>
+                        <p id="estimated-wait">
+                            Estimated wait: Not available
+                        </p>
                     </div>
-                </div>
-
-                <div class="queue-footer">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M12 7v5l3 2" />
-                    </svg>
-                    <span id="estimated-wait">
-                        Estimated wait: Not available
-                    </span>
                 </div>
             </section>
 
-            <section class="content-card">
-                <div class="card-heading">
-                    <div class="card-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <rect x="3" y="5" width="15" height="12" rx="2" />
-                            <path d="m18 9 4-2v8l-4-2M7 21h8M11 17v4" />
-                        </svg>
-                        <h2>Now Serving</h2>
-                    </div>
-                    <span class="live-indicator">
-                        <span class="live-dot"></span>
-                        Station Status
-                    </span>
+            <section class="stations-section">
+                <div class="section-heading">
+                    <h2>Camera Stations</h2>
+                    <span class="section-caption">Current status</span>
                 </div>
 
                 <div class="station-grid">
                     <article class="station-card">
-                        <span>STATION 1</span>
+                        <span>STATION 01</span>
                         <strong id="station-1-number">—</strong>
                         <p id="station-1-status">Not available</p>
                     </article>
 
                     <article class="station-card">
-                        <span>STATION 2</span>
+                        <span>STATION 02</span>
                         <strong id="station-2-number">—</strong>
                         <p id="station-2-status">Not available</p>
                     </article>
 
                     <article class="station-card">
-                        <span>STATION 3</span>
+                        <span>STATION 03</span>
                         <strong id="station-3-number">—</strong>
                         <p id="station-3-status">Not available</p>
                     </article>
 
                     <article class="station-card">
-                        <span>STATION 4</span>
+                        <span>STATION 04</span>
                         <strong id="station-4-number">—</strong>
                         <p id="station-4-status">Not available</p>
                     </article>
                 </div>
 
-                <div class="info-banner">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 11v6M12 7h.01" />
-                    </svg>
-                    <p>
-                        Your station will be assigned automatically
-                        when you are called.
-                    </p>
-                </div>
+                <p class="station-note">
+                    Your assigned station will appear when your queue
+                    number is called.
+                </p>
             </section>
 
-            <section class="content-card appointment-card">
-                <div class="card-heading">
-                    <div class="card-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <rect x="3" y="5" width="18" height="16" rx="2" />
-                            <path d="M7 3v4M17 3v4M3 10h18" />
-                        </svg>
-                        <h2>Upcoming Appointment</h2>
-                    </div>
+            <section class="appointment-card">
+                <div class="section-heading">
+                    <h2>Upcoming Appointment</h2>
                 </div>
 
                 <div class="appointment-details">
@@ -158,34 +122,28 @@
                             Your booking details will appear here.
                         </p>
                     </div>
-                    <span class="appointment-arrow">›</span>
+                    <span class="appointment-arrow" aria-hidden="true">›</span>
                 </div>
             </section>
 
             <button id="book-appointment-button" class="booking-button" type="button">
-                <span class="booking-button-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <rect x="3" y="5" width="18" height="16" rx="2" />
-                        <path d="M7 3v4M17 3v4M3 10h18M12 13v6M9 16h6" />
-                    </svg>
-                    Book an ID Appointment
-                </span>
+                <span>Book an Appointment</span>
                 <span aria-hidden="true">›</span>
             </button>
 
         </main>
 
         <nav class="bottom-navigation" aria-label="Student navigation">
-
             <a href="dashboard.html" class="nav-link active" aria-current="page">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="m3 10 9-7 9 7v10H3z" />
+                    <path d="M9 21v-7h6v7" />
                 </svg>
                 <span>Home</span>
             </a>
 
             <a href="booking.html" class="nav-link" data-feature="booking">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <rect x="3" y="5" width="18" height="16" rx="2" />
                     <path d="M7 3v4M17 3v4M3 10h18" />
                 </svg>
@@ -193,13 +151,12 @@
             </a>
 
             <a href="profile.html" class="nav-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <circle cx="12" cy="8" r="4" />
                     <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
                 </svg>
                 <span>Profile</span>
             </a>
-
         </nav>
 
     </div>
