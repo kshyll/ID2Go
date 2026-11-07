@@ -13,13 +13,15 @@
   const $ = id => document.getElementById(id);
 
   const getCurrentUser = async () => {
-    const { data, error } = await db.auth.getUser();
-
-    if (error || !data.user) {
-      return null;
+    if (!db) {
+      throw new Error("Supabase is unavailable.");
     }
 
-    return data.user;
+    const { data, error } = await db.auth.getUser();
+
+    if (error) throw error;
+
+    return data.user || null;
   };
 
   const getUserRole = async userId => {
@@ -31,26 +33,28 @@
 
     if (error || !data) {
       throw new Error(
-        "Your account has no assigned role. Contact the administrator."
+        "No role is assigned to this account. Contact the administrator."
       );
     }
 
-    if (!Object.prototype.hasOwnProperty.call(routes, data.role)) {
-      throw new Error("Your account has an invalid role.");
+    if (!Object.hasOwn(routes, data.role)) {
+      throw new Error("Invalid account role.");
     }
 
     return data.role;
   };
 
   const login = async (email, password) => {
+    if (!db) {
+      throw new Error("Supabase is unavailable.");
+    }
+
     const { data, error } = await db.auth.signInWithPassword({
       email,
       password
     });
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw error;
 
     if (!data.user) {
       throw new Error("Authentication failed.");
@@ -58,11 +62,7 @@
 
     try {
       const role = await getUserRole(data.user.id);
-
-      return {
-        user: data.user,
-        role
-      };
+      return { user: data.user, role };
     } catch (error) {
       await db.auth.signOut();
       throw error;
@@ -72,9 +72,7 @@
   const logout = async () => {
     const { error } = await db.auth.signOut();
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw error;
 
     window.location.replace("index.html");
   };
@@ -83,7 +81,7 @@
     const destination = routes[role];
 
     if (!destination) {
-      throw new Error("Unknown user role.");
+      throw new Error("Unknown account role.");
     }
 
     window.location.replace(destination);
@@ -99,10 +97,7 @@
 
   const initialize = async () => {
     const form = $("login-form");
-
-    if (!form) {
-      return;
-    }
+    if (!form) return;
 
     const emailInput = $("login-email");
     const passwordInput = $("login-password");
@@ -110,25 +105,65 @@
     const loginButton = $("login-button");
     const errorMessage = $("login-error");
 
+    let busy = false;
+    let redirecting = false;
+
     const showError = message => {
       errorMessage.textContent = message;
       errorMessage.hidden = false;
     };
 
-    const setLoading = (loading, message = "Sign In") => {
+    const setLoading = (loading, label = "Sign In") => {
+      busy = loading;
       loginButton.disabled = loading;
-      loginButton.textContent = message;
+      loginButton.textContent = label;
+    };
+
+    const navigate = async role => {
+      const destination = routes[role];
+
+      if (!destination) {
+        throw new Error("Unknown account role.");
+      }
+
+      const response = await fetch(destination, {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          "Your dashboard is not available. Contact the administrator."
+        );
+      }
+
+      const html = await response.text();
+
+      if (!html.trim()) {
+        throw new Error(
+          "Your dashboard has not been implemented yet."
+        );
+      }
+
+      redirecting = true;
+      redirectByRole(role);
     };
 
     toggleButton.addEventListener("click", () => {
-      const hidden = passwordInput.type === "password";
+      const show = passwordInput.type === "password";
 
-      passwordInput.type = hidden ? "text" : "password";
-      toggleButton.textContent = hidden ? "Hide" : "Show";
+      passwordInput.type = show ? "text" : "password";
+      toggleButton.textContent = show ? "Hide" : "Show";
+      toggleButton.setAttribute(
+        "aria-label",
+        show ? "Hide password" : "Show password"
+      );
     });
 
     form.addEventListener("submit", async event => {
       event.preventDefault();
+
+      if (busy || redirecting) return;
 
       errorMessage.hidden = true;
       setLoading(true, "Signing in...");
@@ -139,11 +174,11 @@
           passwordInput.value
         );
 
-        redirectByRole(result.role);
+        await navigate(result.role);
       } catch (error) {
         showError(error.message || "Unable to sign in.");
       } finally {
-        setLoading(false);
+        if (!redirecting) setLoading(false);
       }
     });
 
@@ -154,12 +189,13 @@
 
       if (user) {
         const role = await getUserRole(user.id);
-        redirectByRole(role);
+        await navigate(role);
       }
     } catch (error) {
+      console.error("Session check:", error);
       showError(error.message || "Unable to verify session.");
     } finally {
-      setLoading(false);
+      if (!redirecting) setLoading(false);
     }
   };
 
