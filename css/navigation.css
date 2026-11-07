@@ -1,0 +1,247 @@
+:root {
+    --navy: #12366b;
+    --navy-dark: #0c2853;
+    --blue-light: #eaf1fb;
+    --background: #f4f6fa;
+    --text: #172b4d;
+    --muted: #6b7890;
+    --border: #dce3ed;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.id2go-page {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+/* LOGIN */
+
+.auth-container {
+    max-width: 440px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 48px 22px 30px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.auth-logo img {
+    width: 85px;
+    height: 85px;
+    object-fit: contain;
+}
+
+.auth-container h1 {
+    color: var(--navy);
+    font-size: 34px;
+    margin: 14px 0 8px;
+}
+
+.auth-subtitle {
+    color: var(--muted);
+    line-height: 1.6;
+    font-size: 13px;
+    margin-bottom: 35px;
+}
+
+.auth-card {
+    padding: 24px 18px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: white;
+    text-align: left;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+}
+
+.auth-card h2 {
+    margin: 0 0 8px;
+    color: var(--navy);
+}
+
+.auth-card p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.role-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 23px 0;
+}
+
+.role-btn {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--navy);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.role-btn.active {
+    background: var(--blue-light);
+    border: 2px solid var(--navy);
+}
+
+.auth-card label,
+.profile-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 16px 0 7px;
+}
+
+.auth-card input,
+.profile-card input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 15px;
+    background: white;
+    color: var(--text);
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 24px;
+    border: none;
+    border-radius: 10px;
+    background: var(--navy);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.primary-btn:hover {
+    background: var(--navy-dark);
+}
+
+.login-message {
+    color: #a33131 !important;
+}
+
+.auth-footer {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 30px;
+}
+
+/* SHARED STUDENT NAVIGATION */
+
+.id2go-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.id2go-bottom-nav a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.id2go-bottom-nav a.active {
+    color: var(--navy);
+}
+
+.id2go-bottom-nav .nav-icon {
+    font-size: 23px;
+    line-height: 1;
+}
+
+body.has-id2go-nav {
+    padding-bottom: 84px;
+}
+
+body.has-id2go-nav .mobile-container {
+    padding-bottom: 84px;
+}
+
+/* PROFILE */
+
+.profile-container {
+    max-width: 440px;
+    margin: auto;
+    min-height: 100vh;
+    padding: 24px 18px 110px;
+    background: var(--background);
+}
+
+.profile-header {
+    padding: 27px 22px;
+    background: var(--navy);
+    border-radius: 18px;
+    color: white;
+}
+
+.profile-header h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+}
+
+.profile-header p {
+    color: #d9e6ff;
+    margin: 0;
+    font-size: 13px;
+}
+
+.profile-card {
+    margin-top: 18px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+}
+
+.profile-card h2 {
+    color: var(--navy);
+    font-size: 17px;
+    margin: 0 0 18px;
+}
+
+.logout-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid #c7d1df;
+    border-radius: 10px;
+    background: white;
+    color: #9c3434;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+[hidden] {
+    display: none !important;
+}

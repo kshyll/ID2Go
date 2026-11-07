@@ -1,10 +1,11 @@
 // SUPABASE CONFIGURATION
-const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
+const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-let supabase = null;
+let supabaseClient = null;
 if (window.supabase) {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -220,9 +221,9 @@ document.addEventListener("DOMContentLoaded", () => {
     timeSlotsList.innerHTML = "<p class='no-slots-notice'>Loading slots...</p>";
 
     let dbBookings = {};
-    if (supabase) {
+    if (db) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from("appointments")
           .select("time_slot")
           .eq("appointment_date", dateString);
@@ -314,9 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const generatedQueueNumber = `0${Math.floor(Math.random() * 90) + 10}`;
     bookingData.queueNumber = generatedQueueNumber;
 
-    if (supabase) {
+    if (db) {
       try {
-        const { data, error } = await supabase.from("appointments").insert([
+        const { data, error } = await db.from("appointments").insert([
           {
             full_name: studentInfo.fullName,
             student_id: studentInfo.studentId,
