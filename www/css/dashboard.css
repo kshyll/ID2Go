@@ -1,59 +1,43 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-    --navy: #102f5e;
-    --navy-dark: #0c2549;
-    --background: #f7f8fa;
-    --surface: #ffffff;
-    --text: #1c2b40;
-    --muted: #697789;
-    --border: #e2e6ec;
-    --radius: 10px;
-}
-
-* {
-    box-sizing: border-box;
+    --dash-navy: #102f5e;
+    --dash-navy-dark: #0c2549;
+    --dash-bg: #f7f8fa;
+    --dash-white: #ffffff;
+    --dash-text: #1c2b40;
+    --dash-muted: #697789;
+    --dash-border: #e2e6ec;
 }
 
 body {
     margin: 0;
-    background: var(--background);
-    color: var(--text);
+    background: var(--dash-bg);
+    color: var(--dash-text);
     font-family: "Inter", Arial, sans-serif;
     font-size: 14px;
-    -webkit-font-smoothing: antialiased;
-}
-
-button,
-input,
-select,
-textarea {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
+    line-height: 1.5;
 }
 
 .app-shell {
+    width: 100%;
     max-width: 480px;
     min-height: 100vh;
     margin: 0 auto;
-    padding-bottom: calc(90px + env(safe-area-inset-bottom));
-    background: var(--background);
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    background: var(--dash-bg);
 }
 
 .app-header {
-    padding: calc(18px + env(safe-area-inset-top)) 20px 18px;
-    background: var(--navy);
-    color: white;
+    background: var(--dash-navy);
+    padding: calc(17px + env(safe-area-inset-top)) 20px 17px;
 }
 
-.header-top {
+.header-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
+    gap: 12px;
 }
 
 .brand {
@@ -66,159 +50,182 @@ button {
 .brand img {
     width: 43px;
     height: 49px;
+    flex-shrink: 0;
     object-fit: contain;
+}
+
+.brand-copy {
+    min-width: 0;
 }
 
 .brand h1 {
     margin: 0;
     color: white;
-    font-family: Georgia, serif;
-    font-size: 20px;
-    font-weight: normal;
-    line-height: 1.3;
+    font: 400 20px/1.3 Georgia, serif;
 }
 
 .brand p {
     margin: 4px 0 0;
     color: #d7e2f0;
     font-size: 9px;
-    letter-spacing: 1.7px;
     font-weight: 600;
+    letter-spacing: 1.5px;
 }
 
 .icon-button {
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    padding: 8px;
     border: 0;
+    border-radius: 8px;
     background: transparent;
     color: white;
 }
 
 .icon-button svg {
-    width: 23px;
-    height: 23px;
+    width: 22px;
+    height: 22px;
 }
 
 .dashboard-content {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    padding: 27px 19px 36px;
+    gap: 25px;
+    padding: 28px 19px 35px;
 }
 
-.welcome .eyebrow {
-    margin: 0 0 10px;
-    color: var(--navy);
+.welcome-section .eyebrow {
+    margin: 0 0 8px;
+    color: var(--dash-navy);
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 1.4px;
+    letter-spacing: 1.2px;
 }
 
-.welcome h2 {
-    margin: 0 0 7px;
-    color: var(--text);
+.welcome-section h2 {
+    margin: 0;
+    color: var(--dash-text);
     font-size: 23px;
     font-weight: 600;
-    letter-spacing: -.6px;
     line-height: 1.35;
+    letter-spacing: -0.5px;
 }
 
-.welcome>p:last-child {
-    margin: 0;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.6;
+.supporting-text {
+    margin: 7px 0 0;
+    color: var(--dash-muted);
+    font-size: 12px;
 }
 
-.queue-card,
-.appointment-card {
-    padding: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+.dashboard-section {
+    min-width: 0;
 }
 
-.section-heading {
+.section-title-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 13px;
 }
 
-.section-heading h2 {
+.section-title-row h2 {
     margin: 0;
-    color: var(--text);
+    color: var(--dash-text);
     font-size: 15px;
     font-weight: 700;
 }
 
-.section-caption {
-    color: var(--muted);
+.section-meta {
+    color: var(--dash-muted);
     font-size: 11px;
+    white-space: nowrap;
 }
 
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.queue-badge {
     max-width: 52%;
-    padding: 6px 10px;
-    border: 1px solid #e1e6ed;
-    border-radius: 5px;
-    background: #f2f4f7;
+    padding: 5px 9px;
+    border: 1px solid var(--dash-border);
+    border-radius: 6px;
+    background: #f0f2f5;
     color: #526174;
     font-size: 10px;
     font-weight: 600;
     text-align: center;
 }
 
-.queue-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
+.queue-card {
+    overflow: hidden;
+    border: 1px solid var(--dash-border);
+    border-radius: 10px;
+    background: var(--dash-white);
+    box-shadow: none;
 }
 
-.queue-number-block p {
-    margin: 0 0 8px;
-    color: var(--muted);
+.queue-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+    padding: 22px 19px;
+}
+
+.queue-number-group {
+    min-width: 0;
+    padding-right: 15px;
+    border-right: 1px solid var(--dash-border);
+}
+
+.field-label {
+    margin: 0 0 10px;
+    color: var(--dash-muted);
     font-size: 10px;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
 }
 
-.queue-number-block strong {
+.queue-number-group strong {
     display: block;
-    color: var(--navy);
+    color: var(--dash-navy);
     font-size: 47px;
     font-weight: 700;
-    letter-spacing: -2px;
+    letter-spacing: -1.8px;
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
 }
 
-.queue-status-block {
-    max-width: 52%;
-    text-align: right;
+.queue-progress-group {
+    min-width: 0;
 }
 
-.queue-status-block p {
-    margin: 6px 0;
-    color: var(--muted);
-    font-size: 11px;
-    line-height: 1.5;
-}
-
-#students-ahead {
-    color: var(--text);
+.queue-progress-group #students-ahead {
+    margin: 0;
+    color: var(--dash-text);
+    font-size: 12px;
     font-weight: 600;
+    line-height: 1.6;
 }
 
-.stations-section .section-heading {
-    margin-bottom: 13px;
+.queue-bottom {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 19px;
+    border-top: 1px solid var(--dash-border);
+    background: #fafbfc;
+    color: var(--dash-muted);
+    font-size: 11px;
+}
+
+.queue-bottom svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    color: var(--dash-navy);
 }
 
 .station-grid {
@@ -230,140 +237,194 @@ button {
 .station-card {
     min-width: 0;
     padding: 16px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--dash-border);
     border-radius: 9px;
     background: white;
 }
 
-.station-card>span {
-    color: var(--muted);
+.station-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.station-top span:first-child {
+    color: var(--dash-muted);
     font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .7px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.station-indicator {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #a8b0bb;
 }
 
 .station-card strong {
     display: block;
-    margin: 12px 0 6px;
-    color: var(--navy);
-    font-size: 28px;
+    margin: 13px 0 5px;
+    color: var(--dash-navy);
+    font-size: 29px;
     font-weight: 700;
-    line-height: 1;
+    line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
 
 .station-card p {
     margin: 0;
-    color: var(--muted);
+    color: var(--dash-muted);
     font-size: 11px;
     line-height: 1.5;
 }
 
-.station-note {
-    margin: 13px 0 0;
-    color: var(--muted);
+.section-note {
+    margin: 12px 0 0;
+    color: var(--dash-muted);
     font-size: 11px;
     line-height: 1.6;
 }
 
-.appointment-card .section-heading {
-    margin-bottom: 15px;
-}
-
-.appointment-details {
+.appointment-card {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 13px;
+    padding: 18px;
+    border: 1px solid var(--dash-border);
+    border-radius: 10px;
+    background: white;
+    box-shadow: none;
 }
 
-.appointment-details h3 {
-    margin: 0 0 7px;
-    color: var(--text);
-    font-size: 14px;
+.appointment-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #f0f3f7;
+    color: var(--dash-navy);
+}
+
+.appointment-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.appointment-info {
+    min-width: 0;
+}
+
+.appointment-info h3 {
+    margin: 0 0 5px;
+    color: var(--dash-text);
+    font-size: 13px;
     font-weight: 600;
 }
 
-.appointment-details p {
+.appointment-info p {
     margin: 0;
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.appointment-arrow {
-    color: var(--navy);
-    font-size: 25px;
+    color: var(--dash-muted);
+    font-size: 11px;
+    line-height: 1.6;
 }
 
 .booking-button {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     width: 100%;
-    min-height: 49px;
-    padding: 13px 17px;
-    border: none;
+    min-height: 50px;
+    padding: 12px 17px;
+    border: 0;
     border-radius: 9px;
-    background: var(--navy);
+    background: var(--dash-navy);
     color: white;
     font-size: 13px;
     font-weight: 600;
 }
 
-.booking-button span:last-child {
-    font-size: 23px;
+.booking-button-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.booking-button-content svg {
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+}
+
+.button-chevron {
+    font-size: 24px;
     line-height: 1;
 }
 
 .booking-button:active {
-    background: var(--navy-dark);
+    background: var(--dash-navy-dark);
 }
 
 .bottom-navigation {
     position: fixed;
-    bottom: 0;
     left: 50%;
+    bottom: 0;
     transform: translateX(-50%);
     display: flex;
+    align-items: stretch;
     width: 100%;
     max-width: 480px;
-    padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
-    border-top: 1px solid var(--border);
+    min-height: 72px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--dash-border);
     background: white;
-    z-index: 100;
+    z-index: 1000;
 }
 
-.nav-link {
+.bottom-navigation .nav-link {
     display: flex;
     flex: 1;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 5px;
-    padding: 7px 8px;
-    color: #778394;
+    min-width: 0;
+    min-height: 55px;
+    padding: 6px;
+    border-radius: 0;
+    background: transparent;
+    color: #8792a1;
     font-size: 11px;
     font-weight: 500;
     text-decoration: none;
 }
 
-.nav-link svg {
-    width: 21px;
-    height: 21px;
+.bottom-navigation .nav-link svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
 }
 
-.nav-link.active {
-    color: var(--navy);
+.bottom-navigation .nav-link.active {
+    background: transparent;
+    color: var(--dash-navy);
     font-weight: 700;
 }
 
-.nav-link.active svg {
-    stroke-width: 2.3;
+.bottom-navigation .nav-link.active svg {
+    stroke-width: 2.2;
 }
 
 button:focus-visible,
 a:focus-visible {
-    outline: 2px solid var(--navy);
+    outline: 2px solid var(--dash-navy);
     outline-offset: 3px;
 }
 
@@ -377,12 +438,17 @@ a:focus-visible {
         font-size: 17px;
     }
 
-    .welcome h2 {
+    .welcome-section h2 {
         font-size: 20px;
     }
 
-    .queue-number-block strong {
-        font-size: 38px;
+    .queue-main {
+        padding: 18px 14px;
+        gap: 10px;
+    }
+
+    .queue-number-group strong {
+        font-size: 39px;
     }
 
     .station-card {
