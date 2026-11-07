@@ -1,0 +1,250 @@
+.notifications-shell {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--background, #f3f6fd);
+}
+
+.notifications-header {
+    padding: 30px 22px 32px;
+    color: white;
+    background: linear-gradient(135deg,
+            #082658,
+            #164992);
+    border-radius: 0 0 32px 32px;
+}
+
+.brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-row img {
+    width: 45px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.brand-row h1 {
+    margin: 0;
+    font: 20px Georgia, serif;
+}
+
+.brand-row p {
+    margin: 5px 0 0;
+    color: #d9e6ff;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+}
+
+.header-bottom {
+    margin-top: 28px;
+}
+
+.back-link {
+    display: inline-block;
+    color: #d9e6ff;
+    font-size: 13px;
+    text-decoration: none;
+    margin-bottom: 18px;
+}
+
+.header-bottom h2 {
+    margin: 0 0 7px;
+    font-size: 28px;
+}
+
+.header-bottom p {
+    margin: 0;
+    color: #d9e6ff;
+    font-size: 13px;
+}
+
+.notifications-content {
+    padding: 24px 16px 40px;
+}
+
+.notifications-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.notifications-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notifications-heading h3 {
+    margin: 0;
+    color: #103675;
+    font-size: 18px;
+}
+
+.unread-badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: #164b9a;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.mark-all-button {
+    border: none;
+    background: transparent;
+    color: #164b9a;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mark-all-button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.notification-filters {
+    display: flex;
+    gap: 9px;
+    margin: 20px 0;
+}
+
+.filter-button {
+    padding: 10px 18px;
+    border: 1px solid #dbe4f3;
+    border-radius: 20px;
+    background: white;
+    color: #697b9d;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.filter-button.active {
+    background: #103675;
+    color: white;
+    border-color: #103675;
+}
+
+.notification-feedback {
+    color: #697b9d;
+    font-size: 13px;
+}
+
+.notification-feedback:empty {
+    display: none;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notification-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    width: 100%;
+    padding: 18px 15px;
+    border: 1px solid #e1e8f5;
+    border-radius: 17px;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(20, 55, 110, .04);
+}
+
+.notification-card.unread {
+    background: #edf3ff;
+    border-color: #c9d9f4;
+}
+
+.notification-icon {
+    display: grid;
+    place-items: center;
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    border-radius: 13px;
+    background: #dce9ff;
+    color: #103675;
+    font-size: 20px;
+}
+
+.notification-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.notification-title h4 {
+    margin: 0;
+    color: #103675;
+    font-size: 14px;
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #164b9a;
+}
+
+.notification-body p {
+    margin: 8px 0;
+    color: #5f7190;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.notification-time {
+    color: #8998b0;
+    font-size: 11px;
+}
+
+.empty-notifications {
+    padding: 55px 20px;
+    text-align: center;
+    background: white;
+    border-radius: 18px;
+}
+
+.empty-icon {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    background: #e7efff;
+    color: #103675;
+    font-size: 27px;
+}
+
+.empty-notifications h3 {
+    color: #103675;
+    margin: 0 0 8px;
+}
+
+.empty-notifications p {
+    color: #697b9d;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+[hidden] {
+    display: none !important;
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#103675">
+
+    <title>ID2Go | Notifications</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/notifications.css">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="js/supabase-client.js"></script>
+    <script defer src="js/notifications/notifications.js"></script>
+</head>
+
+<body>
+    <div class="notifications-shell">
+
+        <header class="notifications-header">
+            <div class="brand-row">
+                <img src="img/logo.png" alt="Xavier University">
+                <div>
+                    <h1>Xavier University</h1>
+                    <p>STUDENT ID SERVICES</p>
+                </div>
+            </div>
+
+            <div class="header-bottom">
+                <a href="dashboard.html" class="back-link">
+                    ← Back to Home
+                </a>
+                <h2>Notifications</h2>
+                <p>Stay informed about your ID services.</p>
+            </div>
+        </header>
+
+        <main class="notifications-content">
+
+            <div class="notifications-toolbar">
+                <div class="notifications-heading">
+                    <h3>My Notifications</h3>
+                    <span id="unread-badge" class="unread-badge" hidden>0</span>
+                </div>
+
+                <button type="button" id="mark-all-read" class="mark-all-button">
+                    Mark all as read
+                </button>
+            </div>
+
+            <div class="notification-filters">
+                <button type="button" class="filter-button active" data-filter="all">
+                    All
+                </button>
+
+                <button type="button" class="filter-button" data-filter="unread">
+                    Unread
+                </button>
+            </div>
+
+            <p id="notification-feedback" class="notification-feedback" role="status" aria-live="polite"></p>
+
+            <section id="notifications-list" class="notifications-list" aria-label="Student notifications">
+            </section>
+
+            <div id="notifications-empty" class="empty-notifications" hidden>
+                <div class="empty-icon">✓</div>
+                <h3>No notifications</h3>
+                <p>
+                    Your appointment and queue updates
+                    will appear here.
+                </p>
+            </div>
+
+        </main>
+
+    </div>
+</body>
+
+</html>
