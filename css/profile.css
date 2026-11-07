@@ -1,0 +1,252 @@
+:root {
+    --primary: #103675;
+    --primary-dark: #0b285c;
+    --primary-light: #1d4f9f;
+    --background: #f3f6fd;
+    --surface: #ffffff;
+    --text: #102b5e;
+    --muted: #697b9d;
+    --border: #e1e8f5;
+    --success: #258b35;
+    --danger: #a32a2a;
+    --radius: 22px;
+    --shadow: 0 5px 22px rgba(20, 55, 110, 0.07);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app-shell {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--background);
+    padding-bottom: 110px;
+}
+
+/* HEADER STYLES */
+.app-header {
+    background: linear-gradient(135deg, #082658 0%, #164992 100%);
+    color: white;
+    padding: 38px 24px 36px;
+    border-radius: 0 0 42px 42px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brand img {
+    width: 50px;
+    height: 58px;
+    object-fit: contain;
+}
+
+.brand h1 {
+    font-family: Georgia, serif;
+    font-size: 21px;
+    font-weight: normal;
+    margin: 0;
+}
+
+.brand p {
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin: 5px 0 0;
+}
+
+.welcome {
+    margin-top: 36px;
+}
+
+.welcome h2 {
+    font-size: 34px;
+    margin: 4px 0;
+}
+
+.welcome span {
+    font-size: 15px;
+    color: #e3ecff;
+}
+
+/* PROFILE CONTENT & CARDS */
+.profile-content {
+    padding: 20px 16px;
+}
+
+.content-card {
+    background: var(--surface);
+    padding: 22px 18px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+}
+
+.content-card h2 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--background);
+}
+
+/* FORM ELEMENTS */
+.profile-content label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text);
+}
+
+.profile-content label:first-of-type {
+    margin-top: 8px;
+}
+
+.profile-content input,
+.profile-content select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #f8fafc;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-content input:focus,
+.profile-content select:focus {
+    border-color: var(--primary-light);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(29, 79, 159, 0.12);
+}
+
+.profile-content input::placeholder {
+    color: #94a3b8;
+}
+
+/* BUTTONS */
+.booking-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 18px 20px;
+    background: var(--primary-light);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: bold;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.booking-button:hover {
+    background: var(--primary-dark);
+}
+
+.booking-button:active {
+    transform: scale(0.99);
+}
+
+#logout-button {
+    background: var(--danger);
+}
+
+#logout-button:hover {
+    background: #842222;
+}
+
+/* NAVIGATION */
+.bottom-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    padding: 12px 8px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+}
+
+.nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 7px;
+    border-radius: 16px;
+}
+
+.nav-link.active {
+    background: #e7efff;
+    color: var(--primary);
+}
+
+.nav-symbol {
+    font-size: 25px;
+    line-height: 1;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 350px) {
+    .brand h1 {
+        font-size: 17px;
+    }
+
+    .welcome h2 {
+        font-size: 28px;
+    }
+
+    .content-card h2 {
+        font-size: 18px;
+    }
+
+    .booking-button {
+        padding: 15px 16px;
+        font-size: 14px;
+    }
+}
