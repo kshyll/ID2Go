@@ -1,150 +1,24 @@
-
 (() => {
   "use strict";
 
-  const STORAGE_KEY = "id2go_operator_demo_v3";
-  const GRACE_MS = 5 * 60 * 1000;
+  const service = window.OperatorQueueService;
   const $ = id => document.getElementById(id);
 
-  const initialState = () => ({
-    stationId: 1,
-    sessionActive: false,
-    currentId: null,
-    lastCompletedId: null,
-    students: [
-      {
-        id: "S001",
-        queue: 31,
-        name: "Student A",
-        studentId: "2024-0001",
-        service: "First-Time ID Picture Taking",
-        level: "Undergraduate",
-        status: "waiting",
-        verified: false,
-        deadline: null
-      },
-      {
-        id: "S002",
-        queue: 32,
-        name: "Student B",
-        studentId: "2024-0002",
-        service: "First-Time ID Picture Taking",
-        level: "Graduate Studies",
-        status: "waiting",
-        verified: false,
-        deadline: null
-      },
-      {
-        id: "S003",
-        queue: 33,
-        name: "Student C",
-        studentId: "2024-0003",
-        service: "ID Replacement",
-        level: "Undergraduate",
-        status: "waiting",
-        verified: false,
-        deadline: null
-      },
-      {
-        id: "S004",
-        queue: 34,
-        name: "Student D",
-        studentId: "2024-0004",
-        service: "First-Time ID Picture Taking",
-        level: "Graduate Studies",
-        status: "waiting",
-        verified: false,
-        deadline: null
-      },
-      {
-        id: "S005",
-        queue: 35,
-        name: "Student E",
-        studentId: "2024-0005",
-        service: "First-Time ID Picture Taking",
-        level: "Undergraduate",
-        status: "waiting",
-        verified: false,
-        deadline: null
-      }
-    ]
-  });
-
-  const loadState = () => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(STORAGE_KEY) || "null"
-      );
-
-      if (saved && Array.isArray(saved.students)) {
-        return saved;
-      }
-    } catch (error) {
-      console.warn("Starting a new demo session.", error);
-    }
-
-    return initialState();
-  };
-
-  let state = loadState();
+  let dashboard = null;
+  let queue = [];
+  let current = null;
   let activeView = "dashboard";
   let activeFilter = "waiting";
-  let toastTimeout = null;
+  let busy = false;
+  let refreshTimer = null;
 
-  const save = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const setFeedback = (message, error = false) => {
+    $("operator-feedback").textContent = message;
+    $("operator-feedback").classList.toggle("error", error);
   };
 
-  const notify = message => {
-    const toast = $("operator-toast");
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-      toast.classList.remove("show");
-    }, 3000);
-  };
-
-  const formatQueue = value => String(value).padStart(3, "0");
-
-  const currentStudent = () =>
-    state.students.find(s => s.id === state.currentId) || null;
-
-  const isGraduate = student =>
-    student.level === "Graduate Studies";
-
-  const eligibleStudents = () =>
-    state.students
-      .filter(s => ["waiting", "returned"].includes(s.status))
-      .sort((a, b) =>
-        Number(!isGraduate(a)) - Number(!isGraduate(b)) ||
-        a.queue - b.queue
-      );
-
-  const updateDeadlines = () => {
-    let changed = false;
-
-    state.students.forEach(student => {
-      if (
-        ["called", "standby"].includes(student.status) &&
-        student.deadline &&
-        Date.now() >= student.deadline
-      ) {
-        student.status = "missed";
-        student.deadline = null;
-
-        if (state.currentId === student.id) {
-          state.currentId = null;
-        }
-
-        changed = true;
-      }
-    });
-
-    if (changed) save();
-    return changed;
-  };
+  const formatQueue = value =>
+    value == null ? "—" : String(value).padStart(3, "0");
 
   const showView = view => {
     activeView = view;
@@ -152,324 +26,122 @@
     document.querySelectorAll(".view").forEach(section => {
       section.classList.toggle(
         "active",
-        section.id === `${view}-view`
+        section.id === ${view}-view
       );
     });
 
-    const titles = {
-      dashboard: "Operator Dashboard",
-      workspace: "Station Workspace",
-      queue: "Queue Management",
-      account: "Operator Account"
-    };
-
-    $("page-title").textContent = titles[view];
-
     document.querySelectorAll(".nav-item").forEach(button => {
-      const selected =
+      button.classList.toggle(
+        "active",
         button.dataset.view === view ||
         (view === "workspace" &&
-         button.dataset.view === "dashboard");
-
-      button.classList.toggle("active", selected);
+         button.dataset.view === "dashboard")
+      );
     });
 
+    $("page-subtitle").textContent = {
+      dashboard: "Queue Management Dashboard",
+      workspace: "Student Processing Workspace",
+      queue: "Queue Management",
+      account: "Operator Account"
+    }[view];
+
     window.scrollTo(0, 0);
-    render();
-  };
-
-  const startSession = () => {
-    state.sessionActive = true;
-    save();
-    showView("workspace");
-    notify("Station session started.");
-  };
-
-  const endSession = () => {
-    if (currentStudent()) {
-      notify("Complete the current student first.");
-      return;
-    }
-
-    state.sessionActive = false;
-    state.lastCompletedId = null;
-    save();
-    showView("dashboard");
-    notify("Station session ended.");
-  };
-
-  const callNext = () => {
-    updateDeadlines();
-
-    if (!state.sessionActive || currentStudent()) {
-      notify("Station is not ready.");
-      return;
-    }
-
-    const next = eligibleStudents()[0];
-
-    if (!next) {
-      notify("No students are waiting.");
-      return;
-    }
-
-    next.status = "called";
-    next.deadline = Date.now() + GRACE_MS;
-    state.currentId = next.id;
-    state.lastCompletedId = null;
-
-    save();
-    render();
-    notify(`Queue ${formatQueue(next.queue)} called.`);
-  };
-
-  const confirmArrival = () => {
-    updateDeadlines();
-
-    const student = currentStudent();
-
-    if (!student || student.status !== "called") {
-      notify("No student awaiting arrival.");
-      return;
-    }
-
-    student.status = "in_service";
-    student.deadline = null;
-    save();
-    render();
-    notify("Arrival confirmed.");
-  };
-
-  const moveToStandby = () => {
-    updateDeadlines();
-
-    const student = currentStudent();
-
-    if (!student || student.status !== "called") return;
-
-    student.status = "standby";
-    state.currentId = null;
-
-    save();
-    render();
-    notify("Student moved to standby.");
-  };
-
-  const verifyStudent = () => {
-    const student = currentStudent();
-
-    if (!student || student.status !== "in_service") return;
-
-    const confirmed = window.confirm(
-      `Verify requirements for ${student.name}?\n` +
-      `Student ID: ${student.studentId}\n` +
-      `Service: ${student.service}`
-    );
-
-    if (!confirmed) return;
-
-    student.verified = true;
-    save();
-    render();
-    notify("Requirements verified.");
-  };
-
-  const completeService = () => {
-    const student = currentStudent();
-
-    if (!student || student.status !== "in_service") return;
-
-    if (!student.verified) {
-      notify("Verify requirements first.");
-      return;
-    }
-
-    if (!window.confirm(
-      `Complete service for Queue ${formatQueue(student.queue)}?`
-    )) return;
-
-    student.status = "completed";
-    state.currentId = null;
-    state.lastCompletedId = student.id;
-
-    save();
-    render();
-    notify("Service completed.");
-  };
-
-  const readyNext = () => {
-    state.lastCompletedId = null;
-    save();
-    render();
-  };
-
-  const markReturned = id => {
-    updateDeadlines();
-
-    const student = state.students.find(s => s.id === id);
-
-    if (!student || student.status !== "standby") {
-      notify("Grace period has expired.");
-      return;
-    }
-
-    student.status = "returned";
-    student.deadline = null;
-
-    save();
-    render();
-    notify("Student returned to queue.");
   };
 
   const renderDashboard = () => {
-    const active = state.sessionActive;
+    const station = dashboard?.station;
+    const stats = dashboard?.stats || {};
 
     $("assigned-station").textContent =
-      `Station ${String(state.stationId).padStart(2, "0")}`;
+      station?.name || "No station assigned";
 
-    $("session-badge").textContent =
-      active ? "Active" : "Not Started";
+    $("station-status").textContent =
+      station?.status || "Unavailable";
 
-    $("session-status").textContent =
-      active ? "Active Session" : "Inactive";
+    $("open-workspace").disabled =
+      !station || station.status !== "available" &&
+      station.status !== "serving";
 
-    $("station-availability").textContent =
-      active ? "Available" : "Offline";
+    const values = {
+      "stat-waiting": stats.waiting,
+      "stat-serving": stats.in_service,
+      "stat-completed": stats.completed,
+      "stat-missed": stats.missed
+    };
 
-    $("start-session").hidden = active;
-    $("open-workspace").hidden = !active;
-
-    $("stat-scheduled").textContent = state.students.length;
-
-    $("stat-waiting").textContent = state.students.filter(s =>
-      ["waiting", "returned", "called", "standby"].includes(s.status)
-    ).length;
-
-    $("stat-completed").textContent = state.students.filter(
-      s => s.status === "completed"
-    ).length;
-
-    $("stat-missed").textContent = state.students.filter(
-      s => s.status === "missed"
-    ).length;
-
-    const stations = [
-      {
-        number: 1,
-        status: active ? "Available" : "Offline",
-        color: active ? "available" : ""
-      },
-      {
-        number: 2,
-        status: "Available",
-        color: "available"
-      },
-      {
-        number: 3,
-        status: "Serving",
-        color: "busy"
-      },
-      {
-        number: 4,
-        status: "Available",
-        color: "available"
-      }
-    ];
-
-    if (active && currentStudent()) {
-      stations[0].status = "Serving";
-      stations[0].color = "busy";
-    }
-
-    const list = $("station-list");
-    list.replaceChildren();
-
-    stations.forEach(station => {
-      const row = document.createElement("div");
-      row.className = "station-row";
-
-      const name = document.createElement("strong");
-      name.className = "station-name";
-      name.textContent =
-        `Station ${String(station.number).padStart(2, "0")}`;
-
-      const status = document.createElement("span");
-      status.className = "station-state";
-
-      const dot = document.createElement("span");
-      dot.className = `status-dot ${station.color}`;
-
-      status.append(dot, document.createTextNode(station.status));
-      row.append(name, status);
-      list.appendChild(row);
+    Object.entries(values).forEach(([id, value]) => {
+      $(id).textContent =
+        Number.isInteger(value) ? value : "—";
     });
+
+    $("workspace-station").textContent =
+      station?.name || "No Station";
+    $("account-station").textContent =
+      station?.name || "Not Assigned";
   };
 
   const renderWorkspace = () => {
-    const student = currentStudent();
-
-    $("workspace-station").textContent =
-      `Station ${state.stationId}`;
-
     $("current-queue").textContent =
-      student ? formatQueue(student.queue) : "—";
+      formatQueue(current?.queue_number);
 
-    $("current-name").textContent = student
-      ? student.name
-      : state.lastCompletedId
-        ? "Service Completed"
-        : "No Student Assigned";
+    $("current-name").textContent =
+      current?.student_name || "No Student Called";
 
-    $("current-service").textContent = student
-      ? student.service
-      : "Ready to call the next student";
+    $("current-service").textContent =
+      current?.service_name || "Ready for next student";
 
-    $("current-id").textContent = student?.studentId || "—";
-    $("current-level").textContent = student?.level || "—";
+    $("current-id").textContent =
+      current?.student_number || "—";
 
-    const status = student?.status ||
-      (state.lastCompletedId ? "completed" : "ready");
+    $("current-level").textContent =
+      current?.study_level || "—";
+
+    const status = current?.status || "ready";
 
     const labels = {
       ready: "Ready",
       called: "Awaiting Arrival",
       in_service: "In Service",
-      completed: "Completed"
+      standby: "Standby",
+      completed: "Completed",
+      missed: "Missed"
     };
 
-    $("student-status").textContent = labels[status] || status;
+    $("student-status").textContent =
+      labels[status] || status;
 
-    $("call-next").hidden =
-      !!student || !!state.lastCompletedId || !state.sessionActive;
-
+    $("call-next").hidden = !!current;
     $("confirm-arrival").hidden = status !== "called";
     $("move-standby").hidden = status !== "called";
-    $("verify-student").hidden = status !== "in_service";
     $("complete-service").hidden = status !== "in_service";
-    $("ready-next").hidden = !state.lastCompletedId || !!student;
 
-    $("verify-student").disabled = !!student?.verified;
-    $("verify-student").textContent = student?.verified
-      ? "Requirements Verified"
-      : "Verify Student Requirements";
+    $("call-next").disabled =
+      busy || $("open-workspace").disabled;
 
-    $("complete-service").disabled = !student?.verified;
+    $("confirm-arrival").disabled = busy;
+    $("move-standby").disabled = busy;
+    $("complete-service").disabled = busy;
 
-    if (status === "called" && student.deadline) {
-      const remaining = Math.max(
+    if (status === "called" && current?.arrival_deadline) {
+      const seconds = Math.max(
         0,
-        Math.ceil((student.deadline - Date.now()) / 1000)
+        Math.ceil(
+          (new Date(current.arrival_deadline).getTime() -
+           Date.now()) / 1000
+        )
       );
 
       const minutes = String(
-        Math.floor(remaining / 60)
+        Math.floor(seconds / 60)
       ).padStart(2, "0");
 
-      const seconds = String(
-        remaining % 60
+      const remainder = String(
+        seconds % 60
       ).padStart(2, "0");
 
-      $("arrival-timer").textContent = `${minutes}:${seconds}`;
+      $("arrival-timer").textContent =
+        ${minutes}:${remainder};
     } else {
       $("arrival-timer").textContent = "—";
     }
@@ -479,56 +151,55 @@
     const list = $("queue-list");
     list.replaceChildren();
 
-    const students = state.students
-      .filter(s => {
-        if (activeFilter === "waiting") {
-          return ["waiting", "returned"].includes(s.status);
-        }
-        return s.status === activeFilter;
-      })
-      .sort((a, b) => a.queue - b.queue);
+    const filtered = queue.filter(student => {
+      if (activeFilter === "waiting") {
+        return ["waiting", "returned"].includes(
+          student.status
+        );
+      }
 
-    if (!students.length) {
+      return student.status === activeFilter;
+    });
+
+    if (!filtered.length) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
-      empty.textContent = `No ${activeFilter} students.`;
+      empty.textContent = "No students in this category.";
       list.appendChild(empty);
       return;
     }
 
-    students.forEach(student => {
+    filtered.forEach(student => {
       const entry = document.createElement("div");
       entry.className = "queue-entry";
 
-      const header = document.createElement("div");
-      header.className = "queue-entry-header";
-
-      const queue = document.createElement("strong");
-      queue.textContent = `Queue ${formatQueue(student.queue)}`;
-
-      const badge = document.createElement("span");
-      badge.className = "status-badge";
-      badge.textContent = isGraduate(student)
-        ? "Graduate Priority"
-        : student.status.replace("_", " ");
-
-      header.append(queue, badge);
+      const title = document.createElement("strong");
+      title.textContent =
+        Queue ${formatQueue(student.queue_number)};
 
       const name = document.createElement("p");
-      name.textContent = `${student.name} · ${student.studentId}`;
+      name.textContent = student.student_name || "Student";
 
-      const service = document.createElement("p");
-      service.textContent = student.service;
+      const details = document.createElement("p");
+      details.textContent = [
+        student.service_name,
+        student.study_level
+      ].filter(Boolean).join(" · ");
 
-      entry.append(header, name, service);
+      entry.append(title, name, details);
 
       if (student.status === "standby") {
         const button = document.createElement("button");
         button.type = "button";
-        button.textContent = "Mark Arrived";
+        button.textContent = "Mark Returned";
+        button.disabled = busy;
+
         button.addEventListener("click", () => {
-          markReturned(student.id);
+          runAction(() =>
+            service.markReturned(student.id)
+          );
         });
+
         entry.appendChild(button);
       }
 
@@ -536,22 +207,49 @@
     });
   };
 
-  const renderAccount = () => {
-    $("account-station").textContent =
-      `Station ${state.stationId}`;
-
-    $("account-session").textContent =
-      state.sessionActive ? "Active" : "Inactive";
-
-    $("end-session").disabled = !state.sessionActive;
-  };
-
   const render = () => {
-    updateDeadlines();
     renderDashboard();
     renderWorkspace();
     renderQueue();
-    renderAccount();
+  };
+
+  const refresh = async () => {
+    const [dashboardData, queueData] = await Promise.all([
+      service.getDashboard(),
+      service.getQueue()
+    ]);
+
+    if (
+      !dashboardData ||
+      !Array.isArray(queueData)
+    ) {
+      throw new Error("Invalid queue data received.");
+    }
+
+    dashboard = dashboardData;
+    queue = queueData;
+    current = dashboardData.current || null;
+
+    render();
+  };
+
+  const runAction = async action => {
+    if (busy) return;
+
+    busy = true;
+    renderWorkspace();
+
+    try {
+      await action();
+      await refresh();
+      setFeedback("Queue updated successfully.");
+    } catch (error) {
+      setFeedback(error.message, true);
+      console.error(error);
+    } finally {
+      busy = false;
+      render();
+    }
   };
 
   const bindEvents = () => {
@@ -566,53 +264,102 @@
         activeFilter = button.dataset.filter;
 
         document.querySelectorAll(".filter-btn").forEach(item => {
-          item.classList.toggle("active", item === button);
+          item.classList.toggle(
+            "active",
+            item === button
+          );
         });
 
         renderQueue();
       });
     });
 
-    $("start-session").addEventListener("click", startSession);
-    $("open-workspace").addEventListener("click", () => showView("workspace"));
-    $("workspace-back").addEventListener("click", () => showView("dashboard"));
-    $("call-next").addEventListener("click", callNext);
-    $("confirm-arrival").addEventListener("click", confirmArrival);
-    $("move-standby").addEventListener("click", moveToStandby);
-    $("verify-student").addEventListener("click", verifyStudent);
-    $("complete-service").addEventListener("click", completeService);
-    $("ready-next").addEventListener("click", readyNext);
-    $("end-session").addEventListener("click", endSession);
-
-    $("operator-logout").addEventListener("click", () => {
-      if (currentStudent()) {
-        notify("Finish the current student first.");
-        return;
+    $("open-workspace").addEventListener("click", () => {
+      if (!$("open-workspace").disabled) {
+        showView("workspace");
       }
+    });
 
-      if (state.sessionActive) {
-        notify("End your station session first.");
-        return;
+    $("workspace-back").addEventListener("click", () => {
+      showView("dashboard");
+    });
+
+    $("refresh-dashboard").addEventListener("click", () => {
+      runAction(async () => {});
+    });
+
+    $("refresh-queue").addEventListener("click", () => {
+      runAction(async () => {});
+    });
+
+    $("call-next").addEventListener("click", () => {
+      runAction(service.callNext);
+    });
+
+    $("confirm-arrival").addEventListener("click", () => {
+      if (current) {
+        runAction(() => service.confirmArrival(current.id));
       }
+    });
 
-      window.location.href = "index.html";
+    $("move-standby").addEventListener("click", () => {
+      if (current) {
+        runAction(() => service.moveToStandby(current.id));
+      }
+    });
+
+    $("complete-service").addEventListener("click", () => {
+      if (!current) return;
+
+      if (window.confirm("Complete this student's ID service?")) {
+        runAction(() => service.completeService(current.id));
+      }
+    });
+
+    $("operator-logout").addEventListener("click", async () => {
+      try {
+        await service.signOut();
+      } catch (error) {
+        setFeedback(error.message, true);
+      }
     });
   };
 
-  document.addEventListener("DOMContentLoaded", () => {
+  const initialize = async () => {
     bindEvents();
-    showView("dashboard");
 
-    setInterval(() => {
-      const expired = updateDeadlines();
+    try {
+      const user = await service.getOperator();
 
-      if (expired) {
-        notify("An arrival grace period expired.");
+      $("operator-name").textContent =
+        user.user_metadata?.full_name || "Camera Operator";
+
+      $("operator-email").textContent =
+        user.email || "—";
+
+      await refresh();
+      setFeedback("");
+    } catch (error) {
+      setFeedback(error.message, true);
+      $("open-workspace").disabled = true;
+      $("call-next").disabled = true;
+      return;
+    }
+
+    refreshTimer = setInterval(async () => {
+      if (busy) return;
+
+      try {
+        await refresh();
+      } catch (error) {
+        setFeedback("Unable to refresh queue.", true);
       }
+    }, 15000);
+  };
 
-      if (activeView === "workspace" || expired) {
-        render();
-      }
-    }, 1000);
+  window.addEventListener("pagehide", () => {
+    if (refreshTimer) clearInterval(refreshTimer);
   });
+
+  document.addEventListener("DOMContentLoaded", initialize);
 })();
