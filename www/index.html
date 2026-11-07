@@ -4,144 +4,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#103675">
     <title>ID2Go | Login</title>
 
-    <link rel="stylesheet" href="css/navigation.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/auth.css">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="js/supabase-client.js"></script>
+    <script defer src="js/auth/auth.js"></script>
 </head>
 
-<body class="id2go-page">
+<body>
+    <main class="auth-shell">
 
-    <main class="auth-container">
+        <header class="auth-header">
+            <img src="img/logo.png" alt="Xavier University">
+            <h1>Xavier University</h1>
+            <p>STUDENT ID SERVICES</p>
+        </header>
 
-        <div class="auth-logo">
-            <img src="img/logo.png" alt="ID2Go Logo">
-        </div>
-
-        <h1>ID2Go</h1>
-        <p class="auth-subtitle">
-            Xavier University - Ateneo de Cagayan
-            <br>
-            Student ID Appointment and Queue Management
-        </p>
-
-        <section class="auth-card">
-
-            <h2>Welcome!</h2>
-            <p>Select your role to continue.</p>
-
-            <div class="role-selection">
-                <button type="button" class="role-btn active" data-role="student">
-                    Student
-                </button>
-
-                <button type="button" class="role-btn" data-role="operator">
-                    Camera Operator
-                </button>
-
-                <button type="button" class="role-btn" data-role="admin">
-                    Administrator
-                </button>
+        <section class="auth-content">
+            <div class="auth-heading">
+                <h2>Welcome to ID2Go</h2>
+                <p>Sign in using your registered account.</p>
             </div>
 
-            <form id="login-form">
+            <form id="login-form" class="auth-card">
+                <h3>Account Login</h3>
 
-                <div id="student-fields">
-                    <label for="student-id">
-                        Student ID Number
-                    </label>
-                    <input type="text" id="student-id" placeholder="e.g. 2024-0001" required>
+                <label for="login-email">Email Address</label>
+                <input id="login-email" type="email" placeholder="Enter your registered email" autocomplete="username"
+                    required>
 
-                    <label for="student-name">
-                        Full Name
-                    </label>
-                    <input type="text" id="student-name" placeholder="Enter your full name" required>
+                <label for="login-password">Password</label>
+                <div class="password-field">
+                    <input id="login-password" type="password" placeholder="Enter your password"
+                        autocomplete="current-password" required>
+                    <button id="toggle-password" type="button">
+                        Show
+                    </button>
                 </div>
 
-                <p id="login-message" class="login-message" aria-live="polite"></p>
+                <p id="login-error" class="auth-error" role="alert" hidden></p>
 
-                <button type="submit" class="primary-btn">
-                    Continue
+                <button id="login-button" type="submit" class="ui-button ui-button-primary">
+                    Sign In
                 </button>
-
             </form>
 
+            <p class="auth-note">
+                Access is restricted to registered ID2Go users.
+                Contact the system administrator for account assistance.
+            </p>
         </section>
-
-        <p class="auth-footer">
-            ID2Go • Student Services
-        </p>
-
     </main>
-
-    <script>
-        let selectedRole = "student";
-
-        const roleButtons =
-            document.querySelectorAll(".role-btn");
-
-        const studentFields =
-            document.getElementById("student-fields");
-
-        const message =
-            document.getElementById("login-message");
-
-        roleButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                selectedRole = button.dataset.role;
-
-                roleButtons.forEach(btn => {
-                    btn.classList.remove("active");
-                });
-
-                button.classList.add("active");
-
-                studentFields.hidden =
-                    selectedRole !== "student";
-
-                studentFields.querySelectorAll("input")
-                    .forEach(input => {
-                        input.required =
-                            selectedRole === "student";
-                    });
-
-                message.textContent = "";
-            });
-        });
-
-        document.getElementById("login-form")
-            .addEventListener("submit", event => {
-                event.preventDefault();
-
-                if (selectedRole === "student") {
-                    const id = document
-                        .getElementById("student-id")
-                        .value.trim();
-
-                    const name = document
-                        .getElementById("student-name")
-                        .value.trim();
-
-                    if (!id || !name) return;
-
-                    localStorage.setItem(
-                        "id2go_student",
-                        JSON.stringify({ id, name })
-                    );
-
-                    window.location.href = "dashboard.html";
-                }
-
-                else if (selectedRole === "operator") {
-                    window.location.href = "operator.html";
-                }
-
-                else {
-                    message.textContent =
-                        "Camera Operator module is not yet available.";
-                }
-            });
-    </script>
-
 </body>
 
 </html>

@@ -1,0 +1,141 @@
+.auth-shell {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--background, #f3f6fd);
+}
+
+.auth-header {
+    padding: 50px 24px 60px;
+    text-align: center;
+    color: #ffffff;
+    background: linear-gradient(135deg, #082658, #164992);
+    border-radius: 0 0 36px 36px;
+}
+
+.auth-header img {
+    width: 78px;
+    height: 78px;
+    object-fit: contain;
+}
+
+.auth-header h1 {
+    margin: 14px 0 6px;
+    font: 26px Georgia, serif;
+}
+
+.auth-header p {
+    margin: 0;
+    color: #d9e6ff;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+
+.auth-content {
+    padding: 30px 20px;
+}
+
+.auth-heading h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: #103675;
+}
+
+.auth-heading p {
+    margin: 0 0 25px;
+    color: #697b9d;
+    font-size: 14px;
+}
+
+.auth-card {
+    padding: 24px 20px;
+    background: #ffffff;
+    border: 1px solid #e1e8f5;
+    border-radius: 20px;
+    box-shadow: 0 5px 22px rgba(20, 55, 110, .06);
+}
+
+.auth-card h3 {
+    margin: 0 0 24px;
+    color: #103675;
+    font-size: 19px;
+}
+
+.auth-card label {
+    display: block;
+    margin: 17px 0 8px;
+    color: #103675;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.auth-card input {
+    width: 100%;
+    min-height: 48px;
+    padding: 13px;
+    border: 1px solid #dbe4f3;
+    border-radius: 11px;
+    background: white;
+    color: #102b5e;
+    font-size: 14px;
+}
+
+.auth-card input:focus {
+    outline: 2px solid #1d4f9f;
+    outline-offset: 1px;
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    padding-right: 75px;
+}
+
+.password-field button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: #164b9a;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-card .ui-button {
+    width: 100%;
+    margin-top: 26px;
+}
+
+.auth-card button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.auth-error {
+    margin: 15px 0 0;
+    padding: 12px;
+    border-radius: 9px;
+    background: #fff0f1;
+    color: #b42332;
+    font-size: 12px;
+}
+
+.auth-note {
+    margin: 25px auto;
+    max-width: 340px;
+    text-align: center;
+    color: #697b9d;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+[hidden] {
+    display: none !important;
+}
