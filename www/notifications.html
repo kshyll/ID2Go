@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#103675">
+    <meta name="theme-color" content="#102f5e">
 
     <title>ID2Go | Notifications</title>
 
@@ -28,17 +28,18 @@
                     <p>STUDENT ID SERVICES</p>
                 </div>
             </div>
-
-            <div class="header-bottom">
-                <a href="dashboard.html" class="back-link">
-                    ← Back to Home
-                </a>
-                <h2>Notifications</h2>
-                <p>Stay informed about your ID services.</p>
-            </div>
         </header>
 
         <main class="notifications-content">
+            <a href="dashboard.html" class="back-link">
+                ← Back to Dashboard
+            </a>
+
+            <div class="page-heading">
+                <span class="eyebrow">STUDENT SERVICES</span>
+                <h2>Notifications</h2>
+                <p>Updates about your appointments and ID services.</p>
+            </div>
 
             <div class="notifications-toolbar">
                 <div class="notifications-heading">
@@ -46,19 +47,15 @@
                     <span id="unread-badge" class="unread-badge" hidden>0</span>
                 </div>
 
-                <button type="button" id="mark-all-read" class="mark-all-button">
+                <button id="mark-all-read" class="mark-all-button" type="button">
                     Mark all as read
                 </button>
             </div>
 
             <div class="notification-filters">
-                <button type="button" class="filter-button active" data-filter="all">
-                    All
-                </button>
+                <button type="button" class="filter-button active" data-filter="all">All</button>
 
-                <button type="button" class="filter-button" data-filter="unread">
-                    Unread
-                </button>
+                <button type="button" class="filter-button" data-filter="unread">Unread</button>
             </div>
 
             <p id="notification-feedback" class="notification-feedback" role="status" aria-live="polite"></p>
@@ -74,7 +71,6 @@
                     will appear here.
                 </p>
             </div>
-
         </main>
 
     </div>
