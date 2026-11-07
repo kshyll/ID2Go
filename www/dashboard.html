@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#102f5e">
+
     <title>ID2Go | Student Dashboard</title>
 
     <link rel="stylesheet" href="css/global.css">
@@ -20,7 +21,7 @@
     <div class="app-shell">
 
         <header class="app-header">
-            <div class="header-inner">
+            <div class="header-top">
                 <div class="brand">
                     <img src="img/logo.png" alt="Xavier University seal">
 
@@ -30,9 +31,10 @@
                     </div>
                 </div>
 
-                <button id="notification-button" class="icon-button" type="button" aria-label="Open notifications">
+                <button id="notification-button" class="notification-button" type="button"
+                    aria-label="Open notifications">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                        stroke-linejoin="round" aria-hidden="true">
+                        stroke-linejoin="round">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
                         <path d="M10 21h4" />
                     </svg>
@@ -43,43 +45,54 @@
         <main class="dashboard-content">
 
             <section class="welcome-section">
-                <p class="eyebrow">STUDENT DASHBOARD</p>
-                <h2>Welcome back, <span id="welcome-name">Student!</span></h2>
-                <p class="supporting-text">
-                    Manage your appointments and ID services.
-                </p>
+                <div class="welcome-copy">
+                    <p class="eyebrow">STUDENT DASHBOARD</p>
+                    <h2>
+                        Hello, <span id="welcome-name">Student!</span>
+                    </h2>
+                    <p>
+                        Here's your ID service overview.
+                    </p>
+                </div>
             </section>
 
-            <section class="dashboard-section" aria-labelledby="queue-heading">
-
-                <div class="section-title-row">
-                    <h2 id="queue-heading">My Queue</h2>
-                    <span id="queue-status" class="queue-badge">
-                        No Active Queue
-                    </span>
+            <section class="queue-section">
+                <div class="section-heading">
+                    <h2>My Queue</h2>
+                    <span class="section-caption">Live status</span>
                 </div>
 
                 <div class="queue-card">
-                    <div class="queue-main">
-                        <div class="queue-number-group">
-                            <p class="field-label">QUEUE NUMBER</p>
+                    <div class="queue-card-top">
+                        <span class="queue-card-label">
+                            CURRENT QUEUE
+                        </span>
+
+                        <span id="queue-status" class="queue-status">
+                            No Active Queue
+                        </span>
+                    </div>
+
+                    <div class="queue-card-main">
+                        <div>
+                            <p>Your Queue Number</p>
                             <strong id="queue-number">—</strong>
                         </div>
 
-                        <div class="queue-progress-group">
-                            <p class="field-label">QUEUE PROGRESS</p>
+                        <div class="queue-progress">
+                            <span>QUEUE PROGRESS</span>
                             <p id="students-ahead">
-                                No queue information available
+                                No active queue
                             </p>
                         </div>
                     </div>
 
-                    <div class="queue-bottom">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <div class="queue-card-footer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <circle cx="12" cy="12" r="9" />
                             <path d="M12 7v5l3 2" />
                         </svg>
+
                         <span id="estimated-wait">
                             Estimated wait: Not available
                         </span>
@@ -87,69 +100,77 @@
                 </div>
             </section>
 
-            <section class="dashboard-section" aria-labelledby="stations-heading">
-
-                <div class="section-title-row">
-                    <h2 id="stations-heading">Camera Stations</h2>
-                    <span class="section-meta">Now Serving</span>
+            <section class="stations-section">
+                <div class="section-heading">
+                    <h2>Now Serving</h2>
+                    <span class="section-caption">
+                        Camera Stations
+                    </span>
                 </div>
 
                 <div class="station-grid">
                     <article class="station-card">
-                        <div class="station-top">
+                        <div class="station-header">
                             <span>STATION 01</span>
-                            <span class="station-indicator"></span>
+                            <span class="station-dot"></span>
                         </div>
+
                         <strong id="station-1-number">—</strong>
                         <p id="station-1-status">Not available</p>
                     </article>
 
                     <article class="station-card">
-                        <div class="station-top">
+                        <div class="station-header">
                             <span>STATION 02</span>
-                            <span class="station-indicator"></span>
+                            <span class="station-dot"></span>
                         </div>
+
                         <strong id="station-2-number">—</strong>
                         <p id="station-2-status">Not available</p>
                     </article>
 
                     <article class="station-card">
-                        <div class="station-top">
+                        <div class="station-header">
                             <span>STATION 03</span>
-                            <span class="station-indicator"></span>
+                            <span class="station-dot"></span>
                         </div>
+
                         <strong id="station-3-number">—</strong>
                         <p id="station-3-status">Not available</p>
                     </article>
 
                     <article class="station-card">
-                        <div class="station-top">
+                        <div class="station-header">
                             <span>STATION 04</span>
-                            <span class="station-indicator"></span>
+                            <span class="station-dot"></span>
                         </div>
+
                         <strong id="station-4-number">—</strong>
                         <p id="station-4-status">Not available</p>
                     </article>
                 </div>
 
-                <p class="section-note">
-                    Your assigned station will be displayed
-                    when your queue number is called.
-                </p>
+                <div class="station-notice">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 11v6M12 7h.01" />
+                    </svg>
+
+                    <p>
+                        Your station will be assigned
+                        when your queue number is called.
+                    </p>
+                </div>
             </section>
 
-            <section class="dashboard-section" aria-labelledby="appointment-heading">
-
-                <div class="section-title-row">
-                    <h2 id="appointment-heading">
-                        Upcoming Appointment
-                    </h2>
+            <section class="appointment-section">
+                <div class="section-heading">
+                    <h2>Upcoming Appointment</h2>
                 </div>
 
-                <article class="appointment-card">
+                <div class="appointment-card">
                     <div class="appointment-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <rect x="3" y="5" width="18" height="16" rx="2" />
                             <path d="M7 3v4M17 3v4M3 10h18" />
                         </svg>
@@ -159,23 +180,24 @@
                         <h3 id="appointment-service">
                             No upcoming appointment
                         </h3>
+
                         <p id="appointment-schedule">
                             Your booking details will appear here.
                         </p>
                     </div>
-                </article>
+                </div>
             </section>
 
             <button id="book-appointment-button" class="booking-button" type="button">
-                <span class="booking-button-content">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                        stroke-linejoin="round" aria-hidden="true">
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <rect x="3" y="5" width="18" height="16" rx="2" />
                         <path d="M7 3v4M17 3v4M3 10h18M9 16h6M12 13v6" />
                     </svg>
                     Book an Appointment
                 </span>
-                <span class="button-chevron" aria-hidden="true">›</span>
+
+                <span class="button-arrow">›</span>
             </button>
 
         </main>
@@ -184,7 +206,7 @@
 
             <a href="dashboard.html" class="nav-link active" aria-current="page">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                    stroke-linejoin="round" aria-hidden="true">
+                    stroke-linejoin="round">
                     <path d="m3 10 9-7 9 7v10H3z" />
                     <path d="M9 21v-7h6v7" />
                 </svg>
@@ -193,7 +215,7 @@
 
             <a href="booking.html" class="nav-link" data-feature="booking">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                    stroke-linejoin="round" aria-hidden="true">
+                    stroke-linejoin="round">
                     <rect x="3" y="5" width="18" height="16" rx="2" />
                     <path d="M7 3v4M17 3v4M3 10h18" />
                 </svg>
@@ -202,7 +224,7 @@
 
             <a href="profile.html" class="nav-link">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                    stroke-linejoin="round" aria-hidden="true">
+                    stroke-linejoin="round">
                     <circle cx="12" cy="8" r="4" />
                     <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
                 </svg>
