@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#103675">
+    <meta name="theme-color" content="#102f5e">
+
     <title>ID2Go | Reports & Monitoring</title>
 
     <link rel="stylesheet" href="css/global.css">
@@ -18,82 +19,85 @@
 
 <body>
     <div class="reports-shell">
+
         <header class="reports-header">
             <div class="reports-brand">
-                <img src="img/logo.png" alt="Xavier University">
+                <img src="img/logo.png" alt="Xavier University seal">
+
                 <div>
                     <h1>Xavier University</h1>
                     <p>STUDENT ID SERVICES</p>
                 </div>
             </div>
-
-            <div class="reports-heading">
-                <span>ID2Go · Administration</span>
-                <h2>Reports & Monitoring</h2>
-                <p>Appointment, queue, and station activity</p>
-            </div>
         </header>
 
         <main class="reports-content">
-            <section class="reports-panel">
-                <label for="report-date">Reporting Date</label>
+
+            <section class="reports-intro">
+                <span class="eyebrow">ID2GO ADMINISTRATION</span>
+                <h2>Reports & Monitoring</h2>
+                <p>
+                    An overview of appointment activity,
+                    service progress, and station performance.
+                </p>
+            </section>
+
+            <section class="date-card">
+                <div class="date-card-heading">
+                    <div class="date-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="5" width="18" height="16" rx="2" />
+                            <path d="M7 3v4M17 3v4M3 10h18" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3>Reporting Period</h3>
+                        <p>Select a date to view activity.</p>
+                    </div>
+                </div>
+
                 <div class="date-controls">
-                    <input type="date" id="report-date">
+                    <label for="report-date" class="sr-only">
+                        Reporting Date
+                    </label>
+
+                    <input id="report-date" type="date">
+
                     <button id="refresh-report" type="button">
                         Refresh
                     </button>
                 </div>
             </section>
 
-            <div class="section-heading">
-                <h2>Daily Overview</h2>
-                <span id="report-date-label"></span>
-            </div>
-
-            <p id="report-status" role="status" aria-live="polite">
+            <p id="report-status" class="report-feedback" role="status" aria-live="polite">
                 Loading reports...
             </p>
 
-            <section class="reports-grid" aria-label="Daily statistics">
-                <article class="report-card">
-                    <span>Appointments</span>
-                    <strong id="total-appointments">—</strong>
-                    <small>Scheduled for selected date</small>
-                </article>
-
-                <article class="report-card">
-                    <span>Waiting</span>
-                    <strong id="total-waiting">—</strong>
-                    <small>Students in queue</small>
-                </article>
-
-                <article class="report-card">
-                    <span>In Service</span>
-                    <strong id="total-serving">—</strong>
-                    <small>Currently processing</small>
-                </article>
-
-                <article class="report-card">
-                    <span>Completed</span>
-                    <strong id="total-completed">—</strong>
-                    <small>Finished ID services</small>
-                </article>
-
-                <article class="report-card">
-                    <span>Missed</span>
-                    <strong id="total-missed">—</strong>
-                    <small>Missed queue calls</small>
-                </article>
-            </section>
-
-            <section class="quota-section">
+            <section class="quota-section" aria-labelledby="quota-heading">
                 <div class="section-heading">
-                    <h2>Daily Service Quota</h2>
-                    <span>All Camera Stations</span>
+                    <h2 id="quota-heading">Daily Service Quota</h2>
+                    <span>All Stations</span>
                 </div>
 
-                <article class="reports-panel quota-panel">
-                    <p class="quota-label">Completed Services</p>
+                <article class="quota-card">
+                    <div class="quota-top">
+                        <div>
+                            <span class="quota-eyebrow">
+                                TODAY'S PERFORMANCE
+                            </span>
+                            <h3>Completed Services</h3>
+                        </div>
+
+                        <div class="quota-symbol" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19V5M4 19h16" />
+                                <path d="m8 15 4-4 3 2 5-6" />
+                            </svg>
+                        </div>
+                    </div>
 
                     <div class="quota-total">
                         <strong id="quota-completed">—</strong>
@@ -103,8 +107,7 @@
                     </div>
 
                     <div id="quota-progress" class="quota-progress" role="progressbar"
-                        aria-label="Daily service quota completion" aria-valuemin="0" aria-valuemax="100"
-                        aria-valuenow="0">
+                        aria-label="Daily quota completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                         <div id="quota-progress-fill"></div>
                     </div>
 
@@ -112,34 +115,78 @@
                         <span id="quota-percentage">—</span>
                         <span id="quota-remaining">—</span>
                     </div>
-
-                    <div class="quota-statistics">
-                        <div>
-                            <strong id="quota-daily-capacity">—</strong>
-                            <span>Daily Capacity</span>
-                        </div>
-                        <div>
-                            <strong id="quota-booked">—</strong>
-                            <span>Booked</span>
-                        </div>
-                        <div>
-                            <strong id="quota-completed-count">—</strong>
-                            <span>Completed</span>
-                        </div>
-                    </div>
                 </article>
+
+                <div class="quota-statistics">
+                    <article>
+                        <span>Daily Capacity</span>
+                        <strong id="quota-daily-capacity">—</strong>
+                    </article>
+
+                    <article>
+                        <span>Booked</span>
+                        <strong id="quota-booked">—</strong>
+                    </article>
+
+                    <article>
+                        <span>Completed</span>
+                        <strong id="quota-completed-count">—</strong>
+                    </article>
+                </div>
             </section>
 
-            <div class="section-heading">
-                <h2>Station Monitoring</h2>
-                <span>Camera Stations</span>
-            </div>
+            <section class="overview-section">
+                <div class="section-heading">
+                    <h2>Daily Overview</h2>
+                    <span id="report-date-label"></span>
+                </div>
 
-            <section id="station-monitoring" class="reports-panel" aria-label="Station monitoring">
-                <p class="reports-muted">
-                    Loading station information...
-                </p>
+                <div class="reports-grid">
+                    <article class="report-card">
+                        <span>Appointments</span>
+                        <strong id="total-appointments">—</strong>
+                        <small>Scheduled bookings</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>Waiting</span>
+                        <strong id="total-waiting">—</strong>
+                        <small>Students in queue</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>In Service</span>
+                        <strong id="total-serving">—</strong>
+                        <small>Currently processing</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>Completed</span>
+                        <strong id="total-completed">—</strong>
+                        <small>Finished ID services</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>Missed</span>
+                        <strong id="total-missed">—</strong>
+                        <small>Missed queue calls</small>
+                    </article>
+                </div>
             </section>
+
+            <section class="stations-section">
+                <div class="section-heading">
+                    <h2>Station Monitoring</h2>
+                    <span>Camera Stations</span>
+                </div>
+
+                <div id="station-monitoring" class="station-panel" aria-label="Station monitoring">
+                    <p class="reports-muted">
+                        Loading station information...
+                    </p>
+                </div>
+            </section>
+
         </main>
     </div>
 </body>
