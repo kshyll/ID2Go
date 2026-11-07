@@ -171,72 +171,6 @@
     line-height: 1.5;
 }
 
-.station-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 0;
-    border-bottom: 1px solid #e1e8f5;
-}
-
-.station-row:last-child {
-    border-bottom: none;
-}
-
-.station-row strong {
-    font-size: 13px;
-    color: #103675;
-}
-
-.station-status {
-    font-size: 12px;
-    color: #697b9d;
-}
-
-.status-dot {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #9ca8bc;
-    margin-right: 7px;
-}
-
-.status-dot.available {
-    background: #258b35;
-}
-
-.status-dot.busy {
-    background: #d99a21;
-}
-
-.reports-muted,
-.reports-footer {
-    font-size: 12px;
-    color: #697b9d;
-    line-height: 1.6;
-}
-
-.reports-footer {
-    text-align: center;
-    margin-top: 28px;
-}
-
-@media (max-width: 350px) {
-    .reports-grid {
-        gap: 8px;
-    }
-
-    .report-card {
-        padding: 13px;
-    }
-
-    .report-card strong {
-        font-size: 27px;
-    }
-}
-
 .quota-panel {
     padding: 22px 18px;
 }
@@ -319,4 +253,75 @@
 .quota-statistics span {
     color: #697b9d;
     font-size: 11px;
+}
+
+.station-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid #e1e8f5;
+}
+
+.station-row:last-child {
+    border-bottom: none;
+}
+
+.station-row strong {
+    font-size: 13px;
+    color: #103675;
+}
+
+.station-status {
+    font-size: 12px;
+    color: #697b9d;
+    text-transform: capitalize;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #9ca8bc;
+    margin-right: 7px;
+}
+
+.status-dot.available {
+    background: #258b35;
+}
+
+.status-dot.busy {
+    background: #d99a21;
+}
+
+.reports-muted,
+.reports-footer {
+    font-size: 12px;
+    color: #697b9d;
+    line-height: 1.6;
+}
+
+.reports-footer {
+    text-align: center;
+    margin-top: 28px;
+}
+
+@media (max-width: 350px) {
+    .reports-grid {
+        gap: 8px;
+    }
+
+    .report-card {
+        padding: 13px;
+    }
+
+    .report-card strong {
+        font-size: 27px;
+    }
+
+    .quota-statistics strong {
+        font-size: 19px;
+    }
 }
