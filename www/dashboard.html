@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#103675">
+
+    <title>ID2Go | Student Dashboard</title>
+
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script defer src="js/navigation.js"></script>
+</head>
+
+<body>
+    <div class="app-shell">
+
+        <header class="app-header">
+            <div class="header-top">
+                <div class="brand">
+                    <img src="img/logo.png" alt="Xavier University">
+                    <div>
+                        <h1>Xavier University</h1>
+                        <p>STUDENT ID SERVICES</p>
+                    </div>
+                </div>
+
+                <button class="icon-button" id="notification-button" aria-label="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                        <path d="M10 21h4" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="welcome">
+                <p>Welcome back,</p>
+                <h2 id="welcome-name">Student!</h2>
+                <span>Your ID service dashboard</span>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+
+            <section class="queue-card">
+                <div class="section-heading">
+                    <span class="heading-icon">◉</span>
+                    <h2>MY QUEUE STATUS</h2>
+                </div>
+
+                <div class="queue-content">
+                    <div class="queue-number-block">
+                        <p>Your Queue Number</p>
+                        <strong id="queue-number">—</strong>
+                    </div>
+
+                    <div class="queue-status-block">
+                        <span class="status-pill" id="queue-status">
+                            No Active Queue
+                        </span>
+                        <p id="students-ahead">
+                            Queue details will appear here
+                        </p>
+                    </div>
+                </div>
+
+                <div class="queue-footer">
+                    <span id="estimated-wait">
+                        Estimated wait: Not available
+                    </span>
+                </div>
+            </section>
+
+            <section class="content-card">
+                <div class="card-heading">
+                    <h2>Now Serving</h2>
+                    <span class="demo-label">Awaiting Data</span>
+                </div>
+
+                <div class="station-grid">
+
+                    <article class="station-card">
+                        <span>STATION 1</span>
+                        <strong id="station-1-number">—</strong>
+                        <p id="station-1-status">Not available</p>
+                    </article>
+
+                    <article class="station-card">
+                        <span>STATION 2</span>
+                        <strong id="station-2-number">—</strong>
+                        <p id="station-2-status">Not available</p>
+                    </article>
+
+                    <article class="station-card">
+                        <span>STATION 3</span>
+                        <strong id="station-3-number">—</strong>
+                        <p id="station-3-status">Not available</p>
+                    </article>
+
+                    <article class="station-card">
+                        <span>STATION 4</span>
+                        <strong id="station-4-number">—</strong>
+                        <p id="station-4-status">Not available</p>
+                    </article>
+
+                </div>
+
+                <div class="info-banner">
+                    Your station will be assigned when you are called.
+                </div>
+            </section>
+
+            <section class="content-card appointment-card">
+                <div class="card-heading">
+                    <h2>Upcoming Appointment</h2>
+                </div>
+
+                <div class="appointment-details">
+                    <div>
+                        <h3 id="appointment-service">
+                            No upcoming appointment
+                        </h3>
+                        <p id="appointment-schedule">
+                            Your booking details will appear here.
+                        </p>
+                    </div>
+
+                    <span class="appointment-arrow">›</span>
+                </div>
+            </section>
+
+            <button class="booking-button" id="book-appointment-button">
+                <span>Book an ID Appointment</span>
+                <span>›</span>
+            </button>
+
+        </main>
+
+        <nav class="bottom-navigation" aria-label="Student navigation">
+
+            <a href="dashboard.html" class="nav-link active" aria-current="page">
+                <span class="nav-symbol">⌂</span>
+                <span>Home</span>
+            </a>
+
+            <a href="booking.html" class="nav-link" data-feature="booking">
+                <span class="nav-symbol">▦</span>
+                <span>Book</span>
+            </a>
+
+            <a href="profile.html" class="nav-link">
+                <span class="nav-symbol">♙</span>
+                <span>Profile</span>
+            </a>
+
+        </nav>
+
+    </div>
+</body>
+
+</html>

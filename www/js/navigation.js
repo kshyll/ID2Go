@@ -6,17 +6,16 @@
     window.location.pathname.split("/").pop() || "index.html";
 
   const studentPages = [
-    "queue.html",
+    "dashboard.html",
     "booking.html",
     "profile.html"
   ];
 
   const getStudent = () => {
     try {
-      const savedStudent = localStorage.getItem("id2go_student");
-      return savedStudent ? JSON.parse(savedStudent) : null;
+      const data = localStorage.getItem("id2go_student");
+      return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error("Unable to load student:", error);
       return null;
     }
   };
@@ -26,8 +25,8 @@
     window.location.replace("index.html");
   };
 
-  const goToQueue = () => {
-    window.location.href = "queue.html";
+  const goToHome = () => {
+    window.location.href = "dashboard.html";
   };
 
   const goToBooking = () => {
@@ -38,17 +37,70 @@
     window.location.href = "profile.html";
   };
 
-  const goToLogin = () => {
-    window.location.href = "index.html";
+  const featureAvailable = async (page) => {
+    try {
+      const response = await fetch(page, {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const showUnavailable = (name) => {
+    let message = document.getElementById(
+      "feature-unavailable-message"
+    );
+
+    if (!message) {
+      message = document.createElement("div");
+      message.id = "feature-unavailable-message";
+
+      Object.assign(message.style, {
+        position: "fixed",
+        left: "50%",
+        bottom: "105px",
+        transform: "translateX(-50%)",
+        width: "calc(100% - 32px)",
+        maxWidth: "420px",
+        padding: "16px",
+        background: "#103675",
+        color: "#ffffff",
+        borderRadius: "12px",
+        textAlign: "center",
+        fontSize: "14px",
+        zIndex: "9999"
+      });
+
+      message.setAttribute("role", "status");
+      document.body.appendChild(message);
+    }
+
+    message.textContent =
+      `${name} is not available yet.`;
+  };
+
+  const openFeature = async (page, name) => {
+    const available = await featureAvailable(page);
+
+    if (available) {
+      window.location.href = page;
+    } else {
+      showUnavailable(name);
+    }
   };
 
   window.ID2Go = {
     getStudent,
     logout,
-    goToQueue,
+    goToHome,
+    goToQueue: goToHome,
     goToBooking,
     goToProfile,
-    goToLogin
+    openFeature
   };
 
   if (studentPages.includes(currentPage) && !getStudent()) {
@@ -56,98 +108,62 @@
     return;
   }
 
-  const createBottomNavigation = () => {
-    if (!studentPages.includes(currentPage)) {
-      return;
-    }
+  const initializeNavigation = () => {
+    const student = getStudent();
 
-    document.body.classList.add("has-id2go-nav");
-
-    document.querySelectorAll(".bottom-nav").forEach(nav => {
-      nav.remove();
-    });
-
-    const existingNavigation = document.querySelector(
-      ".id2go-bottom-nav"
+    const welcomeName = document.getElementById(
+      "welcome-name"
     );
 
-    if (existingNavigation) {
-      existingNavigation.remove();
+    if (welcomeName && student) {
+      const firstName =
+        String(student.name || "Student")
+          .trim()
+          .split(/\s+/)[0];
+
+      welcomeName.textContent = `${firstName}!`;
     }
 
-    const navigationItems = [
-      {
-        page: "queue.html",
-        label: "Home",
-        icon: "⌂"
-      },
-      {
-        page: "booking.html",
-        label: "Book",
-        icon: "▦"
-      },
-      {
-        page: "profile.html",
-        label: "Profile",
-        icon: "♙"
-      }
-    ];
-
-    const navigation = document.createElement("nav");
-
-    navigation.className = "id2go-bottom-nav";
-    navigation.setAttribute(
-      "aria-label",
-      "Student Navigation"
-    );
-
-    navigationItems.forEach(item => {
-      const link = document.createElement("a");
-
-      link.href = item.page;
-
-      if (currentPage === item.page) {
-        link.classList.add("active");
-        link.setAttribute("aria-current", "page");
-      }
-
-      const icon = document.createElement("span");
-      icon.className = "nav-icon";
-      icon.textContent = item.icon;
-      icon.setAttribute("aria-hidden", "true");
-
-      const label = document.createElement("span");
-      label.className = "nav-label";
-      label.textContent = item.label;
-
-      link.appendChild(icon);
-      link.appendChild(label);
-
-      navigation.appendChild(link);
-    });
-
-    document.body.appendChild(navigation);
-  };
-
-  const connectBookingButton = () => {
-    if (currentPage !== "queue.html") {
-      return;
-    }
-
-    const bookingButton = document.querySelector(
-      "#view-normal .btn-primary"
+    const bookingButton = document.getElementById(
+      "book-appointment-button"
     );
 
     if (bookingButton) {
       bookingButton.addEventListener("click", () => {
-        goToBooking();
+        openFeature("booking.html", "Appointment Booking");
       });
     }
-  };
 
-  const initializeNavigation = () => {
-    createBottomNavigation();
-    connectBookingButton();
+    document.querySelectorAll(
+      '[data-feature="booking"]'
+    ).forEach(link => {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+
+        openFeature(
+          "booking.html",
+          "Appointment Booking"
+        );
+      });
+    });
+
+    const notificationButton = document.getElementById(
+      "notification-button"
+    );
+
+    if (notificationButton) {
+      notificationButton.addEventListener("click", () => {
+        showUnavailable("Notifications");
+      });
+    }
+
+    const logoutButton = document.getElementById(
+      "logout-button"
+    );
+
+    if (logoutButton) {
+      logoutButton.addEventListener("click", logout);
+    }
   };
 
   if (document.readyState === "loading") {
