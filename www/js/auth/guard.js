@@ -5,13 +5,15 @@
   const db = window.ID2GoDB;
 
   const getCurrentUser = async () => {
-    const { data, error } = await db.auth.getUser();
-
-    if (error || !data.user) {
-      return null;
+    if (!db) {
+      throw new Error("Supabase client unavailable.");
     }
 
-    return data.user;
+    const { data, error } = await db.auth.getUser();
+
+    if (error) throw error;
+
+    return data.user || null;
   };
 
   const getRole = async userId => {
@@ -21,11 +23,9 @@
       .eq("user_id", userId)
       .single();
 
-    if (error || !data) {
-      return null;
-    }
+    if (error) throw error;
 
-    return data.role;
+    return data?.role || null;
   };
 
   const requireRole = async requiredRole => {
@@ -40,24 +40,26 @@
       const role = await getRole(user.id);
 
       if (role !== requiredRole) {
-        window.location.replace("index.html");
-        return null;
+        throw new Error("Unauthorized account role.");
       }
 
       return user;
     } catch (error) {
-      console.error("Role verification failed:", error);
+      console.error("Access verification:", error);
+
       window.location.replace("index.html");
       return null;
     }
   };
 
   const logout = async () => {
+    if (!db) {
+      throw new Error("Supabase client unavailable.");
+    }
+
     const { error } = await db.auth.signOut();
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw error;
 
     window.location.replace("index.html");
   };
