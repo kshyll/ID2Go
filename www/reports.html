@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#103675">
+    <title>ID2Go | Reports & Monitoring</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/reports.css">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="js/supabase-client.js"></script>
+    <script defer src="js/reports/reports.js"></script>
+</head>
+
+<body>
+    <div class="reports-shell">
+        <header class="reports-header">
+            <div class="reports-brand">
+                <img src="img/logo.png" alt="Xavier University">
+                <div>
+                    <h1>Xavier University</h1>
+                    <p>STUDENT ID SERVICES</p>
+                </div>
+            </div>
+
+            <div class="reports-heading">
+                <span>ID2Go · Administration</span>
+                <h2>Reports & Monitoring</h2>
+                <p>Appointment, queue, and station activity</p>
+            </div>
+        </header>
+
+        <main class="reports-content">
+            <section class="reports-panel">
+                <label for="report-date">Reporting Date</label>
+                <div class="date-controls">
+                    <input type="date" id="report-date">
+                    <button id="refresh-report" type="button">
+                        Refresh
+                    </button>
+                </div>
+            </section>
+
+            <div class="section-heading">
+                <h2>Daily Overview</h2>
+                <span id="report-date-label"></span>
+            </div>
+
+            <p id="report-status" role="status" aria-live="polite">
+                Loading reports...
+            </p>
+
+            <section class="reports-grid" aria-label="Daily statistics">
+                <article class="report-card">
+                    <span>Appointments</span>
+                    <strong id="total-appointments">—</strong>
+                    <small>Scheduled for selected date</small>
+                </article>
+
+                <article class="report-card">
+                    <span>Waiting</span>
+                    <strong id="total-waiting">—</strong>
+                    <small>Students in queue</small>
+                </article>
+
+                <article class="report-card">
+                    <span>In Service</span>
+                    <strong id="total-serving">—</strong>
+                    <small>Currently processing</small>
+                </article>
+
+                <article class="report-card">
+                    <span>Completed</span>
+                    <strong id="total-completed">—</strong>
+                    <small>Finished ID services</small>
+                </article>
+
+                <article class="report-card">
+                    <span>Missed</span>
+                    <strong id="total-missed">—</strong>
+                    <small>Missed queue calls</small>
+                </article>
+            </section>
+
+            <section class="quota-section">
+                <div class="section-heading">
+                    <h2>Daily Service Quota</h2>
+                    <span>All Camera Stations</span>
+                </div>
+
+                <article class="reports-panel quota-panel">
+                    <p class="quota-label">Completed Services</p>
+
+                    <div class="quota-total">
+                        <strong id="quota-completed">—</strong>
+                        <span>
+                            / <span id="quota-capacity">—</span> capacity
+                        </span>
+                    </div>
+
+                    <div id="quota-progress" class="quota-progress" role="progressbar"
+                        aria-label="Daily service quota completion" aria-valuemin="0" aria-valuemax="100"
+                        aria-valuenow="0">
+                        <div id="quota-progress-fill"></div>
+                    </div>
+
+                    <div class="quota-progress-labels">
+                        <span id="quota-percentage">—</span>
+                        <span id="quota-remaining">—</span>
+                    </div>
+
+                    <div class="quota-statistics">
+                        <div>
+                            <strong id="quota-daily-capacity">—</strong>
+                            <span>Daily Capacity</span>
+                        </div>
+                        <div>
+                            <strong id="quota-booked">—</strong>
+                            <span>Booked</span>
+                        </div>
+                        <div>
+                            <strong id="quota-completed-count">—</strong>
+                            <span>Completed</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <div class="section-heading">
+                <h2>Station Monitoring</h2>
+                <span>Camera Stations</span>
+            </div>
+
+            <section id="station-monitoring" class="reports-panel" aria-label="Station monitoring">
+                <p class="reports-muted">
+                    Loading station information...
+                </p>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
