@@ -1,0 +1,152 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.reports-shell {
+    background: #f7f9fc;
+    color: #172b4d;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+.reports-header {
+    padding: calc(20px + env(safe-area-inset-top)) 22px 27px;
+    border-radius: 0 0 20px 20px;
+    background: #102f5e;
+    box-shadow: none;
+}
+
+.reports-brand img {
+    width: 44px;
+    height: 50px;
+}
+
+.reports-brand h1 {
+    color: white;
+    font: 400 20px Georgia, serif;
+}
+
+.reports-brand p {
+    color: #dce8ff;
+    font-size: 9px;
+}
+
+.reports-heading {
+    margin-top: 28px;
+}
+
+.reports-heading h2 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+}
+
+.reports-content {
+    padding: 27px 19px 45px;
+}
+
+.reports-panel,
+.report-card {
+    border: 1px solid #e8edf5;
+    border-radius: 15px;
+    background: white;
+    box-shadow: 0 3px 10px rgba(20, 50, 100, .035);
+}
+
+.reports-panel {
+    padding: 19px;
+    margin-bottom: 22px;
+}
+
+.reports-panel label {
+    color: #172b4d;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.date-controls input {
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+    color: #172b4d;
+}
+
+.date-controls button {
+    border-radius: 10px;
+    background: #315ccb;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.reports-content .section-heading h2 {
+    color: #172b4d;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.report-card {
+    padding: 17px;
+}
+
+.report-card span {
+    color: #78869d;
+    font-size: 11px;
+}
+
+.report-card strong {
+    color: #102f5e;
+    font-size: 29px;
+    font-weight: 800;
+}
+
+.quota-label {
+    color: #78869d;
+}
+
+.quota-total strong {
+    color: #102f5e;
+    font-size: 37px;
+    font-weight: 800;
+}
+
+.quota-progress {
+    height: 9px;
+    border-radius: 6px;
+    background: #eaf2ff;
+}
+
+#quota-progress-fill {
+    border-radius: 6px;
+    background: #315ccb;
+}
+
+.quota-statistics>div {
+    border: 1px solid #e8edf5;
+    border-radius: 11px;
+    background: #f7f9fc;
+}
+
+.quota-statistics strong {
+    color: #315ccb;
+    font-weight: 800;
+}
+
+.station-row strong {
+    color: #172b4d;
+}
+
+#report-status {
+    color: #78869d;
+}
+
+#report-status.error {
+    color: #b42332;
+}
+
+@media (max-width: 350px) {
+    .reports-content {
+        padding-left: 13px;
+        padding-right: 13px;
+    }
+
+    .report-card strong {
+        font-size: 25px;
+    }
+}
