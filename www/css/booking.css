@@ -416,3 +416,79 @@
     font-size: 12px;
     font-weight: bold;
 }
+
+/* Existing Active Appointment Card */
+.existing-appointment-card {
+    background: #edf3ff;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.appointment-status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.status-badge-active {
+    background: #258b35;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.queue-mini-badge {
+    font-size: 13px;
+    color: #102f5e;
+}
+
+.active-service-title {
+    font-size: 18px;
+    color: #102f5e;
+    margin: 0 0 14px;
+    font-weight: bold;
+}
+
+.active-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #ffffff;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #dce3ed;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.info-label {
+    color: var(--muted, #6b7890);
+}
+
+.info-val {
+    font-weight: bold;
+    color: var(--text, #172b4d);
+}
+
+/* Danger / Cancel Button */
+.btn-danger {
+    background: #fff0f0;
+    color: #d93838;
+    border: 1px solid #fecaca;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #fee2e2;
+}

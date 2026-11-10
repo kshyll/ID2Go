@@ -47,28 +47,59 @@
             </div>
         </header>
 
-        <!-- MAIN DASHBOARD-STYLE CONTENT AREA -->
+        <!-- MAIN CONTENT AREA -->
         <main class="dashboard-content">
 
-            <!-- STEP 1: SELECT SERVICE -->
+            <!-- STEP 1: SELECT SERVICE / EXISTING APPOINTMENT VIEW -->
             <section id="step-1" class="step-card content-card active">
                 <header class="step-header">
                     <button type="button" class="back-link" disabled>&#8592; Book Appointment</button>
-                    <p class="step-indicator">Step 1 of 4: Select Service</p>
+                    <p class="step-indicator" id="step1-indicator">Step 1 of 4: Select Service</p>
                 </header>
 
                 <div class="step-body">
-                    <h3 class="section-title">Choose ID Service</h3>
+                    
+                    <!-- OPTION A: DISPLAYED WHEN STUDENT ALREADY HAS AN ACTIVE BOOKING -->
+                    <div id="existing-appointment-card" class="existing-appointment-card" style="display: none;">
+                        <div class="appointment-status-header">
+                            <span class="status-badge-active">Active Booking</span>
+                            <span class="queue-mini-badge">Queue: <strong id="active-queue-no">001</strong></span>
+                        </div>
 
-                    <div class="service-options">
-                        <label class="service-option selected">
-                            <input type="radio" name="id_service" value="First-Time ID Picture Taking" checked>
-                            <span class="custom-radio"></span>
-                            <span class="option-label">First-Time ID Picture Taking</span>
-                        </label>
+                        <h3 id="existing-service-name" class="active-service-title">First-Time ID Picture Taking</h3>
+
+                        <div class="active-info-list">
+                            <div class="info-row">
+                                <span class="info-label">Date:</span>
+                                <span id="active-booking-date" class="info-val">Select Date</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Time Slot:</span>
+                                <span id="active-booking-time" class="info-val">Select Time</span>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" id="btn-view-appointment-details" class="btn btn-primary btn-block">View Appointment Details</button>
+                            <button type="button" id="btn-cancel-booking" class="btn btn-danger btn-block">Cancel Booking</button>
+                        </div>
                     </div>
 
-                    <button type="button" id="btn-step1-next" class="btn btn-primary btn-block">Next</button>
+                    <!-- OPTION B: DISPLAYED FOR NEW BOOKINGS -->
+                    <div id="new-booking-container">
+                        <h3 class="section-title">Choose ID Service</h3>
+
+                        <div class="service-options">
+                            <label class="service-option selected">
+                                <input type="radio" name="id_service" value="First-Time ID Picture Taking" checked>
+                                <span class="custom-radio"></span>
+                                <span class="option-label">First-Time ID Picture Taking</span>
+                            </label>
+                        </div>
+
+                        <button type="button" id="btn-step1-next" class="btn btn-primary btn-block">Next</button>
+                    </div>
+
                 </div>
             </section>
 
@@ -257,31 +288,78 @@
                 </div>
             </section>
 
-            <!-- STEP 5: APPOINTMENT CONFIRMED -->
-        <section id="step-5" class="step-card content-card">
-            <header class="step-header text-center">
-                <h3 class="page-title">Appointment Confirmed</h3>
-                <p class="step-indicator">Your booking was successful.</p>
-            </header>
+           <!-- STEP 5: APPOINTMENT CONFIRMED / DETAILS VIEW -->
+          <section id="step-5" class="step-card content-card">
+              <header class="step-header text-center">
+                  <h3 class="page-title">Appointment Details</h3>
+                  <p class="step-indicator">Your booking status and student information.</p>
+              </header>
 
-            <div class="step-body">
-                <div class="queue-card">
-                    <p class="queue-label">Your Queue Number</p>
-                    <h1 id="generated-queue-number" class="queue-number">001</h1>
-                </div>
+              <div class="step-body">
+                  <!-- Queue Number Header -->
+                  <div class="queue-card">
+                      <p class="queue-label">Your Queue Number</p>
+                      <h1 id="generated-queue-number" class="queue-number">001</h1>
+                  </div>
 
-                <div class="confirmation-summary-card">
-                    <h4 id="conf-service-title" class="summary-service-title">First-Time ID Picture Taking</h4>
-                    <p id="conf-date-display" class="summary-text"></p>
-                    <p id="conf-time-display" class="summary-text"></p>
-                    <span class="status-badge">Confirmed</span>
-                </div>
+                  <div class="confirmation-summary-card">
+                      <h4 id="conf-service-title" class="summary-service-title">First-Time ID Picture Taking</h4>
+                      <span class="status-badge">Confirmed</span>
+                  </div>
 
-                <div class="button-group">
-                    <button type="button" id="btn-view-details" class="btn btn-primary btn-block">View Appointment Details</button>
-                </div>
-            </div>
-        </section>
+                  <!-- FULL APPOINTMENT DETAILS LIST -->
+                  <div class="review-details" style="margin-top: 16px;">
+                      <div class="review-item">
+                          <span class="review-label">Full Name</span>
+                          <span class="review-value" id="conf-student-name">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Student ID</span>
+                          <span class="review-value" id="conf-student-id">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Course & Year</span>
+                          <span class="review-value" id="conf-student-course">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">University Email</span>
+                          <span class="review-value" id="conf-student-email">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Mobile Number</span>
+                          <span class="review-value" id="conf-student-mobile">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Appointment Date</span>
+                          <span class="review-value" id="conf-date-display">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Time Slot</span>
+                          <span class="review-value" id="conf-time-display">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Emergency Contact</span>
+                          <span class="review-value" id="conf-emergency-name">-</span>
+                      </div>
+
+                      <div class="review-item">
+                          <span class="review-label">Emergency Phone</span>
+                          <span class="review-value" id="conf-emergency-phone">-</span>
+                      </div>
+                  </div>
+
+                  <div class="button-group">
+                      <button type="button" id="btn-back-home" class="btn btn-secondary btn-block">Back to Home</button>
+                  </div>
+              </div>
+          </section>
 
         </main>
 
