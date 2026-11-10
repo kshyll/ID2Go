@@ -1,109 +1,167 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 .auth-shell {
     width: 100%;
     max-width: 480px;
     min-height: 100vh;
     margin: 0 auto;
-    background: #f7f8fa;
-    color: #1c2b40;
-    font-family: "Inter", Arial, sans-serif;
+    background: #f7f9fc;
+    color: #172b4d;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
 }
 
-.auth-header {
-    padding: 43px 24px 35px;
-    background: #102f5e;
-    color: #ffffff;
-    text-align: center;
+.auth-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 330px;
+    overflow: hidden;
+    padding: calc(30px + env(safe-area-inset-top)) 25px 35px;
+    border-radius: 0 0 28px 28px;
+    background: linear-gradient(145deg, #102f5e, #315ccb);
+    color: white;
 }
 
-.auth-header img {
-    display: block;
-    width: 66px;
-    height: 70px;
-    margin: 0 auto;
+.hero-shape {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-shape-one {
+    width: 230px;
+    height: 230px;
+    top: 50px;
+    right: -100px;
+    background: rgba(97, 188, 235, .14);
+}
+
+.hero-shape-two {
+    width: 160px;
+    height: 160px;
+    bottom: -100px;
+    left: -55px;
+    background: rgba(255, 255, 255, .07);
+}
+
+.university-brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.university-brand img {
+    width: 48px;
+    height: 56px;
+    flex-shrink: 0;
     object-fit: contain;
 }
 
-.auth-header h1 {
-    margin: 15px 0 6px;
-    color: #ffffff;
-    font-family: Georgia, serif;
-    font-size: 24px;
-    font-weight: 400;
+.university-brand h1 {
+    margin: 0;
+    color: white;
+    font: 400 20px Georgia, serif;
 }
 
-.auth-header p {
-    margin: 0;
-    color: #d7e2f0;
-    font-size: 10px;
+.university-brand p {
+    margin: 5px 0 0;
+    color: #dce8ff;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 1.7px;
+    letter-spacing: 1.6px;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 350px;
+    margin-top: 55px;
+}
+
+.hero-eyebrow {
+    color: #c8dcff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.hero-content h2 {
+    max-width: 330px;
+    margin: 12px 0;
+    color: white;
+    font-size: clamp(25px, 6.5vw, 31px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.3;
+}
+
+.hero-content p {
+    max-width: 315px;
+    margin: 0;
+    color: #e0eaff;
+    font-size: 12px;
+    line-height: 1.8;
 }
 
 .auth-content {
-    padding: 34px 20px 45px;
-}
-
-.auth-eyebrow {
-    display: block;
-    margin-bottom: 10px;
-    color: #102f5e;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.3px;
+    padding: 30px 23px 40px;
 }
 
 .auth-heading h2 {
-    margin: 0 0 8px;
-    color: #1c2b40;
-    font-size: 23px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
+    margin: 0 0 7px;
+    color: #172b4d;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.5px;
 }
 
 .auth-heading p {
-    margin: 0 0 25px;
-    color: #697789;
-    font-size: 13px;
-    line-height: 1.6;
+    margin: 0 0 24px;
+    color: #78869d;
+    font-size: 12px;
 }
 
 .auth-card {
-    padding: 23px 20px;
-    border: 1px solid #e2e6ec;
-    border-radius: 10px;
-    background: #ffffff;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
     box-shadow: none;
 }
 
-.auth-card h3 {
-    margin: 0 0 20px;
-    color: #1c2b40;
-    font-size: 15px;
+.form-group {
+    margin-bottom: 19px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 9px;
+    color: #172b4d;
+    font-size: 12px;
     font-weight: 700;
 }
 
-.auth-card label {
-    display: block;
-    margin: 17px 0 8px;
-    color: #1c2b40;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.auth-card input {
-    display: block;
+.form-group input {
     width: 100%;
-    min-height: 46px;
-    padding: 12px 13px;
-    border: 1px solid #e2e6ec;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #1c2b40;
+    min-height: 51px;
+    padding: 14px 15px;
+    border: 1px solid #e2e9f4;
+    border-radius: 12px;
+    background: white;
+    color: #172b4d;
+    font-family: inherit;
     font-size: 13px;
 }
 
-.auth-card input:focus {
-    outline: 2px solid #164b9a;
+.form-group input::placeholder {
+    color: #9aa7b8;
+}
+
+.form-group input:focus {
+    outline: 2px solid #315ccb;
     outline-offset: 1px;
 }
 
@@ -118,54 +176,76 @@
 .password-field button {
     position: absolute;
     top: 50%;
-    right: 10px;
+    right: 12px;
     transform: translateY(-50%);
-    padding: 8px;
     border: none;
+    padding: 8px;
     background: transparent;
-    color: #102f5e;
+    color: #315ccb;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
-.auth-card .ui-button {
+.auth-submit {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
-    min-height: 48px;
-    margin-top: 25px;
+    min-height: 53px;
+    margin-top: 27px;
+    padding: 14px 19px;
     border: 0;
-    border-radius: 8px;
-    background: #102f5e;
-    color: #ffffff;
+    border-radius: 12px;
+    background: #315ccb;
+    color: white;
+    font-family: inherit;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
-.auth-card .ui-button:disabled {
-    opacity: 0.6;
+.auth-submit span {
+    font-size: 20px;
+}
+
+.auth-submit:disabled {
+    opacity: .6;
+    cursor: wait;
 }
 
 .auth-error {
     margin: 15px 0 0;
     padding: 12px;
-    border: 1px solid #f0cbd0;
-    border-radius: 7px;
-    background: #fff4f4;
+    border: 1px solid #f1cbd1;
+    border-radius: 9px;
+    background: #fff2f4;
     color: #b42332;
     font-size: 12px;
 }
 
 .auth-note {
-    max-width: 360px;
-    margin: 24px auto;
-    color: #697789;
-    font-size: 12px;
+    margin: 26px auto 0;
+    color: #8793a5;
+    font-size: 11px;
     line-height: 1.7;
     text-align: center;
 }
 
 [hidden] {
     display: none !important;
+}
+
+@media (max-width: 350px) {
+    .auth-hero {
+        padding-left: 19px;
+        padding-right: 19px;
+    }
+
+    .university-brand h1 {
+        font-size: 17px;
+    }
+
+    .auth-content {
+        padding-left: 17px;
+        padding-right: 17px;
+    }
 }
