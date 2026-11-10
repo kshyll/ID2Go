@@ -3,260 +3,291 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102f5e">
+
   <title>ID2GO - Book Appointment</title>
-  <!-- Supabase JS Client Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Global & Layout Styles -->
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/booking.css">
   <link rel="stylesheet" href="css/navigation.css">
+
+  <!-- Supabase & App Client Scripts -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="js/supabase-client.js"></script>
   <script defer src="js/navigation.js"></script>
 </head>
 <body>
 
-  <main class="mobile-container">
+  <div class="app-shell">
 
-    <!-- STEP 1: SELECT SERVICE -->
-    <section id="step-1" class="step-card active">
-      <header class="step-header">
-        <button type="button" class="back-link" disabled>&#8592; Book Appointment</button>
-        <p class="step-indicator">Step 1 of 4: Select Service</p>
-      </header>
+    <main class="mobile-container">
 
-      <div class="step-body">
-        <h2 class="section-title">Choose ID Service</h2>
+      <!-- STEP 1: SELECT SERVICE -->
+      <section id="step-1" class="step-card active">
+        <header class="step-header">
+          <button type="button" class="back-link" disabled>&#8592; Book Appointment</button>
+          <p class="step-indicator">Step 1 of 4: Select Service</p>
+        </header>
 
-        <div class="service-options">
-          <label class="service-option selected">
-            <input type="radio" name="id_service" value="First-Time ID Picture Taking" checked>
-            <span class="custom-radio"></span>
-            <span class="option-label">First-Time ID Picture Taking</span>
-          </label>
+        <div class="step-body">
+          <h2 class="section-title">Choose ID Service</h2>
+
+          <div class="service-options">
+            <label class="service-option selected">
+              <input type="radio" name="id_service" value="First-Time ID Picture Taking" checked>
+              <span class="custom-radio"></span>
+              <span class="option-label">First-Time ID Picture Taking</span>
+            </label>
+          </div>
+
+          <button type="button" id="btn-step1-next" class="btn btn-primary btn-block">Next</button>
         </div>
+      </section>
 
-        <button type="button" id="btn-step1-next" class="btn btn-primary btn-block">Next</button>
-      </div>
-    </section>
+      <!-- STEP 2: STUDENT INFO -->
+      <section id="step-2" class="step-card">
+        <header class="step-header">
+          <button type="button" class="back-link nav-back-btn" data-target="1">&#8592; Back</button>
+          <h2 class="page-title">Student Information</h2>
+          <p class="step-indicator">Step 2 of 4: Review and Complete</p>
+        </header>
 
-    <!-- STEP 2: STUDENT INFO -->
-    <section id="step-2" class="step-card">
-      <header class="step-header">
-        <button type="button" class="back-link nav-back-btn" data-target="1">&#8592; Back</button>
-        <h2 class="page-title">Student Information</h2>
-        <p class="step-indicator">Step 2 of 4: Review and Complete</p>
-      </header>
-
-      <form id="student-info-form" class="step-body">
-        <!-- Personal Details -->
-        <div class="form-group">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required>
-        </div>
-
-        <div class="form-group">
-          <label for="studentId">Student ID Number</label>
-          <input type="text" id="studentId" name="studentId" placeholder="Enter student ID number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="courseProgram">Course / Program</label>
-          <select id="courseProgram" name="courseProgram" required>
-            <option value="" disabled selected>Select Course / Program</option>
-            <option value="BS Information Technology">BS Information Technology</option>
-            <option value="BS Computer Science">BS Computer Science</option>
-            <option value="BS Information Systems">BS Information Systems</option>
-            <option value="BS Business Administration">BS Business Administration</option>
-            <option value="BS Accountancy">BS Accountancy</option>
-            <option value="BS Nursing">BS Nursing</option>
-            <option value="BS Civil Engineering">BS Civil Engineering</option>
-            <option value="AB Psychology">AB Psychology</option>
-            <option value="AB Communication">AB Communication</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="yearLevel">Year Level</label>
-          <select id="yearLevel" name="yearLevel" required>
-            <option value="" disabled selected>Select Year Level</option>
-            <option value="1st Year">1st Year</option>
-            <option value="2nd Year">2nd Year</option>
-            <option value="3rd Year">3rd Year</option>
-            <option value="4th Year">4th Year</option>
-            <option value="5th Year">5th Year</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="email">University Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter university email" required>
-        </div>
-
-        <div class="form-group">
-          <label for="mobileNumber">Mobile Number</label>
-          <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter mobile number" required>
-        </div>
-
-        <!-- Emergency Contact Section -->
-        <div class="form-section-divider">
-          <h3 class="subsection-title">Emergency Contact</h3>
-
+        <form id="student-info-form" class="step-body">
           <div class="form-group">
-            <label for="emergencyName">Contact Name</label>
-            <input type="text" id="emergencyName" name="emergencyName" placeholder="Enter contact name" required>
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required>
           </div>
 
           <div class="form-group">
-            <label for="emergencyRelationship">Relationship</label>
-            <select id="emergencyRelationship" name="emergencyRelationship" required>
-              <option value="" disabled selected>Select relationship</option>
-              <option value="Parent">Parent</option>
-              <option value="Guardian">Guardian</option>
-              <option value="Spouse">Spouse</option>
-              <option value="Sibling">Sibling</option>
-              <option value="Relative">Relative</option>
-              <option value="Friend">Friend</option>
-              <option value="Other">Other</option>
+            <label for="studentId">Student ID Number</label>
+            <input type="text" id="studentId" name="studentId" placeholder="Enter student ID number" required>
+          </div>
+
+          <div class="form-group">
+            <label for="courseProgram">Course / Program</label>
+            <select id="courseProgram" name="courseProgram" required>
+              <option value="" disabled selected>Select Course / Program</option>
+              <option value="BS Information Technology">BS Information Technology</option>
+              <option value="BS Computer Science">BS Computer Science</option>
+              <option value="BS Information Systems">BS Information Systems</option>
+              <option value="BS Business Administration">BS Business Administration</option>
+              <option value="BS Accountancy">BS Accountancy</option>
+              <option value="BS Nursing">BS Nursing</option>
+              <option value="BS Civil Engineering">BS Civil Engineering</option>
+              <option value="AB Psychology">AB Psychology</option>
+              <option value="AB Communication">AB Communication</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="emergencyPhone">Emergency Contact Number</label>
-            <input type="tel" id="emergencyPhone" name="emergencyPhone" placeholder="Enter number" required>
-          </div>
-        </div>
-
-        <div class="button-group">
-          <button type="submit" id="btn-step2-next" class="btn btn-primary btn-block">Save and Continue</button>
-          <button type="button" class="btn btn-secondary btn-block nav-back-btn" data-target="1">Back</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- STEP 3: SCHEDULE SELECTION -->
-    <section id="step-3" class="step-card">
-      <header class="step-header">
-        <button type="button" class="back-link nav-back-btn" data-target="2">&#8592; Back</button>
-        <h2 class="page-title">Select Appointment Schedule</h2>
-        <p class="step-indicator">Step 3 of 4</p>
-      </header>
-
-      <div class="step-body">
-        <!-- Interactive Calendar Picker -->
-        <div class="calendar-wrapper">
-          <div class="calendar-header">
-            <button type="button" id="prev-month" class="cal-nav-btn">&lt;</button>
-            <span id="calendar-month-year" class="cal-month-title"></span>
-            <button type="button" id="next-month" class="cal-nav-btn">&gt;</button>
+            <label for="yearLevel">Year Level</label>
+            <select id="yearLevel" name="yearLevel" required>
+              <option value="" disabled selected>Select Year Level</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+              <option value="5th Year">5th Year</option>
+            </select>
           </div>
 
-          <div class="calendar-grid">
-            <div class="cal-day-header">S</div>
-            <div class="cal-day-header">M</div>
-            <div class="cal-day-header">T</div>
-            <div class="cal-day-header">W</div>
-            <div class="cal-day-header">T</div>
-            <div class="cal-day-header">F</div>
-            <div class="cal-day-header">S</div>
-            <div id="calendar-days" class="calendar-days-container"></div>
-          </div>
-        </div>
-
-        <!-- Available Slots -->
-        <div class="time-slots-container">
-          <h3 class="subsection-title">Available Time Slots</h3>
-          <p id="selected-date-label" class="selected-date-subtext">Select a date from the calendar</p>
-          <div id="time-slots-list" class="slots-list">
-            <!-- Dynamic Slots Rendered Here -->
-          </div>
-        </div>
-
-        <div class="button-group">
-          <button type="button" id="btn-step3-next" class="btn btn-primary btn-block" disabled>Next</button>
-          <button type="button" class="btn btn-secondary btn-block nav-back-btn" data-target="2">Back</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- STEP 4: REVIEW APPOINTMENT -->
-    <section id="step-4" class="step-card">
-      <header class="step-header">
-        <button type="button" class="back-link nav-back-btn" data-target="3">&#8592; Back</button>
-        <h2 class="page-title">Review Appointment</h2>
-        <p class="step-indicator">Step 4 of 4</p>
-      </header>
-
-      <div class="step-body">
-        <div class="review-details">
-          <div class="review-item">
-            <span class="review-label">Service</span>
-            <span class="review-value" id="review-service">First-Time ID Picture Taking</span>
+          <div class="form-group">
+            <label for="email">University Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter university email" required>
           </div>
 
-          <div class="review-item">
-            <span class="review-label">Student</span>
-            <span class="review-value" id="review-student-name">-</span>
+          <div class="form-group">
+            <label for="mobileNumber">Mobile Number</label>
+            <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter mobile number" required>
           </div>
 
-          <div class="review-item">
-            <span class="review-label">Course & Year</span>
-            <span class="review-value" id="review-student-course">-</span>
+          <div class="form-section-divider">
+            <h3 class="subsection-title">Emergency Contact</h3>
+
+            <div class="form-group">
+              <label for="emergencyName">Contact Name</label>
+              <input type="text" id="emergencyName" name="emergencyName" placeholder="Enter contact name" required>
+            </div>
+
+            <div class="form-group">
+              <label for="emergencyRelationship">Relationship</label>
+              <select id="emergencyRelationship" name="emergencyRelationship" required>
+                <option value="" disabled selected>Select relationship</option>
+                <option value="Parent">Parent</option>
+                <option value="Guardian">Guardian</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Sibling">Sibling</option>
+                <option value="Relative">Relative</option>
+                <option value="Friend">Friend</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="emergencyPhone">Emergency Contact Number</label>
+              <input type="tel" id="emergencyPhone" name="emergencyPhone" placeholder="Enter number" required>
+            </div>
           </div>
 
-          <div class="review-item">
-            <span class="review-label">Date</span>
-            <span class="review-value" id="review-date">-</span>
+          <div class="button-group">
+            <button type="submit" id="btn-step2-next" class="btn btn-primary btn-block">Save and Continue</button>
+            <button type="button" class="btn btn-secondary btn-block nav-back-btn" data-target="1">Back</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- STEP 3: SCHEDULE SELECTION -->
+      <section id="step-3" class="step-card">
+        <header class="step-header">
+          <button type="button" class="back-link nav-back-btn" data-target="2">&#8592; Back</button>
+          <h2 class="page-title">Select Appointment Schedule</h2>
+          <p class="step-indicator">Step 3 of 4</p>
+        </header>
+
+        <div class="step-body">
+          <div class="calendar-wrapper">
+            <div class="calendar-header">
+              <button type="button" id="prev-month" class="cal-nav-btn">&lt;</button>
+              <span id="calendar-month-year" class="cal-month-title"></span>
+              <button type="button" id="next-month" class="cal-nav-btn">&gt;</button>
+            </div>
+
+            <div class="calendar-grid">
+              <div class="cal-day-header">S</div>
+              <div class="cal-day-header">M</div>
+              <div class="cal-day-header">T</div>
+              <div class="cal-day-header">W</div>
+              <div class="cal-day-header">T</div>
+              <div class="cal-day-header">F</div>
+              <div class="cal-day-header">S</div>
+              <div id="calendar-days" class="calendar-days-container"></div>
+            </div>
           </div>
 
-          <div class="review-item">
-            <span class="review-label">Time</span>
-            <span class="review-value" id="review-time">-</span>
+          <div class="time-slots-container">
+            <h3 class="subsection-title">Available Time Slots</h3>
+            <p id="selected-date-label" class="selected-date-subtext">Select a date from the calendar</p>
+            <div id="time-slots-list" class="slots-list"></div>
           </div>
 
-          <div class="review-item">
-            <span class="review-label">Emergency Contact</span>
-            <span class="review-value" id="review-emergency">-</span>
+          <div class="button-group">
+            <button type="button" id="btn-step3-next" class="btn btn-primary btn-block" disabled>Next</button>
+            <button type="button" class="btn btn-secondary btn-block nav-back-btn" data-target="2">Back</button>
           </div>
         </div>
+      </section>
 
-        <p class="disclaimer-text">
-          The system will generate your queue number upon confirmation. Your station will be assigned when called.
-        </p>
+      <!-- STEP 4: REVIEW APPOINTMENT -->
+      <section id="step-4" class="step-card">
+        <header class="step-header">
+          <button type="button" class="back-link nav-back-btn" data-target="3">&#8592; Back</button>
+          <h2 class="page-title">Review Appointment</h2>
+          <p class="step-indicator">Step 4 of 4</p>
+        </header>
 
-        <div class="button-group">
-          <button type="button" id="btn-confirm-booking" class="btn btn-primary btn-block">Confirm Booking</button>
-          <button type="button" class="btn btn-secondary btn-block nav-back-btn" data-target="3">Back</button>
+        <div class="step-body">
+          <div class="review-details">
+            <div class="review-item">
+              <span class="review-label">Service</span>
+              <span class="review-value" id="review-service">First-Time ID Picture Taking</span>
+            </div>
+
+            <div class="review-item">
+              <span class="review-label">Student</span>
+              <span class="review-value" id="review-student-name">-</span>
+            </div>
+
+            <div class="review-item">
+              <span class="review-label">Course & Year</span>
+              <span class="review-value" id="review-student-course">-</span>
+            </div>
+
+            <div class="review-item">
+              <span class="review-label">Date</span>
+              <span class="review-value" id="review-date">-</span>
+            </div>
+
+            <div class="review-item">
+              <span class="review-label">Time</span>
+              <span class="review-value" id="review-time">-</span>
+            </div>
+
+            <div class="review-item">
+              <span class="review-label">Emergency Contact</span>
+              <span class="review-value" id="review-emergency">-</span>
+            </div>
+          </div>
+
+          <p class="disclaimer-text">
+            The system will generate your queue number upon confirmation. Your station will be assigned when called.
+          </p>
+
+          <div class="button-group">
+            <button type="button" id="btn-confirm-booking" class="btn btn-primary btn-block">Confirm Booking</button>
+            <button type="button" class="btn btn-secondary btn-block nav-back-btn" data-target="3">Back</button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- STEP 5: APPOINTMENT CONFIRMED -->
-    <section id="step-5" class="step-card">
-      <header class="step-header text-center">
-        <h2 class="page-title">Appointment Confirmed</h2>
-        <p class="step-indicator">Your booking was successful.</p>
-      </header>
+      <!-- STEP 5: APPOINTMENT CONFIRMED -->
+      <section id="step-5" class="step-card">
+        <header class="step-header text-center">
+          <h2 class="page-title">Appointment Confirmed</h2>
+          <p class="step-indicator">Your booking was successful.</p>
+        </header>
 
-      <div class="step-body">
-        <!-- Queue Number Card -->
-        <div class="queue-card">
-          <p class="queue-label">Your Queue Number</p>
-          <h1 id="generated-queue-number" class="queue-number">001</h1>
+        <div class="step-body">
+          <div class="queue-card">
+            <p class="queue-label">Your Queue Number</p>
+            <h1 id="generated-queue-number" class="queue-number">001</h1>
+          </div>
+
+          <div class="confirmation-summary-card">
+            <h4 id="conf-service-title" class="summary-service-title">First-Time ID Picture Taking</h4>
+            <p id="conf-date-display" class="summary-text"></p>
+            <p id="conf-time-display" class="summary-text"></p>
+            <span class="status-badge">Confirmed</span>
+          </div>
+
+          <div class="button-group">
+            <button type="button" id="btn-go-dashboard" class="btn btn-text btn-block">Go to Dashboard</button>
+            <button type="button" id="btn-view-details" class="btn btn-primary btn-block">View Appointment Details</button>
+          </div>
         </div>
+      </section>
 
-        <!-- Details Summary Badge -->
-        <div class="confirmation-summary-card">
-          <h4 id="conf-service-title" class="summary-service-title">First-Time ID Picture Taking</h4>
-          <p id="conf-date-display" class="summary-text"></p>
-          <p id="conf-time-display" class="summary-text"></p>
-          <span class="status-badge">Confirmed</span>
-        </div>
+    </main>
 
-        <div class="button-group">
-          <button type="button" id="btn-go-dashboard" class="btn btn-text btn-block">Go to Dashboard</button>
-          <button type="button" id="btn-view-details" class="btn btn-primary btn-block">View Appointment Details</button>
-        </div>
-      </div>
-    </section>
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-navigation" aria-label="Student navigation">
+      <a href="dashboard.html" class="nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 10 9-7 9 7v10H3z" />
+          <path d="M9 21v-7h6v7" />
+        </svg>
+        <span>Home</span>
+      </a>
 
-  </main>
+      <a href="booking.html" class="nav-link active" aria-current="page" data-feature="booking">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M7 3v4M17 3v4M3 10h18" />
+        </svg>
+        <span>Book</span>
+      </a>
+
+      <a href="profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+        </svg>
+        <span>Profile</span>
+      </a>
+    </nav>
+
+  </div>
 
   <script src="js/booking.js"></script>
 </body>

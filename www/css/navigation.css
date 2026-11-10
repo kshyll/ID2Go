@@ -245,3 +245,49 @@ body.has-id2go-nav .mobile-container {
 [hidden] {
     display: none !important;
 }
+
+/* Fix giant SVG sizes and layout for bottom navigation */
+.bottom-navigation,
+.id2go-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: #ffffff;
+    border-top: 1px solid #dce3ed;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-navigation .nav-link,
+.id2go-bottom-nav a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #6b7890;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.bottom-navigation .nav-link.active,
+.id2go-bottom-nav a.active {
+    color: #102f5e;
+}
+
+/* Constrain SVG icons so they don't blow up */
+.bottom-navigation svg,
+.id2go-bottom-nav svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
