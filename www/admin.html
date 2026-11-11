@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID2GO | Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="has-id2go-nav">
+    <div class="app-shell">
+        
+        <!-- Module Header Banner -->
+        <header class="app-header">
+            <div class="header-top">
+                <div class="brand">
+                    <p>Xavier University · ID2GO</p>
+                    <h1>Admin Dashboard</h1>
+                </div>
+                <span class="role-pill">ADMIN</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-content">
+
+            <!-- Section 1: Overview Metrics & Live Station Status -->
+            <section class="ui-card" id="section-overview">
+                <h3>System Overview</h3>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <span>Total Appts</span>
+                        <strong>120</strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Active Stations</span>
+                        <strong>3 / 4</strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Waiting Queue</span>
+                        <strong>52</strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Completed</span>
+                        <strong>38</strong>
+                    </div>
+                </div>
+                
+                <h4 class="section-sublabel">Station Status</h4>
+                <div class="station-grid">
+                    <div class="station-pill-item"><span class="dot online"></span> Station 1</div>
+                    <div class="station-pill-item"><span class="dot online"></span> Station 2</div>
+                    <div class="station-pill-item"><span class="dot online"></span> Station 3</div>
+                    <div class="station-pill-item"><span class="dot offline"></span> Station 4</div>
+                </div>
+            </section>
+
+            <!-- Section 2: Live Queue Management -->
+            <section class="ui-card" id="section-live-queue">
+                <h3>Live Queue Management</h3>
+                <div class="controls-bar">
+                    <input type="text" id="queue-search" placeholder="Search student name or ID..." onkeyup="filterQueueTable()">
+                </div>
+                <table id="table-live-queue">
+                    <thead>
+                        <tr>
+                            <th>Queue</th>
+                            <th>Student</th>
+                            <th>Station</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="live-queue-body">
+                        <tr onclick="selectStudent('A-101', 'Juan Dela Cruz', '2021-0012')">
+                            <td><strong>A-101</strong></td>
+                            <td>Juan Dela Cruz</td>
+                            <td>Station 1</td>
+                            <td><span class="ui-badge badge-serving">Serving</span></td>
+                        </tr>
+                        <tr onclick="selectStudent('A-102', 'Maria Santos', '2021-0045')">
+                            <td><strong>A-102</strong></td>
+                            <td>Maria Santos</td>
+                            <td>Station 2</td>
+                            <td><span class="ui-badge badge-waiting">Waiting</span></td>
+                        </tr>
+                        <tr onclick="selectStudent('A-103', 'Mark Reyes', '2021-0089')">
+                            <td><strong>A-103</strong></td>
+                            <td>Mark Reyes</td>
+                            <td>Station 3</td>
+                            <td><span class="ui-badge badge-completed">Completed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Section 3: Student Record Inspector -->
+            <section class="ui-card" id="student-record-card">
+                <div class="card-header">
+                    <h3>Student Record</h3>
+                    <span id="rec-status-tag" class="ui-badge badge-serving">Active</span>
+                </div>
+                <div class="record-details">
+                    <strong id="rec-student-name">Select a Student</strong>
+                    <p id="rec-student-id">ID: --</p>
+                    <p id="rec-ticket-num">Ticket: --</p>
+                </div>
+            </section>
+
+            <!-- Section 4: Station Availability Controls -->
+            <section class="ui-card" id="section-station-control">
+                <h3>Station Availability Controls</h3>
+                <div id="station-toggle-list">
+                    <div class="toggle-row">
+                        <span>Camera Station 1</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="toggle-row">
+                        <span>Camera Station 2</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="toggle-row">
+                        <span>Camera Station 3</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="toggle-row">
+                        <span>Camera Station 4</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                </div>
+                <button id="btn-save-stations" class="ui-button ui-button-primary" onclick="saveStationSettings()">Save Station Settings</button>
+            </section>
+
+        </main>
+
+        <!-- Navigation Shell -->
+        <nav class="id2go-bottom-nav">
+            <a href="admin.html" class="active"><span class="nav-icon">Admin</span></a>
+            <a href="operator.html"><span class="nav-icon">Camera</span></a>
+            <a href="dashboard.html"><span class="nav-icon">Home</span></a>
+            <a href="profile.html"><span class="nav-icon">Profile</span></a>
+        </nav>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

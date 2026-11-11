@@ -1,0 +1,347 @@
+:root {
+    --xu-blue: #0d3b66;
+    --xu-blue-dark: #082642;
+    --xu-accent-blue: #e8f1f5;
+    --xu-pill-bg: #dbe7f0;
+    --xu-pill-text: #1d4ed8;
+    --bg-light: #f4f6f9;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --white: #ffffff;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-pill: 20px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: 80px;
+}
+
+.app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: var(--bg-light);
+}
+
+/* Header Banner Card */
+.app-header {
+    background-color: var(--xu-blue);
+    color: var(--white);
+    padding: 24px 20px;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 4px;
+    letter-spacing: -0.3px;
+}
+
+.brand p {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #93c5fd;
+    font-weight: 600;
+}
+
+.role-pill {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Dashboard Main Layout */
+.dashboard-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ui-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.ui-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--xu-blue);
+    margin-bottom: 12px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-sublabel {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.metric-box {
+    background-color: var(--bg-light);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.metric-box span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    display: block;
+}
+
+.metric-box strong {
+    font-size: 20px;
+    color: var(--xu-blue);
+    font-weight: 700;
+}
+
+/* Live Station Overview */
+.station-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.station-pill-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.online { background-color: var(--success); }
+.dot.offline { background-color: var(--danger); }
+
+/* Controls & Form Elements */
+.controls-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.controls-bar input, .controls-bar select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    font-size: 12px;
+    background-color: var(--bg-light);
+    outline: none;
+}
+
+/* Data Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th {
+    text-align: left;
+    padding: 8px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+}
+
+/* Status Badges */
+.ui-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-serving { background-color: #dbeafe; color: #1e40af; }
+.badge-waiting { background-color: #fef3c7; color: #92400e; }
+.badge-completed { background-color: #d1fae5; color: #065f46; }
+
+/* Student Record Card */
+.record-details {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.record-details strong {
+    font-size: 15px;
+    color: var(--xu-blue);
+    display: block;
+}
+
+.record-details p {
+    color: var(--text-muted);
+}
+
+/* Station Controls Toggle */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 22px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--xu-blue);
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px);
+}
+
+/* Buttons */
+.ui-button {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s;
+}
+
+.ui-button-primary {
+    background-color: #8da9c4;
+    color: var(--white);
+}
+
+.ui-button-primary:hover {
+    background-color: var(--xu-blue);
+}
+
+/* Bottom Navigation Bar */
+.id2go-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+    z-index: 100;
+}
+
+.id2go-bottom-nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+}
+
+.id2go-bottom-nav a.active {
+    background-color: var(--xu-accent-blue);
+    color: var(--xu-blue);
+}
