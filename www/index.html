@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#102f5e">
+
     <title>ID2Go | Sign In</title>
 
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/auth.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
     <script defer src="js/supabase-client.js"></script>
     <script defer src="js/auth/auth.js"></script>
 </head>
@@ -25,6 +27,7 @@
 
             <div class="university-brand">
                 <img src="img/logo.png" alt="Xavier University seal">
+
                 <div>
                     <h1>Xavier University</h1>
                     <p>STUDENT ID SERVICES</p>
@@ -36,32 +39,51 @@
                     WELCOME TO ID2GO
                 </span>
 
-                <h2>Your student ID services, simplified.</h2>
+                <h2>
+                    Your student ID services,
+                    simplified.
+                </h2>
 
                 <p>
-                    Manage your appointments, track your queue,
-                    and stay informed in one place.
+                    Book appointments, monitor your queue,
+                    and stay updated with your ID services
+                    in one convenient application.
                 </p>
             </div>
         </header>
 
         <section class="auth-content">
+
             <div class="auth-heading">
-                <h2>Sign in</h2>
-                <p>Enter your registered account credentials.</p>
+                <span class="auth-eyebrow">
+                    ACCOUNT ACCESS
+                </span>
+
+                <h2>Welcome back!</h2>
+
+                <p>
+                    Sign in to continue to your ID2Go account.
+                </p>
             </div>
 
             <form id="login-form" class="auth-card">
+
                 <div class="form-group">
-                    <label for="login-email">Email address</label>
-                    <input id="login-email" type="email" placeholder="Enter your email" autocomplete="username"
-                        required>
+                    <label for="login-email">
+                        Email Address
+                    </label>
+
+                    <input id="login-email" name="email" type="email" placeholder="Enter your email address"
+                        autocomplete="username" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="login-password">Password</label>
+                    <label for="login-password">
+                        Password
+                    </label>
+
                     <div class="password-field">
-                        <input id="login-password" type="password" placeholder="Enter your password"
+                        <input id="login-password" name="password" type="password" placeholder="Enter your password"
                             autocomplete="current-password" required>
 
                         <button id="toggle-password" type="button" aria-label="Show password">
@@ -70,19 +92,41 @@
                     </div>
                 </div>
 
-                <p id="login-error" class="auth-error" role="alert" hidden></p>
+                <p id="login-error" class="auth-error" role="alert" hidden>
+                </p>
 
                 <button id="login-button" class="auth-submit" type="submit">
+
                     Sign In
                     <span aria-hidden="true">→</span>
                 </button>
+
             </form>
 
+            <div class="auth-help">
+                <div class="auth-help-icon" aria-hidden="true">
+                    i
+                </div>
+
+                <p>
+                    Use your registered ID2Go account
+                    credentials to sign in.
+                </p>
+            </div>
+
             <p class="auth-note">
-                Account access is provided by the
+                Account access is managed by the
                 ID2Go system administrator.
             </p>
+
         </section>
+
+        <footer class="auth-footer">
+            <p>
+                Xavier University – Ateneo de Cagayan
+            </p>
+            <span>ID2Go Student ID Services</span>
+        </footer>
 
     </main>
 </body>
