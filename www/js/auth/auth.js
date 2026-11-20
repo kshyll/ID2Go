@@ -19,9 +19,13 @@
 
     const { data, error } = await db.auth.getUser();
 
-    // A signed-out visitor can use the form without seeing an error.
-    if (error?.name === "AuthSessionMissingError") return null;
-    if (error) throw error;
+    if (error?.name === "AuthSessionMissingError") {
+      return null;
+    }
+
+    if (error) {
+      throw error;
+    }
 
     return data.user || null;
   };
@@ -39,7 +43,7 @@
       );
     }
 
-    if (!Object.hasOwn(routes, data.role)) {
+    if (!routes[data.role]) {
       throw new Error("Invalid account role.");
     }
 
@@ -56,15 +60,21 @@
       password
     });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     if (!data.user) {
-      throw new Error("Authentication failed.");
+      throw new Error("Unable to sign in.");
     }
 
     try {
       const role = await getUserRole(data.user.id);
-      return { user: data.user, role };
+
+      return {
+        user: data.user,
+        role: role
+      };
     } catch (error) {
       await db.auth.signOut();
       throw error;
@@ -72,9 +82,15 @@
   };
 
   const logout = async () => {
+    if (!db) {
+      throw new Error("Supabase is unavailable.");
+    }
+
     const { error } = await db.auth.signOut();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     window.location.replace("index.html");
   };
@@ -83,11 +99,12 @@
     const destination = routes[role];
 
     if (!destination) {
-      throw new Error("Unknown account role.");
+      throw new Error("Invalid account role.");
     }
 
     window.location.replace(destination);
   };
+
 
   window.ID2GoAuth = {
     login,
@@ -99,7 +116,10 @@
 
   const initialize = async () => {
     const form = $("login-form");
-    if (!form) return;
+
+    if (!form) {
+      return;
+    }
 
     const emailInput = $("login-email");
     const passwordInput = $("login-password");
@@ -122,51 +142,23 @@
       loginButtonLabel.textContent = label;
     };
 
-    const navigate = async role => {
-      const destination = routes[role];
-
-      if (!destination) {
-        throw new Error("Unknown account role.");
-      }
-
-      const response = await fetch(destination, {
-        method: "GET",
-        cache: "no-store"
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          "Your dashboard is not available. Contact the administrator."
-        );
-      }
-
-      const html = await response.text();
-
-      if (!html.trim()) {
-        throw new Error(
-          "Your dashboard has not been implemented yet."
-        );
-      }
-
-      redirecting = true;
-      redirectByRole(role);
-    };
-
     toggleButton.addEventListener("click", () => {
-      const show = passwordInput.type === "password";
+      const isHidden = passwordInput.type === "password";
 
-      passwordInput.type = show ? "text" : "password";
-      toggleButton.textContent = show ? "Hide" : "Show";
+      passwordInput.type = isHidden ? "text" : "password";
+      toggleButton.textContent = isHidden ? "Hide" : "Show";
       toggleButton.setAttribute(
         "aria-label",
-        show ? "Hide password" : "Show password"
+        isHidden ? "Hide password" : "Show password"
       );
     });
 
     form.addEventListener("submit", async event => {
       event.preventDefault();
 
-      if (busy || redirecting) return;
+      if (busy || redirecting) {
+        return;
+      }
 
       errorMessage.hidden = true;
       setLoading(true, "Signing in...");
@@ -177,13 +169,21 @@
           passwordInput.value
         );
 
-        await navigate(result.role);
+        redirecting = true;
+        redirectByRole(result.role);
+
       } catch (error) {
-        showError(error.code === "invalid_credentials"
-          ? "Email or password is incorrect. Please try again."
-          : error.message || "Unable to sign in.");
+        if (error.code === "invalid_credentials") {
+          showError(
+            "Email or password is incorrect. Please try again."
+          );
+        } else {
+          showError(error.message || "Unable to sign in.");
+        }
       } finally {
-        if (!redirecting) setLoading(false);
+        if (!redirecting) {
+          setLoading(false);
+        }
       }
     });
 
@@ -194,13 +194,21 @@
 
       if (user) {
         const role = await getUserRole(user.id);
-        await navigate(role);
+
+        redirecting = true;
+        redirectByRole(role);
       }
+
     } catch (error) {
       console.error("Session check:", error);
-      showError(error.message || "Unable to verify session.");
+
+      showError(
+        "Unable to verify your session. Please try signing in."
+      );
     } finally {
-      if (!redirecting) setLoading(false);
+      if (!redirecting) {
+        setLoading(false);
+      }
     }
   };
 
