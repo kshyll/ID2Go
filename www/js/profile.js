@@ -298,10 +298,6 @@ function setupLogout() {
       }
     }
 
-<<<<<<< Updated upstream
-    window.location.replace("index.html");
-=======
     window.location.href = "index.html";
->>>>>>> Stashed changes
   });
 }
