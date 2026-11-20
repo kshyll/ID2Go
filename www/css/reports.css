@@ -1,31 +1,14 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
-
-/* Main page */
-
 .reports-shell {
-    --report-navy: #102f5e;
-    --report-blue: #315ccb;
-    --report-bg: #f7f9fc;
-    --report-text: #172b4d;
-    --report-muted: #78869d;
-    --report-border: #e8edf5;
-
+    max-width: 480px;
     min-height: 100vh;
-    background: var(--report-bg);
-    color: var(--report-text);
-    font-family: "Plus Jakarta Sans", Arial, sans-serif;
-    font-size: 13px;
+    margin: auto;
+    background: #f7f8fa;
+    font-family: "Inter", Arial, sans-serif;
 }
 
-/* Header */
-
 .reports-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 20px 30px;
-    background: var(--report-navy);
+    padding: 18px 20px 25px;
+    background: #102f5e;
     color: white;
 }
 
@@ -36,121 +19,70 @@
 }
 
 .reports-brand img {
-    width: 44px;
-    height: 50px;
+    width: 43px;
+    height: 49px;
     object-fit: contain;
 }
 
 .reports-brand h1 {
     margin: 0;
-    color: white;
     font: 400 20px Georgia, serif;
 }
 
 .reports-brand p {
-    margin: 5px 0 0;
-    color: #d9e7ff;
+    margin: 4px 0 0;
+    color: #d7e2f0;
     font-size: 9px;
+    letter-spacing: 1.7px;
+}
+
+.reports-heading {
+    margin-top: 28px;
+}
+
+.reports-heading span {
+    color: #d7e2f0;
+    font-size: 11px;
+}
+
+.reports-heading h2 {
+    margin: 8px 0;
+    font-size: 23px;
     font-weight: 600;
-    letter-spacing: 1.6px;
 }
 
-.role-label {
-    padding: 8px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 10px;
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
+.reports-heading p {
+    margin: 0;
+    color: #d7e2f0;
+    font-size: 12px;
 }
-
-/* Main content */
 
 .reports-content {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    width: 100%;
-    max-width: 1050px;
-    margin: 0 auto;
-    padding: 30px 24px 60px;
+    padding: 27px 19px 45px;
 }
 
-.back-link {
-    color: var(--report-blue);
-    font-size: 12px;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.back-link:hover {
-    text-decoration: underline;
-}
-
-.reports-intro .eyebrow {
-    color: var(--report-blue);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-}
-
-.reports-intro h2 {
-    margin: 9px 0;
-    color: var(--report-text);
-    font-size: 27px;
-    font-weight: 800;
-}
-
-.reports-intro p {
-    margin: 0;
-    color: var(--report-muted);
-    font-size: 12px;
-    line-height: 1.7;
-}
-
-/* Shared cards */
-
-.date-card,
-.report-card,
-.quota-statistics article,
-.station-panel {
-    border: 1px solid var(--report-border);
-    border-radius: 15px;
+.reports-panel,
+.report-card {
     background: white;
-    box-shadow: 0 3px 10px rgba(20, 50, 100, 0.035);
+    border: 1px solid #e2e6ec;
+    border-radius: 10px;
+    box-shadow: none;
 }
 
-/* Date selection */
-
-.date-card {
+.reports-panel {
     padding: 20px;
+    margin-bottom: 22px;
 }
 
-.date-card-heading h3 {
-    margin: 0 0 5px;
-    font-size: 15px;
-    font-weight: 800;
-}
-
-.date-card-heading p {
-    margin: 0;
-    color: var(--report-muted);
+.reports-panel label {
+    display: block;
+    margin-bottom: 10px;
+    color: #1c2b40;
     font-size: 12px;
+    font-weight: 600;
 }
 
 .date-controls {
-    margin-top: 18px;
-}
-
-.date-controls label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.date-input-row {
     display: flex;
     gap: 10px;
 }
@@ -158,217 +90,188 @@
 .date-controls input {
     flex: 1;
     min-width: 0;
-    min-height: 46px;
-    padding: 10px 12px;
-    border: 1px solid var(--report-border);
-    border-radius: 10px;
+    padding: 11px;
+    border: 1px solid #e2e6ec;
+    border-radius: 8px;
     background: white;
-    color: var(--report-text);
-    font: inherit;
+    color: #1c2b40;
 }
 
 .date-controls button {
-    min-height: 46px;
-    padding: 10px 20px;
+    padding: 11px 16px;
     border: none;
-    border-radius: 10px;
-    background: var(--report-blue);
+    border-radius: 8px;
+    background: #102f5e;
     color: white;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .date-controls button:disabled {
-    opacity: 0.5;
+    opacity: 0.55;
 }
-
-/* Feedback */
-
-.report-feedback {
-    margin: -8px 0 0;
-    color: var(--report-muted);
-    font-size: 12px;
-}
-
-.report-feedback.error {
-    color: #b42332;
-}
-
-/* Section headings */
 
 .section-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 14px;
+    margin: 24px 0 13px;
 }
 
 .section-heading h2 {
     margin: 0;
-    color: var(--report-text);
-    font-size: 16px;
-    font-weight: 800;
+    color: #1c2b40;
+    font-size: 15px;
+    font-weight: 700;
 }
 
 .section-heading span {
-    color: var(--report-muted);
+    color: #697789;
     font-size: 11px;
 }
 
-/* Quota card */
-
-.quota-card {
-    padding: 24px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #173f95, #315ccb);
-    color: white;
+#report-status {
+    color: #697789;
+    font-size: 12px;
 }
 
-.quota-eyebrow {
-    color: #d8e5ff;
-    font-size: 10px;
+#report-status.error {
+    color: #b42332;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.report-card {
+    min-width: 0;
+    padding: 17px;
+}
+
+.report-card>span {
+    display: block;
+    color: #697789;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.report-card strong {
+    display: block;
+    margin: 12px 0 8px;
+    color: #102f5e;
+    font-size: 28px;
     font-weight: 700;
-    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
 }
 
-.quota-top h3 {
-    margin: 8px 0 0;
-    color: white;
-    font-size: 15px;
+.report-card small {
+    color: #8792a1;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.quota-label {
+    margin: 0 0 10px;
+    color: #697789;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .quota-total {
     display: flex;
     align-items: baseline;
     gap: 8px;
-    margin: 24px 0 20px;
+    margin-bottom: 18px;
 }
 
 .quota-total strong {
-    color: white;
-    font-size: 48px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
+    color: #102f5e;
+    font-size: 35px;
+    font-weight: 700;
 }
 
-.quota-total>span {
-    color: #e3edff;
-    font-size: 12px;
+.quota-total span {
+    color: #697789;
+    font-size: 13px;
 }
 
 .quota-progress {
     width: 100%;
-    height: 10px;
+    height: 8px;
     overflow: hidden;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    background: #e9edf3;
 }
 
 #quota-progress-fill {
     width: 0;
     height: 100%;
-    border-radius: inherit;
-    background: white;
+    border-radius: 4px;
+    background: #102f5e;
+    transition: width 200ms ease;
 }
 
 .quota-progress-labels {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    margin-top: 12px;
-    color: #e3edff;
+    margin-top: 10px;
+    color: #697789;
     font-size: 11px;
 }
-
-/* Summary statistics */
 
 .quota-statistics {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 22px;
 }
 
-.quota-statistics article {
-    padding: 18px;
+.quota-statistics>div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 14px 6px;
+    border: 1px solid #e2e6ec;
+    border-radius: 8px;
+    background: #f8f9fb;
     text-align: center;
 }
 
-.quota-statistics span {
-    display: block;
-    color: var(--report-muted);
-    font-size: 11px;
-}
-
 .quota-statistics strong {
-    display: block;
-    margin-top: 8px;
-    color: var(--report-navy);
-    font-size: 26px;
-    font-weight: 800;
+    color: #102f5e;
+    font-size: 21px;
 }
 
-/* Daily overview */
-
-.reports-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.report-card {
-    padding: 20px;
-}
-
-.report-card>span {
-    display: block;
-    color: var(--report-muted);
-    font-size: 12px;
-}
-
-.report-card strong {
-    display: block;
-    margin: 12px 0 8px;
-    color: var(--report-navy);
-    font-size: 32px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-}
-
-.report-card small {
-    color: #94a0b2;
-    font-size: 11px;
-}
-
-/* Station monitoring */
-
-.station-panel {
-    padding: 8px 20px;
+.quota-statistics span {
+    color: #697789;
+    font-size: 10px;
 }
 
 .station-row {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--report-border);
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    border-bottom: 1px solid #e2e6ec;
 }
 
 .station-row:last-child {
-    border-bottom: none;
+    border-bottom: 0;
 }
 
 .station-row strong {
+    color: #1c2b40;
     font-size: 13px;
 }
 
 .station-status {
-    display: flex;
-    align-items: center;
-    color: var(--report-muted);
+    color: #697789;
     font-size: 12px;
     text-transform: capitalize;
 }
@@ -377,9 +280,9 @@
     display: inline-block;
     width: 8px;
     height: 8px;
-    margin-right: 8px;
+    margin-right: 7px;
     border-radius: 50%;
-    background: #a8b5c6;
+    background: #9ca8bc;
 }
 
 .status-dot.available {
@@ -390,63 +293,33 @@
     background: #d99a21;
 }
 
-.reports-muted {
-    color: var(--report-muted);
+.reports-muted,
+.reports-footer {
+    color: #697789;
     font-size: 12px;
-    line-height: 1.7;
+    line-height: 1.6;
 }
 
-/* Mobile layout */
-
-@media (max-width: 600px) {
-    .reports-header {
-        padding: 20px;
-    }
-
-    .reports-content {
-        padding: 24px 18px 45px;
-    }
-
-    .role-label {
-        font-size: 9px;
-        padding: 7px;
-    }
-
-    .reports-intro h2 {
-        font-size: 24px;
-    }
-
-    .reports-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .quota-statistics article {
-        padding: 14px 8px;
-    }
-
-    .quota-statistics strong {
-        font-size: 21px;
-    }
-
-    .report-card {
-        padding: 16px;
-    }
-
-    .report-card strong {
-        font-size: 28px;
-    }
+.reports-footer {
+    text-align: center;
+    margin-top: 28px;
 }
 
 @media (max-width: 350px) {
-    .reports-brand h1 {
-        font-size: 17px;
+    .reports-content {
+        padding-left: 13px;
+        padding-right: 13px;
     }
 
-    .date-input-row {
-        flex-direction: column;
+    .report-card {
+        padding: 13px;
     }
 
-    .quota-total strong {
-        font-size: 40px;
+    .report-card strong {
+        font-size: 25px;
+    }
+
+    .quota-statistics strong {
+        font-size: 18px;
     }
 }
