@@ -53,12 +53,11 @@
             <!-- STEP 1: SELECT SERVICE / EXISTING APPOINTMENT VIEW -->
             <section id="step-1" class="step-card content-card active">
                 <header class="step-header">
-                    <button type="button" class="back-link" disabled>&#8592; Book Appointment</button>
                     <p class="step-indicator" id="step1-indicator">Step 1 of 4: Select Service</p>
                 </header>
 
                 <div class="step-body">
-                    
+
                     <!-- OPTION A: DISPLAYED WHEN STUDENT ALREADY HAS AN ACTIVE BOOKING -->
                     <div id="existing-appointment-card" class="existing-appointment-card" style="display: none;">
                         <div class="appointment-status-header">
@@ -112,6 +111,10 @@
                 </header>
 
                 <form id="student-info-form" class="step-body">
+                    <div style="background: #edf3ff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12.5px; color: #102f5e;">
+                        <strong>Account Owner Verification:</strong> Appointments are strictly tied to your account. Your identity details sync automatically with your Student Profile and cannot be changed to book for another person.
+                    </div>
+
                     <div class="form-group">
                         <label for="fullName">Full Name</label>
                         <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required>
@@ -195,28 +198,6 @@
                 </form>
             </section>
 
-            <section id="step-2" class="step-card content-card">
-                <header class="step-header">
-                    <button type="button" class="back-link nav-back-btn" data-target="1">&#8592; Back</button>
-                    <h3 class="page-title">Student Information</h3>
-                    <p class="step-indicator">Step 2 of 4: Review and Complete</p>
-                </header>
-
-                <form id="student-info-form" class="step-body">
-                    <div style="background: #edf3ff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12.5px; color: #102f5e;">
-                        <strong>Account Owner Verification:</strong> Appointments are strictly tied to your account. Your identity details sync automatically with your Student Profile and cannot be changed to book for another person.
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fullName">Full Name</label>
-                        <input type="text" id="fullName" name="fullName" placeholder="Enter full name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="studentId">Student ID Number</label>
-                        <input type="text" id="studentId" name="studentId" placeholder="Enter student ID number" required>
-                    </div>
-
             <!-- STEP 3: SCHEDULE SELECTION -->
             <section id="step-3" class="step-card content-card">
                 <header class="step-header">
@@ -279,7 +260,7 @@
                         </div>
 
                         <div class="review-item">
-                            <span class="review-label">Course & Year</span>
+                            <span class="review-label">Course &amp; Year</span>
                             <span class="review-value" id="review-student-course">-</span>
                         </div>
 
@@ -310,78 +291,78 @@
                 </div>
             </section>
 
-           <!-- STEP 5: APPOINTMENT CONFIRMED / DETAILS VIEW -->
-          <section id="step-5" class="step-card content-card">
-              <header class="step-header text-center">
-                  <h3 class="page-title">Appointment Details</h3>
-                  <p class="step-indicator">Your booking status and student information.</p>
-              </header>
+            <!-- STEP 5: APPOINTMENT CONFIRMED / DETAILS VIEW -->
+            <section id="step-5" class="step-card content-card">
+                <header class="step-header text-center">
+                    <h3 class="page-title">Appointment Details</h3>
+                    <p class="step-indicator">Your booking status and student information.</p>
+                </header>
 
-              <div class="step-body">
-                  <!-- Queue Number Header -->
-                  <div class="queue-card">
-                      <p class="queue-label">Your Queue Number</p>
-                      <h1 id="generated-queue-number" class="queue-number">001</h1>
-                  </div>
+                <div class="step-body">
+                    <!-- Queue Number Header -->
+                    <div class="queue-card">
+                        <p class="queue-label">Your Queue Number</p>
+                        <h1 id="generated-queue-number" class="queue-number">001</h1>
+                    </div>
 
-                  <div class="confirmation-summary-card">
-                      <h4 id="conf-service-title" class="summary-service-title">First-Time ID Picture Taking</h4>
-                      <span class="status-badge">Confirmed</span>
-                  </div>
+                    <div class="confirmation-summary-card">
+                        <h4 id="conf-service-title" class="summary-service-title">First-Time ID Picture Taking</h4>
+                        <span class="status-badge">Confirmed</span>
+                    </div>
 
-                  <!-- FULL APPOINTMENT DETAILS LIST -->
-                  <div class="review-details" style="margin-top: 16px;">
-                      <div class="review-item">
-                          <span class="review-label">Full Name</span>
-                          <span class="review-value" id="conf-student-name">-</span>
-                      </div>
+                    <!-- FULL APPOINTMENT DETAILS LIST -->
+                    <div class="review-details" style="margin-top: 16px;">
+                        <div class="review-item">
+                            <span class="review-label">Full Name</span>
+                            <span class="review-value" id="conf-student-name">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Student ID</span>
-                          <span class="review-value" id="conf-student-id">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">Student ID</span>
+                            <span class="review-value" id="conf-student-id">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Course & Year</span>
-                          <span class="review-value" id="conf-student-course">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">Course &amp; Year</span>
+                            <span class="review-value" id="conf-student-course">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">University Email</span>
-                          <span class="review-value" id="conf-student-email">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">University Email</span>
+                            <span class="review-value" id="conf-student-email">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Mobile Number</span>
-                          <span class="review-value" id="conf-student-mobile">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">Mobile Number</span>
+                            <span class="review-value" id="conf-student-mobile">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Appointment Date</span>
-                          <span class="review-value" id="conf-date-display">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">Appointment Date</span>
+                            <span class="review-value" id="conf-date-display">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Time Slot</span>
-                          <span class="review-value" id="conf-time-display">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">Time Slot</span>
+                            <span class="review-value" id="conf-time-display">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Emergency Contact</span>
-                          <span class="review-value" id="conf-emergency-name">-</span>
-                      </div>
+                        <div class="review-item">
+                            <span class="review-label">Emergency Contact</span>
+                            <span class="review-value" id="conf-emergency-name">-</span>
+                        </div>
 
-                      <div class="review-item">
-                          <span class="review-label">Emergency Phone</span>
-                          <span class="review-value" id="conf-emergency-phone">-</span>
-                      </div>
-                  </div>
+                        <div class="review-item">
+                            <span class="review-label">Emergency Phone</span>
+                            <span class="review-value" id="conf-emergency-phone">-</span>
+                        </div>
+                    </div>
 
-                  <div class="button-group">
-                      <button type="button" id="btn-back-home" class="btn btn-secondary btn-block">Back to Home</button>
-                  </div>
-              </div>
-          </section>
+                    <div class="button-group">
+                        <button type="button" id="btn-back-home" class="btn btn-secondary btn-block">Back to Home</button>
+                    </div>
+                </div>
+            </section>
 
         </main>
 
