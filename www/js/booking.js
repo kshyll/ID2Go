@@ -38,8 +38,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         currentUser = userData?.user || null;
       }
     } catch (err) {
-      console.error("Auth session check failed:", err);
+      console.error("[ID2GO Booking] Auth session check failed:", err);
     }
+  } else {
+    console.error("[ID2GO Booking] Supabase client failed to initialize.");
   }
 
   if (!currentUser) {
@@ -51,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userProfileCacheKey = `id2go_user_profile_${currentUser.id}`;
   const userBookingCacheKey = `id2go_active_appointment_${currentUser.id}`;
 
-  // Clear legacy unscoped keys to avoid cross-account leakage
+  // Clear legacy unscoped keys so different accounts on the same device never mix
   localStorage.removeItem("id2go_user_profile");
   localStorage.removeItem("id2go_active_student_id");
   localStorage.removeItem("id2go_active_appointment");
@@ -63,8 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectedDate: null,
     selectedTimeSlot: null,
     queueNumber: "",
-    activeBooking: null,
-    isIdentityLocked: false
+    activeBooking: null
   };
 
   let slotBookings =
@@ -115,18 +116,51 @@ document.addEventListener("DOMContentLoaded", async () => {
     el.style.cursor = "not-allowed";
   }
 
+  function setSelectValueSmart(selectId, rawValue) {
+    const el = document.getElementById(selectId);
+    if (!el || !rawValue) return;
+
+    const clean = String(rawValue).trim();
+    // Exact match first
+    for (const opt of el.options) {
+      if (opt.value.toLowerCase() === clean.toLowerCase()) {
+        el.value = opt.value;
+        return;
+      }
+    }
+
+    // Common shorthand mappings (e.g., BSIT -> BS Information Technology, 3 -> 3rd Year)
+    const aliases = {
+      bsit: "BS Information Technology",
+      bscs: "BS Computer Science",
+      bsis: "BS Information Systems",
+      bsba: "BS Business Administration",
+      bsa: "BS Accountancy",
+      bsn: "BS Nursing",
+      bsce: "BS Civil Engineering",
+      "1": "1st Year",
+      "2": "2nd Year",
+      "3": "3rd Year",
+      "4": "4th Year",
+      "5": "5th Year"
+    };
+
+    const mapped = aliases[clean.toLowerCase()];
+    if (mapped) {
+      el.value = mapped;
+    }
+  }
+
   function lockOwnerIdentityFields(hasExistingIdentity) {
     const emailEl = document.getElementById("email");
     const fullNameEl = document.getElementById("fullName");
     const studentIdEl = document.getElementById("studentId");
 
-    // Always lock email to the authenticated account's email
     if (emailEl && currentUser.email) {
       emailEl.value = currentUser.email;
       applyReadOnlyStyle(emailEl);
     }
 
-    // Lock Full Name and Student ID once saved to the owner's profile
     if (hasExistingIdentity) {
       if (fullNameEl && fullNameEl.value.trim()) {
         applyReadOnlyStyle(fullNameEl);
@@ -134,7 +168,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (studentIdEl && studentIdEl.value.trim()) {
         applyReadOnlyStyle(studentIdEl);
       }
-      bookingData.isIdentityLocked = true;
     }
   }
 
@@ -149,7 +182,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           .eq("user_id", currentUser.id)
           .maybeSingle();
 
-        if (!error && data) {
+        if (error) {
+          console.warn("[ID2GO Booking] student_profiles query error:", error.message);
+        } else if (data) {
           profile = {
             fullName: data.full_name || "",
             studentId: data.student_id || "",
@@ -164,36 +199,37 @@ document.addEventListener("DOMContentLoaded", async () => {
           localStorage.setItem(userProfileCacheKey, JSON.stringify(profile));
         }
       } catch (err) {
-        console.warn("Profile fetch error:", err);
+        console.warn("[ID2GO Booking] Profile fetch exception:", err);
       }
     }
 
+    // Fallback to user-scoped local cache if Supabase returned no row yet
     if (!profile) {
       const cached = localStorage.getItem(userProfileCacheKey);
       if (cached) {
         try {
           profile = JSON.parse(cached);
         } catch (e) {
-          console.warn("Invalid cached profile:", e);
+          console.warn("[ID2GO Booking] Invalid cached profile:", e);
         }
       }
     }
 
-    const setField = (id, val) => {
+    const setInput = (id, val) => {
       const el = document.getElementById(id);
       if (el && val) el.value = val;
     };
 
     if (profile) {
-      setField("fullName", profile.fullName);
-      setField("studentId", profile.studentId);
-      setField("courseProgram", profile.courseProgram);
-      setField("yearLevel", profile.yearLevel);
-      setField("email", currentUser.email || profile.email);
-      setField("mobileNumber", profile.mobileNumber);
-      setField("emergencyName", profile.emergencyName);
-      setField("emergencyRelationship", profile.emergencyRelationship);
-      setField("emergencyPhone", profile.emergencyPhone);
+      setInput("fullName", profile.fullName);
+      setInput("studentId", profile.studentId);
+      setSelectValueSmart("courseProgram", profile.courseProgram);
+      setSelectValueSmart("yearLevel", profile.yearLevel);
+      setInput("email", currentUser.email || profile.email);
+      setInput("mobileNumber", profile.mobileNumber);
+      setInput("emergencyName", profile.emergencyName);
+      setSelectValueSmart("emergencyRelationship", profile.emergencyRelationship);
+      setInput("emergencyPhone", profile.emergencyPhone);
 
       const hasIdentity = Boolean(
         profile.fullName?.trim() && profile.studentId?.trim()
@@ -322,7 +358,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           localStorage.removeItem(userBookingCacheKey);
         }
       } catch (err) {
-        console.warn("Supabase active appointment query error:", err);
+        console.warn("[ID2GO Booking] Active appointment query error:", err);
       }
     }
 
@@ -420,7 +456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           await query;
         } catch (err) {
-          console.error("Supabase cancel error:", err);
+          console.error("[ID2GO Booking] Cancel error:", err);
         }
       }
 
@@ -487,7 +523,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         btnStep2Next.textContent = "Syncing Profile...";
       }
 
-      // Sync booking details directly to student_profiles so Profile page matches
+      // Sync booking details to student_profiles so Profile page matches
       if (db) {
         try {
           const profilePayload = {
@@ -522,7 +558,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             throw error;
           }
         } catch (err) {
-          console.error("Failed to sync profile from booking:", err);
+          console.error("[ID2GO Booking] Profile sync error:", err);
           alert(
             `Unable to verify and save your student profile: ${
               err.message || "Please try again."
@@ -539,7 +575,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem(userProfileCacheKey, JSON.stringify(info));
       bookingData.studentInfo = info;
 
-      // Lock identity fields now that the owner profile is established
       lockOwnerIdentityFields(true);
 
       if (btnStep2Next) {
@@ -692,7 +727,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         }
       } catch (err) {
-        console.warn("Supabase fetch error, using local fallback:", err);
+        console.warn("[ID2GO Booking] Slot fetch error:", err);
         dbBookings = slotBookings[dateString] || {};
       }
     } else {
@@ -817,7 +852,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (error) throw error;
           insertedId = data?.id || null;
         } catch (err) {
-          console.error("Supabase Save Error:", err);
+          console.error("[ID2GO Booking] Supabase Save Error:", err);
           alert(
             `Booking failed: ${
               err.message || "Could not verify account ownership."
@@ -829,7 +864,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
 
-      // Save user-scoped backup for active view
       const activeObj = {
         service: service,
         date: selectedDate,
@@ -850,7 +884,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem(userBookingCacheKey, JSON.stringify(activeObj));
       bookingData.activeBooking = activeObj;
 
-      // Update slot tracking
       if (!slotBookings[selectedDate]) slotBookings[selectedDate] = {};
       const currentBooked = slotBookings[selectedDate][selectedTimeSlot] || 0;
       slotBookings[selectedDate][selectedTimeSlot] = currentBooked + 1;
