@@ -41,29 +41,37 @@
     letter-spacing: 1.6px;
 }
 
-.header-bottom {
-    margin-top: 28px;
+.page-intro {
+    margin: 0 0 26px;
 }
 
 .back-link {
     display: inline-block;
     margin-bottom: 17px;
-    color: #dce8ff;
+    color: #102f5e;
     font-size: 12px;
     text-decoration: none;
 }
 
-.header-bottom h2 {
-    margin: 0 0 7px;
-    color: white;
+.page-eyebrow {
+    color: #315ccb;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+.page-intro h2 {
+    margin: 6px 0 7px;
+    color: #172b4d;
     font-size: 24px;
     font-weight: 800;
 }
 
-.header-bottom p {
+.page-intro p {
     margin: 0;
-    color: #dce8ff;
+    color: #546579;
     font-size: 12px;
+    line-height: 1.6;
 }
 
 .notifications-content {
@@ -178,6 +186,7 @@
 }
 
 .notification-body {
+    display: block;
     flex: 1;
     min-width: 0;
 }
@@ -189,7 +198,7 @@
     gap: 8px;
 }
 
-.notification-title h4 {
+.notification-name {
     margin: 0;
     color: #172b4d;
     font-size: 13px;
@@ -204,7 +213,8 @@
     background: #315ccb;
 }
 
-.notification-body p {
+.notification-message {
+    display: block;
     margin: 8px 0;
     color: #78869d;
     font-size: 12px;
@@ -235,6 +245,11 @@
     background: #eaf2ff;
     color: #315ccb;
     font-size: 22px;
+}
+
+.empty-icon svg {
+    width: 24px;
+    height: 24px;
 }
 
 .empty-notifications h3 {

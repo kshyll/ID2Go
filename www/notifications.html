@@ -52,17 +52,17 @@
                         <span id="unread-badge" class="unread-badge" hidden>0</span>
                     </div>
 
-                    <button id="mark-all-read" class="mark-all-button" type="button">
-                        Mark all as read
+                    <button id="mark-all-read" class="mark-all-button" type="button" disabled>
+                        Mark shown as read
                     </button>
                 </div>
 
                 <div class="notification-filters" role="group" aria-label="Filter notifications">
-                    <button type="button" class="filter-button active" data-filter="all">
+                    <button type="button" class="filter-button active" data-filter="all" aria-pressed="true" disabled>
                         All
                     </button>
 
-                    <button type="button" class="filter-button" data-filter="unread">
+                    <button type="button" class="filter-button" data-filter="unread" aria-pressed="false" disabled>
                         Unread
                     </button>
                 </div>
