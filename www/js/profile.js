@@ -2,23 +2,55 @@
 const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
 
-// Initialize Supabase client
-const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+// Reuse global Supabase client if available
+const db =
+  window.ID2GoDB ||
+  (window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null);
+
+let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initProfilePage();
 });
 
 async function initProfilePage() {
+  if (db) {
+    try {
+      const { data, error } = await db.auth.getUser();
+      if (!error && data?.user) {
+        currentUser = data.user;
+      }
+    } catch (err) {
+      console.error("Auth check failed:", err);
+    }
+  }
+
+  if (!currentUser) {
+    alert("Please log in to view or edit your student profile.");
+    window.location.replace("index.html");
+    return;
+  }
+
+  // Clear legacy unscoped cache keys
+  localStorage.removeItem("id2go_user_profile");
+  localStorage.removeItem("id2go_active_student_id");
+
   setupTitleCaseInputs();
   const studentData = await loadStudentProfile();
 
-  if (studentData) {
-    populateProfileInputs(studentData);
-  }
-
+  populateProfileInputs(studentData || { email: currentUser.email });
   setupProfileFormSubmit();
   setupLogout();
+}
+
+function applyReadOnlyStyle(el) {
+  if (!el) return;
+  el.readOnly = true;
+  el.style.backgroundColor = "#f1f5f9";
+  el.style.color = "#475569";
+  el.style.cursor = "not-allowed";
 }
 
 /**
@@ -35,86 +67,64 @@ function setupTitleCaseInputs() {
     const input = document.getElementById(id);
     if (!input) return;
 
-    // Capitalize while typing while preserving cursor position
     input.addEventListener("input", (e) => {
+      if (e.target.readOnly) return;
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
       e.target.value = formatTitleCase(e.target.value);
       e.target.setSelectionRange(start, end);
     });
 
-    // Clean up extra spacing on blur
     input.addEventListener("blur", (e) => {
+      if (e.target.readOnly) return;
       e.target.value = formatTitleCase(e.target.value.trim());
     });
   });
 }
 
-/**
- * Validates Email Address format
- */
 function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/**
- * Validates Student ID format (e.g. 2023-0001 or alphanumeric ID of 4 to 15 chars)
- */
 function isValidStudentId(studentId) {
-  const idRegex = /^[0-9A-Za-z-]{4,15}$/;
-  return idRegex.test(studentId);
+  return /^[0-9A-Za-z-]{4,15}$/.test(studentId);
 }
 
 /**
- * Loads student profile data from Supabase profiles table or local storage fallback
+ * Loads student profile data strictly for the logged-in user_id
  */
 async function loadStudentProfile() {
-  const activeStudentId = localStorage.getItem("id2go_active_student_id");
+  const cacheKey = `id2go_user_profile_${currentUser.id}`;
 
-  // 1. Fetch from Supabase
   if (db) {
     try {
-      // Check for logged-in auth user session
-      const { data: authData } = await db.auth.getUser();
-      const authUser = authData?.user;
+      const { data, error } = await db
+        .from("student_profiles")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
 
-      // Note: Update "student_profiles" to "profiles" if your table is named "profiles"
-      let query = db.from("student_profiles").select("*");
-
-      if (authUser) {
-        query = query.eq("user_id", authUser.id);
-      } else if (activeStudentId) {
-        query = query.eq("student_id", activeStudentId);
-      } else {
-        query = null;
-      }
-
-      if (query) {
-        // Using .maybeSingle() prevents PGRST116 exceptions on new accounts with no row
-        const { data, error } = await query.maybeSingle();
-
-        if (data && !error) {
-          return {
-            fullName: data.full_name,
-            studentId: data.student_id,
-            courseProgram: data.course_program,
-            yearLevel: data.year_level,
-            email: data.email,
-            mobileNumber: data.mobile_number,
-            emergencyName: data.emergency_name,
-            emergencyRelationship: data.emergency_relationship,
-            emergencyPhone: data.emergency_phone
-          };
-        }
+      if (data && !error) {
+        const mapped = {
+          fullName: data.full_name || "",
+          studentId: data.student_id || "",
+          courseProgram: data.course_program || "",
+          yearLevel: data.year_level || "",
+          email: currentUser.email || data.email || "",
+          mobileNumber: data.mobile_number || "",
+          emergencyName: data.emergency_name || "",
+          emergencyRelationship: data.emergency_relationship || "",
+          emergencyPhone: data.emergency_phone || ""
+        };
+        localStorage.setItem(cacheKey, JSON.stringify(mapped));
+        return mapped;
       }
     } catch (err) {
       console.warn("Supabase profile fetch error:", err);
     }
   }
 
-  // 2. Local storage fallback
-  const storedUser = localStorage.getItem("id2go_user_profile");
+  const storedUser = localStorage.getItem(cacheKey);
   if (storedUser) {
     try {
       return JSON.parse(storedUser);
@@ -127,7 +137,7 @@ async function loadStudentProfile() {
 }
 
 /**
- * Fills inputs and dropdowns with student profile values safely
+ * Fills inputs and locks owner identity fields once established
  */
 function populateProfileInputs(data) {
   const setFieldValue = (id, value) => {
@@ -141,15 +151,26 @@ function populateProfileInputs(data) {
   setFieldValue("studentId", data.studentId);
   setFieldValue("courseProgram", data.courseProgram);
   setFieldValue("yearLevel", data.yearLevel);
-  setFieldValue("email", data.email);
+  setFieldValue("email", currentUser.email || data.email);
   setFieldValue("mobileNumber", data.mobileNumber);
   setFieldValue("emergencyName", data.emergencyName);
   setFieldValue("emergencyRelationship", data.emergencyRelationship);
   setFieldValue("emergencyPhone", data.emergencyPhone);
+
+  // Always lock account email
+  applyReadOnlyStyle(document.getElementById("email"));
+
+  // Lock Full Name and Student ID once saved so account owner cannot be swapped
+  if (data.fullName && data.fullName.trim()) {
+    applyReadOnlyStyle(document.getElementById("fullName"));
+  }
+  if (data.studentId && data.studentId.trim()) {
+    applyReadOnlyStyle(document.getElementById("studentId"));
+  }
 }
 
 /**
- * Handles validation and form submission to Supabase and LocalStorage
+ * Handles validation and form submission to Supabase and user-scoped LocalStorage
  */
 function setupProfileFormSubmit() {
   const profileForm = document.getElementById("profile-form");
@@ -158,15 +179,22 @@ function setupProfileFormSubmit() {
   profileForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const titleCase = (str) => str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
+    const titleCase = (str) =>
+      str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
 
+    const fullNameEl = document.getElementById("fullName");
     const studentIdEl = document.getElementById("studentId");
-    const emailEl = document.getElementById("email");
 
+    const fullNameInput = fullNameEl ? titleCase(fullNameEl.value) : "";
     const studentIdInput = studentIdEl ? studentIdEl.value.trim() : "";
-    const emailInput = emailEl ? emailEl.value.trim() : "";
+    const emailInput = currentUser.email;
 
-    // Field Validations
+    if (!fullNameInput) {
+      alert("Please enter your full name.");
+      if (fullNameEl) fullNameEl.focus();
+      return;
+    }
+
     if (!isValidStudentId(studentIdInput)) {
       alert("Please enter a valid Student ID (e.g., 2023-0001).");
       if (studentIdEl) studentIdEl.focus();
@@ -174,8 +202,7 @@ function setupProfileFormSubmit() {
     }
 
     if (!isValidEmail(emailInput)) {
-      alert("Please enter a valid email address (e.g., student@xu.edu.ph).");
-      if (emailEl) emailEl.focus();
+      alert("Authenticated account email is invalid.");
       return;
     }
 
@@ -184,10 +211,10 @@ function setupProfileFormSubmit() {
       return el ? el.value : "";
     };
 
-    // Database mapping payload
     const dbPayload = {
+      user_id: currentUser.id,
       student_id: studentIdInput,
-      full_name: titleCase(getVal("fullName")),
+      full_name: fullNameInput,
       course_program: getVal("courseProgram"),
       year_level: getVal("yearLevel"),
       email: emailInput,
@@ -197,14 +224,6 @@ function setupProfileFormSubmit() {
       emergency_phone: getVal("emergencyPhone").trim(),
       updated_at: new Date().toISOString()
     };
-
-    // Attach user_id if authenticated session exists
-    if (db) {
-      const { data: authData } = await db.auth.getUser();
-      if (authData?.user) {
-        dbPayload.user_id = authData.user.id;
-      }
-    }
 
     const localPayload = {
       fullName: dbPayload.full_name,
@@ -218,28 +237,34 @@ function setupProfileFormSubmit() {
       emergencyPhone: dbPayload.emergency_phone
     };
 
-    // Cache locally
-    localStorage.setItem("id2go_user_profile", JSON.stringify(localPayload));
-    localStorage.setItem("id2go_active_student_id", dbPayload.student_id);
+    const cacheKey = `id2go_user_profile_${currentUser.id}`;
 
-    // Upsert into Supabase database
     if (db) {
       try {
-        // Match table name in Supabase ("student_profiles" or "profiles")
-        const targetTable = "student_profiles"; 
-        const conflictTarget = dbPayload.user_id ? "user_id" : "student_id";
-
         const { error } = await db
-          .from(targetTable)
-          .upsert(dbPayload, { onConflict: conflictTarget });
+          .from("student_profiles")
+          .upsert(dbPayload, { onConflict: "user_id" });
 
-        if (error) throw error;
-        alert("Profile saved and synced to database successfully!");
+        if (error) {
+          if (error.code === "23505") {
+            alert(
+              "This Student ID is already linked to another account. Please enter your own Student ID."
+            );
+            return;
+          }
+          throw error;
+        }
+
+        localStorage.setItem(cacheKey, JSON.stringify(localPayload));
+        applyReadOnlyStyle(fullNameEl);
+        applyReadOnlyStyle(studentIdEl);
+        alert("Profile saved! Your details will now auto-fill when booking.");
       } catch (err) {
         console.error("Database save error details:", err.message || err);
-        alert(`Profile saved locally, but database sync failed: ${err.message || 'Check console'}`);
+        alert(`Database sync failed: ${err.message || "Check console"}`);
       }
     } else {
+      localStorage.setItem(cacheKey, JSON.stringify(localPayload));
       alert("Profile saved locally!");
     }
   });
@@ -255,8 +280,15 @@ function setupLogout() {
   logoutBtn.addEventListener("click", async () => {
     if (!confirm("Are you sure you want to log out?")) return;
 
-    localStorage.removeItem("id2go_user_profile");
-    localStorage.removeItem("id2go_active_student_id");
+    if (currentUser) {
+      localStorage.removeItem(`id2go_user_profile_${currentUser.id}`);
+      localStorage.removeItem(`id2go_active_appointment_${currentUser.id}`);
+    }
+
+    if (window.ID2GoAuth?.logout) {
+      await window.ID2GoAuth.logout();
+      return;
+    }
 
     if (db && db.auth) {
       try {
@@ -266,6 +298,6 @@ function setupLogout() {
       }
     }
 
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   });
 }
