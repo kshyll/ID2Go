@@ -2,10 +2,17 @@
 const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
 
-// Use global ID2Go client if initialized, or fallback
-const db = window.ID2GoDB || (window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+function getDbClient() {
+  return (
+    window.ID2GoDB ||
+    (window.supabase
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null)
+  );
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const db = getDbClient();
   const MAX_SLOTS_PER_HOUR = 48;
 
   const TIME_SLOTS = [
@@ -19,6 +26,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     "4:00–5:00 PM"
   ];
 
+  // 1. VERIFY AUTHENTICATED ACCOUNT OWNER
+  let currentUser = null;
+  if (db) {
+    try {
+      const { data: sessionData } = await db.auth.getSession();
+      currentUser = sessionData?.session?.user || null;
+
+      if (!currentUser) {
+        const { data: userData } = await db.auth.getUser();
+        currentUser = userData?.user || null;
+      }
+    } catch (err) {
+      console.error("Auth session check failed:", err);
+    }
+  }
+
+  if (!currentUser) {
+    alert("Please log in to your student account before booking an appointment.");
+    window.location.replace("index.html");
+    return;
+  }
+
+  const userProfileCacheKey = `id2go_user_profile_${currentUser.id}`;
+  const userBookingCacheKey = `id2go_active_appointment_${currentUser.id}`;
+
+  // Clear legacy unscoped keys to avoid cross-account leakage
+  localStorage.removeItem("id2go_user_profile");
+  localStorage.removeItem("id2go_active_student_id");
+  localStorage.removeItem("id2go_active_appointment");
+
   // Booking system state
   let bookingData = {
     service: "First-Time ID Picture Taking",
@@ -26,10 +63,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectedDate: null,
     selectedTimeSlot: null,
     queueNumber: "",
-    activeBooking: null
+    activeBooking: null,
+    isIdentityLocked: false
   };
 
-  let slotBookings = JSON.parse(localStorage.getItem("id2go_slot_bookings")) || {};
+  let slotBookings =
+    JSON.parse(localStorage.getItem("id2go_slot_bookings")) || {};
 
   // Calendar State
   let currentDate = new Date();
@@ -67,6 +106,104 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  /* ==================== LOCK & PREFILL OWNER IDENTITY ==================== */
+  function applyReadOnlyStyle(el) {
+    if (!el) return;
+    el.readOnly = true;
+    el.style.backgroundColor = "#f1f5f9";
+    el.style.color = "#475569";
+    el.style.cursor = "not-allowed";
+  }
+
+  function lockOwnerIdentityFields(hasExistingIdentity) {
+    const emailEl = document.getElementById("email");
+    const fullNameEl = document.getElementById("fullName");
+    const studentIdEl = document.getElementById("studentId");
+
+    // Always lock email to the authenticated account's email
+    if (emailEl && currentUser.email) {
+      emailEl.value = currentUser.email;
+      applyReadOnlyStyle(emailEl);
+    }
+
+    // Lock Full Name and Student ID once saved to the owner's profile
+    if (hasExistingIdentity) {
+      if (fullNameEl && fullNameEl.value.trim()) {
+        applyReadOnlyStyle(fullNameEl);
+      }
+      if (studentIdEl && studentIdEl.value.trim()) {
+        applyReadOnlyStyle(studentIdEl);
+      }
+      bookingData.isIdentityLocked = true;
+    }
+  }
+
+  async function loadAndPopulateOwnerProfile() {
+    let profile = null;
+
+    if (db) {
+      try {
+        const { data, error } = await db
+          .from("student_profiles")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .maybeSingle();
+
+        if (!error && data) {
+          profile = {
+            fullName: data.full_name || "",
+            studentId: data.student_id || "",
+            courseProgram: data.course_program || "",
+            yearLevel: data.year_level || "",
+            email: currentUser.email || data.email || "",
+            mobileNumber: data.mobile_number || "",
+            emergencyName: data.emergency_name || "",
+            emergencyRelationship: data.emergency_relationship || "",
+            emergencyPhone: data.emergency_phone || ""
+          };
+          localStorage.setItem(userProfileCacheKey, JSON.stringify(profile));
+        }
+      } catch (err) {
+        console.warn("Profile fetch error:", err);
+      }
+    }
+
+    if (!profile) {
+      const cached = localStorage.getItem(userProfileCacheKey);
+      if (cached) {
+        try {
+          profile = JSON.parse(cached);
+        } catch (e) {
+          console.warn("Invalid cached profile:", e);
+        }
+      }
+    }
+
+    const setField = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && val) el.value = val;
+    };
+
+    if (profile) {
+      setField("fullName", profile.fullName);
+      setField("studentId", profile.studentId);
+      setField("courseProgram", profile.courseProgram);
+      setField("yearLevel", profile.yearLevel);
+      setField("email", currentUser.email || profile.email);
+      setField("mobileNumber", profile.mobileNumber);
+      setField("emergencyName", profile.emergencyName);
+      setField("emergencyRelationship", profile.emergencyRelationship);
+      setField("emergencyPhone", profile.emergencyPhone);
+
+      const hasIdentity = Boolean(
+        profile.fullName?.trim() && profile.studentId?.trim()
+      );
+      lockOwnerIdentityFields(hasIdentity);
+    } else {
+      lockOwnerIdentityFields(false);
+    }
+  }
+
   /* ==================== TITLE CASE VALIDATION ==================== */
   function setupTitleCaseValidation(inputElement) {
     if (!inputElement) return;
@@ -76,6 +213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     inputElement.addEventListener("input", (e) => {
+      if (e.target.readOnly) return;
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
       e.target.value = formatTitleCase(e.target.value);
@@ -83,122 +221,145 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     inputElement.addEventListener("blur", (e) => {
+      if (e.target.readOnly) return;
       e.target.value = formatTitleCase(e.target.value.trim());
     });
   }
 
-  const fullNameInput = document.getElementById("fullName");
-  const emergencyNameInput = document.getElementById("emergencyName");
-  setupTitleCaseValidation(fullNameInput);
-  setupTitleCaseValidation(emergencyNameInput);
+  setupTitleCaseValidation(document.getElementById("fullName"));
+  setupTitleCaseValidation(document.getElementById("emergencyName"));
 
   /* ==================== RENDER FULL DETAILS IN STEP 5 ==================== */
   function renderDetailsStep(data) {
     if (!data) return;
 
-    document.getElementById("generated-queue-number").textContent = data.queueNumber || "001";
-    document.getElementById("conf-service-title").textContent = data.service || "First-Time ID Picture Taking";
+    document.getElementById("generated-queue-number").textContent =
+      data.queueNumber || "001";
+    document.getElementById("conf-service-title").textContent =
+      data.service || "First-Time ID Picture Taking";
 
-    document.getElementById("conf-student-name").textContent = data.fullName || data.studentInfo?.fullName || "-";
-    document.getElementById("conf-student-id").textContent = data.studentId || data.studentInfo?.studentId || "-";
+    document.getElementById("conf-student-name").textContent =
+      data.fullName || data.studentInfo?.fullName || "-";
+    document.getElementById("conf-student-id").textContent =
+      data.studentId || data.studentInfo?.studentId || "-";
 
     const course = data.courseProgram || data.studentInfo?.courseProgram || "";
     const year = data.yearLevel || data.studentInfo?.yearLevel || "";
-    document.getElementById("conf-student-course").textContent = course && year ? `${course} (${year})` : (course || year || "-");
+    document.getElementById("conf-student-course").textContent =
+      course && year ? `${course} (${year})` : course || year || "-";
 
-    document.getElementById("conf-student-email").textContent = data.email || data.studentInfo?.email || "-";
-    document.getElementById("conf-student-mobile").textContent = data.mobileNumber || data.studentInfo?.mobileNumber || "-";
+    document.getElementById("conf-student-email").textContent =
+      data.email || data.studentInfo?.email || "-";
+    document.getElementById("conf-student-mobile").textContent =
+      data.mobileNumber || data.studentInfo?.mobileNumber || "-";
 
     const rawDate = data.date || data.appointment_date || data.selectedDate;
     if (rawDate) {
       const [y, m, d] = rawDate.split("-").map(Number);
       const dateObj = new Date(y, m - 1, d);
-      document.getElementById("conf-date-display").textContent = dateObj.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-      });
+      document.getElementById("conf-date-display").textContent =
+        dateObj.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        });
     } else {
       document.getElementById("conf-date-display").textContent = "-";
     }
 
-    document.getElementById("conf-time-display").textContent = data.time || data.selectedTimeSlot || "-";
+    document.getElementById("conf-time-display").textContent =
+      data.time || data.selectedTimeSlot || "-";
 
-    const emerName = data.emergencyName || data.studentInfo?.emergencyName || "";
-    const emerRel = data.emergencyRelationship || data.studentInfo?.emergencyRelationship || "";
-    document.getElementById("conf-emergency-name").textContent = emerName && emerRel ? `${emerName} (${emerRel})` : (emerName || "-");
-    document.getElementById("conf-emergency-phone").textContent = data.emergencyPhone || data.studentInfo?.emergencyPhone || "-";
+    const emerName =
+      data.emergencyName || data.studentInfo?.emergencyName || "";
+    const emerRel =
+      data.emergencyRelationship ||
+      data.studentInfo?.emergencyRelationship ||
+      "";
+    document.getElementById("conf-emergency-name").textContent =
+      emerName && emerRel ? `${emerName} (${emerRel})` : emerName || "-";
+    document.getElementById("conf-emergency-phone").textContent =
+      data.emergencyPhone || data.studentInfo?.emergencyPhone || "-";
   }
 
   /* ==================== ACTIVE APPOINTMENT CHECK ==================== */
   async function checkExistingAppointment() {
     let activeAppointment = null;
 
-    // Local Storage check
-    const localActive = localStorage.getItem("id2go_active_appointment");
-    if (localActive) {
-      activeAppointment = JSON.parse(localActive);
-    }
-
-    // Supabase query
     if (db) {
       try {
-        const { data: userData } = await db.auth.getUser();
-        if (userData?.user?.email) {
-          const { data, error } = await db
-            .from("appointments")
-            .select("*")
-            .eq("email", userData.user.email)
-            .eq("status", "Confirmed")
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        const { data, error } = await db
+          .from("appointments")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .eq("status", "Confirmed")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-          if (!error && data) {
-            activeAppointment = {
-              service: data.service,
-              date: data.appointment_date,
-              time: data.time_slot,
-              queueNumber: data.queue_number,
-              fullName: data.full_name,
-              studentId: data.student_id,
-              courseProgram: data.course_program,
-              yearLevel: data.year_level,
-              email: data.email,
-              mobileNumber: data.mobile_number,
-              emergencyName: data.emergency_name,
-              emergencyRelationship: data.emergency_relationship,
-              emergencyPhone: data.emergency_phone,
-              dbId: data.id
-            };
-          }
+        if (!error && data) {
+          activeAppointment = {
+            service: data.service,
+            date: data.appointment_date,
+            time: data.time_slot,
+            queueNumber: data.queue_number,
+            fullName: data.full_name,
+            studentId: data.student_id,
+            courseProgram: data.course_program,
+            yearLevel: data.year_level,
+            email: data.email,
+            mobileNumber: data.mobile_number,
+            emergencyName: data.emergency_name,
+            emergencyRelationship: data.emergency_relationship,
+            emergencyPhone: data.emergency_phone,
+            dbId: data.id
+          };
+          localStorage.setItem(
+            userBookingCacheKey,
+            JSON.stringify(activeAppointment)
+          );
+        } else if (!error && !data) {
+          localStorage.removeItem(userBookingCacheKey);
         }
       } catch (err) {
-        console.warn("Supabase active appointment query skipped:", err);
+        console.warn("Supabase active appointment query error:", err);
+      }
+    }
+
+    if (!activeAppointment) {
+      const localActive = localStorage.getItem(userBookingCacheKey);
+      if (localActive) {
+        activeAppointment = JSON.parse(localActive);
       }
     }
 
     const existingCard = document.getElementById("existing-appointment-card");
-    const newBookingContainer = document.getElementById("new-booking-container");
+    const newBookingContainer = document.getElementById(
+      "new-booking-container"
+    );
     const step1Indicator = document.getElementById("step1-indicator");
 
     if (activeAppointment && existingCard && newBookingContainer) {
       bookingData.activeBooking = activeAppointment;
 
-      document.getElementById("active-queue-no").textContent = activeAppointment.queueNumber || "001";
-      document.getElementById("existing-service-name").textContent = activeAppointment.service;
+      document.getElementById("active-queue-no").textContent =
+        activeAppointment.queueNumber || "001";
+      document.getElementById("existing-service-name").textContent =
+        activeAppointment.service;
 
       if (activeAppointment.date) {
         const [y, m, d] = activeAppointment.date.split("-").map(Number);
         const dateObj = new Date(y, m - 1, d);
-        document.getElementById("active-booking-date").textContent = dateObj.toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric"
-        });
+        document.getElementById("active-booking-date").textContent =
+          dateObj.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+          });
       }
 
-      document.getElementById("active-booking-time").textContent = activeAppointment.time;
+      document.getElementById("active-booking-time").textContent =
+        activeAppointment.time;
 
       if (step1Indicator) {
         step1Indicator.textContent = "Active Appointment Details";
@@ -216,7 +377,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // View Details Click Handler
-  const btnViewActiveDetails = document.getElementById("btn-view-appointment-details");
+  const btnViewActiveDetails = document.getElementById(
+    "btn-view-appointment-details"
+  );
   if (btnViewActiveDetails) {
     btnViewActiveDetails.addEventListener("click", () => {
       if (bookingData.activeBooking) {
@@ -233,21 +396,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       const active = bookingData.activeBooking;
       if (!active) return;
 
-      const confirmCancel = confirm("Are you sure you want to cancel your active appointment?");
+      const confirmCancel = confirm(
+        "Are you sure you want to cancel your active appointment?"
+      );
       if (!confirmCancel) return;
 
       btnCancelBooking.disabled = true;
       btnCancelBooking.textContent = "Cancelling...";
 
-      if (db && active.dbId) {
+      if (db) {
         try {
-          await db.from("appointments").update({ status: "Cancelled" }).eq("id", active.dbId);
+          const query = active.dbId
+            ? db
+                .from("appointments")
+                .update({ status: "Cancelled" })
+                .eq("id", active.dbId)
+                .eq("user_id", currentUser.id)
+            : db
+                .from("appointments")
+                .update({ status: "Cancelled" })
+                .eq("user_id", currentUser.id)
+                .eq("status", "Confirmed");
+
+          await query;
         } catch (err) {
           console.error("Supabase cancel error:", err);
         }
       }
 
-      localStorage.removeItem("id2go_active_appointment");
+      localStorage.removeItem(userBookingCacheKey);
       bookingData.activeBooking = null;
 
       btnCancelBooking.disabled = false;
@@ -262,7 +439,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnStep1Next = document.getElementById("btn-step1-next");
   if (btnStep1Next) {
     btnStep1Next.addEventListener("click", () => {
-      const selectedRadio = document.querySelector('input[name="id_service"]:checked');
+      const selectedRadio = document.querySelector(
+        'input[name="id_service"]:checked'
+      );
       if (selectedRadio) {
         bookingData.service = selectedRadio.value;
         goToStep(2);
@@ -270,25 +449,103 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  /* ==================== STEP 2 ==================== */
+  /* ==================== STEP 2: SYNC WITH STUDENT PROFILE ==================== */
   const studentInfoForm = document.getElementById("student-info-form");
   if (studentInfoForm) {
-    studentInfoForm.addEventListener("submit", (e) => {
+    studentInfoForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const titleCase = (str) => str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
+      const btnStep2Next = document.getElementById("btn-step2-next");
+      const titleCase = (str) =>
+        str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
 
-      bookingData.studentInfo = {
+      const studentIdVal = document.getElementById("studentId").value.trim();
+      if (!/^[0-9A-Za-z-]{4,15}$/.test(studentIdVal)) {
+        alert("Please enter a valid Student ID (e.g., 2023-0001).");
+        document.getElementById("studentId").focus();
+        return;
+      }
+
+      const info = {
         fullName: titleCase(document.getElementById("fullName").value),
-        studentId: document.getElementById("studentId").value.trim(),
+        studentId: studentIdVal,
         courseProgram: document.getElementById("courseProgram").value,
         yearLevel: document.getElementById("yearLevel").value,
-        email: document.getElementById("email").value.trim(),
+        email: currentUser.email,
         mobileNumber: document.getElementById("mobileNumber").value.trim(),
-        emergencyName: titleCase(document.getElementById("emergencyName").value),
-        emergencyRelationship: document.getElementById("emergencyRelationship").value,
+        emergencyName: titleCase(
+          document.getElementById("emergencyName").value
+        ),
+        emergencyRelationship: document.getElementById(
+          "emergencyRelationship"
+        ).value,
         emergencyPhone: document.getElementById("emergencyPhone").value.trim()
       };
+
+      if (btnStep2Next) {
+        btnStep2Next.disabled = true;
+        btnStep2Next.textContent = "Syncing Profile...";
+      }
+
+      // Sync booking details directly to student_profiles so Profile page matches
+      if (db) {
+        try {
+          const profilePayload = {
+            user_id: currentUser.id,
+            student_id: info.studentId,
+            full_name: info.fullName,
+            course_program: info.courseProgram,
+            year_level: info.yearLevel,
+            email: info.email,
+            mobile_number: info.mobileNumber,
+            emergency_name: info.emergencyName,
+            emergency_relationship: info.emergencyRelationship,
+            emergency_phone: info.emergencyPhone,
+            updated_at: new Date().toISOString()
+          };
+
+          const { error } = await db
+            .from("student_profiles")
+            .upsert(profilePayload, { onConflict: "user_id" });
+
+          if (error) {
+            if (error.code === "23505") {
+              alert(
+                "This Student ID is already registered to another account. Each student must book using their own account."
+              );
+              if (btnStep2Next) {
+                btnStep2Next.disabled = false;
+                btnStep2Next.textContent = "Save and Continue";
+              }
+              return;
+            }
+            throw error;
+          }
+        } catch (err) {
+          console.error("Failed to sync profile from booking:", err);
+          alert(
+            `Unable to verify and save your student profile: ${
+              err.message || "Please try again."
+            }`
+          );
+          if (btnStep2Next) {
+            btnStep2Next.disabled = false;
+            btnStep2Next.textContent = "Save and Continue";
+          }
+          return;
+        }
+      }
+
+      localStorage.setItem(userProfileCacheKey, JSON.stringify(info));
+      bookingData.studentInfo = info;
+
+      // Lock identity fields now that the owner profile is established
+      lockOwnerIdentityFields(true);
+
+      if (btnStep2Next) {
+        btnStep2Next.disabled = false;
+        btnStep2Next.textContent = "Save and Continue";
+      }
 
       renderCalendar();
       goToStep(3);
@@ -327,8 +584,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
   ];
 
   function renderCalendar() {
@@ -338,7 +605,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     calendarDaysContainer.innerHTML = "";
 
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-    const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const totalDaysInMonth = new Date(
+      currentYear,
+      currentMonth + 1,
+      0
+    ).getDate();
 
     for (let i = 0; i < firstDayIndex; i++) {
       const emptyDiv = document.createElement("div");
@@ -364,7 +635,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         dayEl.addEventListener("click", () => {
-          document.querySelectorAll(".cal-day").forEach((el) => el.classList.remove("selected"));
+          document
+            .querySelectorAll(".cal-day")
+            .forEach((el) => el.classList.remove("selected"));
           dayEl.classList.add("selected");
           bookingData.selectedDate = dateString;
           bookingData.selectedTimeSlot = null;
@@ -401,7 +674,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     selectedDateLabel.textContent = `Schedule for ${formattedDateText}`;
-    timeSlotsList.innerHTML = "<p class='selected-date-subtext' style='grid-column: span 2;'>Loading available slots...</p>";
+    timeSlotsList.innerHTML =
+      "<p class='selected-date-subtext' style='grid-column: span 2;'>Loading available slots...</p>";
 
     let dbBookings = {};
     if (db) {
@@ -453,7 +727,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
 
         slotEl.addEventListener("click", () => {
-          document.querySelectorAll(".slot-item").forEach((el) => el.classList.remove("selected"));
+          document
+            .querySelectorAll(".slot-item")
+            .forEach((el) => el.classList.remove("selected"));
           slotEl.classList.add("selected");
           bookingData.selectedTimeSlot = slotText;
           if (btnStep3Next) btnStep3Next.disabled = false;
@@ -476,21 +752,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function populateReviewStep() {
     document.getElementById("review-service").textContent = bookingData.service;
-    document.getElementById("review-student-name").textContent = bookingData.studentInfo.fullName || "N/A";
-    document.getElementById("review-student-course").textContent = `${bookingData.studentInfo.courseProgram || ""} (${bookingData.studentInfo.yearLevel || ""})`;
+    document.getElementById("review-student-name").textContent =
+      bookingData.studentInfo.fullName || "N/A";
+    document.getElementById("review-student-course").textContent = `${
+      bookingData.studentInfo.courseProgram || ""
+    } (${bookingData.studentInfo.yearLevel || ""})`;
 
     if (bookingData.selectedDate) {
       const [y, m, d] = bookingData.selectedDate.split("-").map(Number);
       const dateObj = new Date(y, m - 1, d);
-      document.getElementById("review-date").textContent = dateObj.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-      });
+      document.getElementById("review-date").textContent =
+        dateObj.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        });
     }
 
-    document.getElementById("review-time").textContent = bookingData.selectedTimeSlot || "N/A";
-    document.getElementById("review-emergency").textContent = `${bookingData.studentInfo.emergencyName || ""} (${bookingData.studentInfo.emergencyRelationship || ""})`;
+    document.getElementById("review-time").textContent =
+      bookingData.selectedTimeSlot || "N/A";
+    document.getElementById("review-emergency").textContent = `${
+      bookingData.studentInfo.emergencyName || ""
+    } (${bookingData.studentInfo.emergencyRelationship || ""})`;
   }
 
   if (btnConfirmBooking) {
@@ -498,16 +781,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       btnConfirmBooking.disabled = true;
       btnConfirmBooking.textContent = "Processing...";
 
-      const { selectedDate, selectedTimeSlot, studentInfo, service } = bookingData;
+      const { selectedDate, selectedTimeSlot, studentInfo, service } =
+        bookingData;
       const generatedQueueNumber = `0${Math.floor(Math.random() * 90) + 10}`;
       bookingData.queueNumber = generatedQueueNumber;
 
       const newRecord = {
+        user_id: currentUser.id,
         full_name: studentInfo.fullName,
         student_id: studentInfo.studentId,
         course_program: studentInfo.courseProgram,
         year_level: studentInfo.yearLevel,
-        email: studentInfo.email,
+        email: currentUser.email,
         mobile_number: studentInfo.mobileNumber,
         emergency_name: studentInfo.emergencyName,
         emergency_relationship: studentInfo.emergencyRelationship,
@@ -519,16 +804,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         status: "Confirmed"
       };
 
+      let insertedId = null;
+
       if (db) {
         try {
-          const { error } = await db.from("appointments").insert([newRecord]);
+          const { data, error } = await db
+            .from("appointments")
+            .insert([newRecord])
+            .select("id")
+            .single();
+
           if (error) throw error;
+          insertedId = data?.id || null;
         } catch (err) {
           console.error("Supabase Save Error:", err);
+          alert(
+            `Booking failed: ${
+              err.message || "Could not verify account ownership."
+            }`
+          );
+          btnConfirmBooking.disabled = false;
+          btnConfirmBooking.textContent = "Confirm Booking";
+          return;
         }
       }
 
-      // Save local backup for active view
+      // Save user-scoped backup for active view
       const activeObj = {
         service: service,
         date: selectedDate,
@@ -538,14 +839,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         studentId: studentInfo.studentId,
         courseProgram: studentInfo.courseProgram,
         yearLevel: studentInfo.yearLevel,
-        email: studentInfo.email,
+        email: currentUser.email,
         mobileNumber: studentInfo.mobileNumber,
         emergencyName: studentInfo.emergencyName,
         emergencyRelationship: studentInfo.emergencyRelationship,
-        emergencyPhone: studentInfo.emergencyPhone
+        emergencyPhone: studentInfo.emergencyPhone,
+        dbId: insertedId
       };
 
-      localStorage.setItem("id2go_active_appointment", JSON.stringify(activeObj));
+      localStorage.setItem(userBookingCacheKey, JSON.stringify(activeObj));
       bookingData.activeBooking = activeObj;
 
       // Update slot tracking
@@ -576,6 +878,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Initial Check on Load
+  // Initial Load: Pre-fill Owner Profile first, then check Active Appointment
+  await loadAndPopulateOwnerProfile();
   await checkExistingAppointment();
 });
