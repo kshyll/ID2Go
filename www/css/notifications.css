@@ -1,6 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
+/* Notifications page */
+
 .notifications-shell {
+    width: 100%;
     max-width: 480px;
     min-height: 100vh;
     margin: 0 auto;
@@ -9,9 +12,10 @@
     font-family: "Plus Jakarta Sans", Arial, sans-serif;
 }
 
+/* University header */
+
 .notifications-header {
-    padding: calc(20px + env(safe-area-inset-top)) 22px 25px;
-    border-radius: 0 0 20px 20px;
+    padding: calc(20px + env(safe-area-inset-top)) 22px 24px;
     background: #102f5e;
     color: white;
 }
@@ -37,56 +41,66 @@
 .brand-row p {
     margin: 5px 0 0;
     color: #dce8ff;
-    font-size: 9px;
-    letter-spacing: 1.6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
 }
 
-.page-intro {
-    margin: 0 0 26px;
+/* Main content */
+
+.notifications-content {
+    padding: 22px 19px calc(45px + env(safe-area-inset-bottom));
 }
 
 .back-link {
-    display: inline-block;
-    margin-bottom: 17px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 15px;
     color: #102f5e;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 700;
     text-decoration: none;
+}
+
+.page-intro {
+    margin-bottom: 26px;
 }
 
 .page-eyebrow {
     color: #315ccb;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 1.3px;
+    letter-spacing: 1.2px;
 }
 
 .page-intro h2 {
-    margin: 6px 0 7px;
+    margin: 8px 0;
     color: #172b4d;
-    font-size: 24px;
+    font-size: 25px;
     font-weight: 800;
 }
 
 .page-intro p {
     margin: 0;
     color: #546579;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.6;
 }
 
-.notifications-content {
-    padding: 27px 19px 45px;
+/* Notifications heading */
+
+.notifications-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
-.notifications-toolbar,
 .notifications-heading {
     display: flex;
     align-items: center;
     gap: 9px;
-}
-
-.notifications-toolbar {
-    justify-content: space-between;
 }
 
 .notifications-heading h3 {
@@ -97,41 +111,51 @@
 }
 
 .unread-badge {
-    padding: 5px 8px;
-    border-radius: 7px;
+    padding: 5px 9px;
+    border-radius: 999px;
     background: #eaf2ff;
-    color: #315ccb;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.mark-all-button {
-    border: none;
-    background: transparent;
     color: #315ccb;
     font-size: 11px;
     font-weight: 700;
 }
 
+/* Action buttons */
+
+.mark-all-button {
+    min-height: 44px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    background: #eaf2ff;
+    color: #315ccb;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
 .mark-all-button:disabled {
-    opacity: .45;
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .notification-filters {
     display: flex;
-    gap: 9px;
-    margin: 22px 0;
+    gap: 10px;
+    margin: 18px 0;
 }
 
 .filter-button {
-    min-height: 37px;
-    padding: 9px 17px;
+    min-height: 44px;
+    padding: 11px 19px;
     border: 1px solid #e8edf5;
-    border-radius: 10px;
+    border-radius: 11px;
     background: white;
-    color: #78869d;
-    font-size: 12px;
+    color: #546579;
+    font-family: inherit;
+    font-size: 13px;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .filter-button.active {
@@ -140,19 +164,30 @@
     color: white;
 }
 
+.filter-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Loading and error messages */
+
 .notification-feedback {
-    color: #78869d;
-    font-size: 12px;
+    margin: 10px 0;
+    color: #546579;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
 .notification-feedback:empty {
     display: none;
 }
 
+/* Notification cards */
+
 .notifications-list {
     display: flex;
     flex-direction: column;
-    gap: 11px;
+    gap: 12px;
 }
 
 .notification-card {
@@ -160,12 +195,15 @@
     align-items: flex-start;
     gap: 13px;
     width: 100%;
+    min-height: 76px;
     padding: 17px 15px;
     border: 1px solid #e8edf5;
     border-radius: 15px;
     background: white;
-    box-shadow: 0 3px 10px rgba(20, 50, 100, .035);
+    box-shadow: 0 3px 10px rgba(20, 50, 100, 0.04);
+    font-family: inherit;
     text-align: left;
+    cursor: pointer;
 }
 
 .notification-card.unread {
@@ -173,16 +211,20 @@
     background: #f0f5ff;
 }
 
+.notification-card:disabled {
+    cursor: wait;
+}
+
 .notification-icon {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     flex-shrink: 0;
     border-radius: 11px;
     background: #eaf2ff;
     color: #315ccb;
-    font-size: 18px;
+    font-size: 19px;
 }
 
 .notification-body {
@@ -199,15 +241,14 @@
 }
 
 .notification-name {
-    margin: 0;
     color: #172b4d;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
 }
 
 .unread-dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     flex-shrink: 0;
     border-radius: 50%;
     background: #315ccb;
@@ -216,19 +257,21 @@
 .notification-message {
     display: block;
     margin: 8px 0;
-    color: #78869d;
-    font-size: 12px;
-    line-height: 1.7;
+    color: #546579;
+    font-size: 13px;
+    line-height: 1.6;
     overflow-wrap: anywhere;
 }
 
 .notification-time {
-    color: #94a0b2;
-    font-size: 10px;
+    color: #64748b;
+    font-size: 11px;
 }
 
+/* Empty notifications */
+
 .empty-notifications {
-    padding: 45px 20px;
+    padding: 42px 20px;
     border: 1px solid #e8edf5;
     border-radius: 15px;
     background: white;
@@ -244,7 +287,6 @@
     border-radius: 13px;
     background: #eaf2ff;
     color: #315ccb;
-    font-size: 22px;
 }
 
 .empty-icon svg {
@@ -261,11 +303,42 @@
 
 .empty-notifications p {
     margin: 0;
-    color: #78869d;
-    font-size: 12px;
+    color: #546579;
+    font-size: 13px;
     line-height: 1.7;
+}
+
+/* Keyboard accessibility */
+
+.back-link:focus-visible,
+.mark-all-button:focus-visible,
+.filter-button:focus-visible,
+.notification-card:focus-visible {
+    outline: 3px solid #315ccb;
+    outline-offset: 3px;
 }
 
 [hidden] {
     display: none !important;
+}
+
+/* Smaller screens */
+
+@media (max-width: 350px) {
+    .notifications-content {
+        padding-left: 13px;
+        padding-right: 13px;
+    }
+
+    .notifications-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .mark-all-button {
+        font-size: 11px;
+    }
+
+    .notification-card {
+        padding: 14px 12px;
+    }
 }
