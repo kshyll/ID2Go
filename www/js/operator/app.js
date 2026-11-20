@@ -7,22 +7,29 @@
   let dashboard = null;
   let queue = [];
   let current = null;
-  let activeView = "dashboard";
   let activeFilter = "waiting";
   let busy = false;
+  let loading = false;
   let refreshTimer = null;
+  let countdownTimer = null;
 
-  const setFeedback = (message, error = false) => {
+  // Display feedback to the operator.
+  const showMessage = (message, isError = false) => {
     $("operator-feedback").textContent = message;
-    $("operator-feedback").classList.toggle("error", error);
+    $("operator-feedback").classList.toggle("error", isError);
   };
 
-  const formatQueue = value =>
-    value == null ? "—" : String(value).padStart(3, "0");
+  // Display queue numbers with at least three digits.
+  const formatQueue = value => {
+    if (value === null || value === undefined) {
+      return "—";
+    }
 
+    return String(value).padStart(3, "0");
+  };
+
+  // Change the visible screen.
   const showView = view => {
-    activeView = view;
-
     document.querySelectorAll(".view").forEach(section => {
       section.classList.toggle(
         "active",
@@ -31,24 +38,41 @@
     });
 
     document.querySelectorAll(".nav-item").forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.view === view ||
+      const active = button.dataset.view === view ||
         (view === "workspace" &&
-         button.dataset.view === "dashboard")
-      );
+         button.dataset.view === "dashboard");
+
+      button.classList.toggle("active", active);
+
+      if (active) {
+        button.setAttribute("aria-current", "page");
+      } else {
+        button.removeAttribute("aria-current");
+      }
     });
 
-    $("page-subtitle").textContent = {
-      dashboard: "Queue Management Dashboard",
-      workspace: "Student Processing Workspace",
-      queue: "Queue Management",
-      account: "Operator Account"
-    }[view];
+    const headings = {
+      dashboard: "Operator Dashboard",
+      workspace: "Queue Workspace",
+      queue: "Queue List",
+      account: "Operator Profile"
+    };
+
+    $("page-title").textContent = headings[view] || "Operator";
+
+    const descriptions = {
+      dashboard: "Manage student queues and ID processing.",
+      workspace: "Process the student assigned to your station.",
+      queue: "View students according to their queue status.",
+      account: "View your account and assigned station."
+    };
+
+    $("page-subtitle").textContent = descriptions[view] || "";
 
     window.scrollTo(0, 0);
   };
 
+  // Display the station and daily statistics.
   const renderDashboard = () => {
     const station = dashboard?.station;
     const stats = dashboard?.stats || {};
@@ -59,9 +83,16 @@
     $("station-status").textContent =
       station?.status || "Unavailable";
 
-    $("open-workspace").disabled =
-      !station || station.status !== "available" &&
-      station.status !== "serving";
+    const available = station &&
+      ["available", "serving"].includes(station.status);
+
+    $("open-workspace").disabled = !available || busy;
+
+    $("workspace-station").textContent =
+      station?.name || "No Station";
+
+    $("account-station").textContent =
+      station?.name || "Not Assigned";
 
     const values = {
       "stat-waiting": stats.waiting,
@@ -71,16 +102,53 @@
     };
 
     Object.entries(values).forEach(([id, value]) => {
-      $(id).textContent =
-        Number.isInteger(value) ? value : "—";
+      $(id).textContent = Number.isInteger(value)
+        ? String(value)
+        : "—";
     });
-
-    $("workspace-station").textContent =
-      station?.name || "No Station";
-    $("account-station").textContent =
-      station?.name || "Not Assigned";
   };
 
+  // Update the five-minute arrival countdown.
+  const updateCountdown = () => {
+    const timer = $("arrival-timer");
+
+    if (!current ||
+        current.status !== "called" ||
+        !current.arrival_deadline) {
+      timer.textContent = "—";
+      return;
+    }
+
+    const deadline = new Date(
+      current.arrival_deadline
+    ).getTime();
+
+    if (Number.isNaN(deadline)) {
+      timer.textContent = "—";
+      return;
+    }
+
+    const seconds = Math.max(
+      0,
+      Math.ceil((deadline - Date.now()) / 1000)
+    );
+
+    const minutes = String(
+      Math.floor(seconds / 60)
+    ).padStart(2, "0");
+
+    const remaining = String(
+      seconds % 60
+    ).padStart(2, "0");
+
+    timer.textContent = ${minutes}:${remaining};
+
+    if (seconds === 0) {
+      timer.textContent = "Time expired";
+    }
+  };
+
+  // Display the student assigned to this station.
   const renderWorkspace = () => {
     $("current-queue").textContent =
       formatQueue(current?.queue_number);
@@ -101,6 +169,8 @@
 
     const labels = {
       ready: "Ready",
+      waiting: "Waiting",
+      returned: "Returned",
       called: "Awaiting Arrival",
       in_service: "In Service",
       standby: "Standby",
@@ -123,30 +193,10 @@
     $("move-standby").disabled = busy;
     $("complete-service").disabled = busy;
 
-    if (status === "called" && current?.arrival_deadline) {
-      const seconds = Math.max(
-        0,
-        Math.ceil(
-          (new Date(current.arrival_deadline).getTime() -
-           Date.now()) / 1000
-        )
-      );
-
-      const minutes = String(
-        Math.floor(seconds / 60)
-      ).padStart(2, "0");
-
-      const remainder = String(
-        seconds % 60
-      ).padStart(2, "0");
-
-      $("arrival-timer").textContent =
-        ${minutes}:${remainder};
-    } else {
-      $("arrival-timer").textContent = "—";
-    }
+    updateCountdown();
   };
 
+  // Display the queue list.
   const renderQueue = () => {
     const list = $("queue-list");
     list.replaceChildren();
@@ -161,7 +211,7 @@
       return student.status === activeFilter;
     });
 
-    if (!filtered.length) {
+    if (filtered.length === 0) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
       empty.textContent = "No students in this category.";
@@ -178,7 +228,8 @@
         Queue ${formatQueue(student.queue_number)};
 
       const name = document.createElement("p");
-      name.textContent = student.student_name || "Student";
+      name.textContent =
+        student.student_name || "Student";
 
       const details = document.createElement("p");
       details.textContent = [
@@ -190,14 +241,15 @@
 
       if (student.status === "standby") {
         const button = document.createElement("button");
+
         button.type = "button";
         button.textContent = "Mark Returned";
         button.disabled = busy;
 
         button.addEventListener("click", () => {
-          runAction(() =>
-            service.markReturned(student.id)
-          );
+          runAction(() => {
+            return service.markReturned(student.id);
+          });
         });
 
         entry.appendChild(button);
@@ -213,45 +265,63 @@
     renderQueue();
   };
 
+  // Get the latest queue information from Supabase.
   const refresh = async () => {
-    const [dashboardData, queueData] = await Promise.all([
-      service.getDashboard(),
-      service.getQueue()
-    ]);
-
-    if (
-      !dashboardData ||
-      !Array.isArray(queueData)
-    ) {
-      throw new Error("Invalid queue data received.");
+    if (loading) {
+      return;
     }
 
-    dashboard = dashboardData;
-    queue = queueData;
-    current = dashboardData.current || null;
+    loading = true;
 
-    render();
+    try {
+      const results = await Promise.all([
+        service.getDashboard(),
+        service.getQueue()
+      ]);
+
+      const dashboardData = results[0];
+      const queueData = results[1];
+
+      if (!dashboardData || !Array.isArray(queueData)) {
+        throw new Error("Invalid queue information.");
+      }
+
+      dashboard = dashboardData;
+      queue = queueData;
+      current = dashboardData.current || null;
+
+      render();
+    } finally {
+      loading = false;
+    }
   };
 
+  // Run an operator action and refresh the screen.
   const runAction = async action => {
-    if (busy) return;
+    if (busy || loading) {
+      return;
+    }
 
     busy = true;
-    renderWorkspace();
+    render();
 
     try {
       await action();
       await refresh();
-      setFeedback("Queue updated successfully.");
+      showMessage("Queue updated successfully.");
     } catch (error) {
-      setFeedback(error.message, true);
       console.error(error);
+      showMessage(
+        error.message || "Unable to update the queue.",
+        true
+      );
     } finally {
       busy = false;
       render();
     }
   };
 
+  // Connect buttons to their functions.
   const bindEvents = () => {
     document.querySelectorAll(".nav-item").forEach(button => {
       button.addEventListener("click", () => {
@@ -263,12 +333,16 @@
       button.addEventListener("click", () => {
         activeFilter = button.dataset.filter;
 
-        document.querySelectorAll(".filter-btn").forEach(item => {
-          item.classList.toggle(
-            "active",
-            item === button
-          );
-        });
+        document.querySelectorAll(".filter-btn")
+          .forEach(item => {
+            const selected = item === button;
+
+            item.classList.toggle("active", selected);
+            item.setAttribute(
+              "aria-pressed",
+              String(selected)
+            );
+          });
 
         renderQueue();
       });
@@ -284,12 +358,22 @@
       showView("dashboard");
     });
 
-    $("refresh-dashboard").addEventListener("click", () => {
-      runAction(async () => {});
+    $("refresh-dashboard").addEventListener("click", async () => {
+      try {
+        await refresh();
+        showMessage("Queue refreshed.");
+      } catch (error) {
+        showMessage("Unable to refresh queue.", true);
+      }
     });
 
-    $("refresh-queue").addEventListener("click", () => {
-      runAction(async () => {});
+    $("refresh-queue").addEventListener("click", async () => {
+      try {
+        await refresh();
+        showMessage("Queue refreshed.");
+      } catch (error) {
+        showMessage("Unable to refresh queue.", true);
+      }
     });
 
     $("call-next").addEventListener("click", () => {
@@ -309,22 +393,40 @@
     });
 
     $("complete-service").addEventListener("click", () => {
-      if (!current) return;
+      if (!current) {
+        return;
+      }
 
-      if (window.confirm("Complete this student's ID service?")) {
+      const confirmed = window.confirm(
+        "Complete this student's ID service?"
+      );
+
+      if (confirmed) {
         runAction(() => service.completeService(current.id));
       }
     });
 
     $("operator-logout").addEventListener("click", async () => {
+      if (!window.confirm("Sign out of ID2Go?")) {
+        return;
+      }
+
+      $("operator-logout").disabled = true;
+
       try {
         await service.signOut();
       } catch (error) {
-        setFeedback(error.message, true);
+        showMessage(
+          error.message || "Unable to sign out.",
+          true
+        );
+
+        $("operator-logout").disabled = false;
       }
     });
   };
 
+  // Start the operator application.
   const initialize = async () => {
     bindEvents();
 
@@ -338,28 +440,55 @@
         user.email || "—";
 
       await refresh();
-      setFeedback("");
+      showMessage("");
+
     } catch (error) {
-      setFeedback(error.message, true);
+      console.error(error);
+
+      showMessage(
+        error.message || "Unable to load operator dashboard.",
+        true
+      );
+
       $("open-workspace").disabled = true;
       $("call-next").disabled = true;
       return;
     }
 
+    // Refresh the data every 15 seconds.
     refreshTimer = setInterval(async () => {
-      if (busy) return;
+      if (busy || loading) {
+        return;
+      }
 
       try {
         await refresh();
       } catch (error) {
-        setFeedback("Unable to refresh queue.", true);
+        showMessage("Unable to refresh queue.", true);
       }
     }, 15000);
+
+    // Update the countdown every second.
+    countdownTimer = setInterval(
+      updateCountdown,
+      1000
+    );
   };
 
+  // Stop timers when the page closes.
   window.addEventListener("pagehide", () => {
-    if (refreshTimer) clearInterval(refreshTimer);
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+    }
   });
 
-  document.addEventListener("DOMContentLoaded", initialize);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize);
+  } else {
+    initialize();
+  }
 })();

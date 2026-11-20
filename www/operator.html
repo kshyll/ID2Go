@@ -1,221 +1,359 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#103675">
-  <title>ID2Go | Operator Queue</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#102f5e">
 
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/operator.css">
+    <title>ID2Go | Camera Operator</title>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="js/supabase-client.js"></script>
-  <script defer src="js/operator/queue-service.js"></script>
-  <script defer src="js/operator/app.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/operator.css">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="js/supabase-client.js"></script>
+    <script defer src="js/operator/queue-service.js"></script>
+    <script defer src="js/operator/app.js"></script>
 </head>
 
 <body>
-  <div class="operator-shell">
-    <header class="operator-header">
-      <div class="operator-brand">
-        <div>
-          <span class="brand-caption">XAVIER UNIVERSITY · ID2GO</span>
-          <h1>Camera Operations</h1>
-        </div>
-        <span class="staff-badge">OPERATOR</span>
-      </div>
-      <p id="page-subtitle">Queue Management Dashboard</p>
-    </header>
+    <div class="operator-shell">
 
-    <main class="operator-content">
+        <header class="operator-header">
+            <div class="operator-brand">
+                <img src="img/logo.png"
+                     alt="Xavier University seal">
 
-      <section id="dashboard-view" class="view active">
-        <div class="section-heading">
-          <h2>Assigned Station</h2>
-          <span id="station-status" class="status-badge">Loading</span>
-        </div>
+                <div>
+                    <h1>Xavier University</h1>
+                    <p>STUDENT ID SERVICES</p>
+                </div>
+            </div>
+        </header>
 
-        <article class="ui-card">
-          <span class="eyebrow">MY WORKSPACE</span>
-          <h2 id="assigned-station">Loading station...</h2>
-          <p class="muted">
-            Station assignment is managed by the administrator.
-          </p>
+        <main class="operator-content">
 
-          <button id="open-workspace"
-                  class="ui-button ui-button-primary"
-                  disabled>
-            Open Queue Workspace
-          </button>
-        </article>
+            <div class="page-intro">
+                <span class="eyebrow">CAMERA OPERATOR</span>
+                <h2 id="page-title">Operator Dashboard</h2>
+                <p id="page-subtitle">
+                    Manage student queues and ID processing.
+                </p>
+            </div>
 
-        <div class="section-heading">
-          <h2>Today's Queue</h2>
-          <button id="refresh-dashboard"
-                  class="text-button"
-                  type="button">
-            Refresh
-          </button>
-        </div>
+            <p id="operator-feedback"
+               class="operator-feedback"
+               role="status"
+               aria-live="polite"></p>
 
-        <div class="statistics-grid">
-          <article class="stat-card">
-            <span>Waiting</span>
-            <strong id="stat-waiting">—</strong>
-          </article>
-          <article class="stat-card">
-            <span>In Service</span>
-            <strong id="stat-serving">—</strong>
-          </article>
-          <article class="stat-card">
-            <span>Completed</span>
-            <strong id="stat-completed">—</strong>
-          </article>
-          <article class="stat-card">
-            <span>Missed</span>
-            <strong id="stat-missed">—</strong>
-          </article>
-        </div>
-      </section>
+            <!-- HOME -->
+            <section id="dashboard-view" class="view active">
 
-      <section id="workspace-view" class="view">
-        <button id="workspace-back"
-                class="text-button"
-                type="button">
-          ← Back to Dashboard
-        </button>
+                <div class="section-heading">
+                    <h2>Assigned Station</h2>
+                    <span id="station-status"
+                          class="status-badge">
+                        Loading
+                    </span>
+                </div>
 
-        <div class="section-heading">
-          <h2>Queue Workspace</h2>
-          <span id="workspace-station"
-                class="status-badge">—</span>
-        </div>
+                <article class="ui-card station-card">
+                    <span class="eyebrow">MY WORKSPACE</span>
 
-        <article class="ui-card">
-          <div class="section-heading">
-            <h3>Current Student</h3>
-            <span id="student-status"
-                  class="status-badge">Ready</span>
-          </div>
+                    <h3 id="assigned-station">
+                        Loading station...
+                    </h3>
 
-          <div class="student-panel">
-            <span class="eyebrow">QUEUE NUMBER</span>
-            <strong id="current-queue">—</strong>
-            <h3 id="current-name">No Student Called</h3>
-            <p id="current-service">Ready for next student</p>
-          </div>
+                    <p class="muted">
+                        Your camera station is assigned
+                        by the administrator.
+                    </p>
 
-          <div class="detail-row">
-            <span>Student ID</span>
-            <strong id="current-id">—</strong>
-          </div>
+                    <button id="open-workspace"
+                            type="button"
+                            class="ui-button ui-button-primary"
+                            disabled>
+                        Open Queue Workspace
+                    </button>
+                </article>
 
-          <div class="detail-row">
-            <span>Study Level</span>
-            <strong id="current-level">—</strong>
-          </div>
+                <div class="section-heading">
+                    <h2>Today's Queue</h2>
 
-          <div class="detail-row">
-            <span>Arrival Countdown</span>
-            <strong id="arrival-timer">—</strong>
-          </div>
+                    <button id="refresh-dashboard"
+                            class="text-button"
+                            type="button">
+                        Refresh
+                    </button>
+                </div>
 
-          <div class="workspace-actions">
-            <button id="call-next"
-                    class="ui-button ui-button-primary">
-              Call Next Student
+                <div class="statistics-grid">
+                    <article class="stat-card">
+                        <span>Waiting</span>
+                        <strong id="stat-waiting">—</strong>
+                    </article>
+
+                    <article class="stat-card">
+                        <span>In Service</span>
+                        <strong id="stat-serving">—</strong>
+                    </article>
+
+                    <article class="stat-card">
+                        <span>Completed</span>
+                        <strong id="stat-completed">—</strong>
+                    </article>
+
+                    <article class="stat-card">
+                        <span>Missed</span>
+                        <strong id="stat-missed">—</strong>
+                    </article>
+                </div>
+            </section>
+
+            <!-- QUEUE WORKSPACE -->
+            <section id="workspace-view" class="view">
+
+                <button id="workspace-back"
+                        class="text-button back-button"
+                        type="button">
+                    ← Back to Dashboard
+                </button>
+
+                <div class="section-heading">
+                    <h2>Queue Workspace</h2>
+
+                    <span id="workspace-station"
+                          class="status-badge">
+                        —
+                    </span>
+                </div>
+
+                <article class="ui-card">
+                    <div class="section-heading">
+                        <h3>Current Student</h3>
+
+                        <span id="student-status"
+                              class="status-badge">
+                            Ready
+                        </span>
+                    </div>
+
+                    <div class="student-panel">
+                        <span class="eyebrow">
+                            QUEUE NUMBER
+                        </span>
+
+                        <strong id="current-queue">—</strong>
+
+                        <h3 id="current-name">
+                            No Student Called
+                        </h3>
+
+                        <p id="current-service">
+                            Ready for the next student
+                        </p>
+                    </div>
+
+                    <div class="detail-row">
+                        <span>Student ID</span>
+                        <strong id="current-id">—</strong>
+                    </div>
+
+                    <div class="detail-row">
+                        <span>Study Level</span>
+                        <strong id="current-level">—</strong>
+                    </div>
+
+                    <div class="detail-row">
+                        <span>Arrival Countdown</span>
+                        <strong id="arrival-timer">—</strong>
+                    </div>
+
+                    <div class="workspace-actions">
+                        <button id="call-next"
+                                type="button"
+                                class="ui-button ui-button-primary">
+                            Call Next Student
+                        </button>
+
+                        <button id="confirm-arrival"
+                                type="button"
+                                class="ui-button ui-button-primary"
+                                hidden>
+                            Confirm Student Arrival
+                        </button>
+
+                        <button id="move-standby"
+                                type="button"
+                                class="ui-button ui-button-secondary"
+                                hidden>
+                            Move to Standby
+                        </button>
+
+                        <button id="complete-service"
+                                type="button"
+                                class="ui-button ui-button-primary"
+                                hidden>
+                            Complete Service
+                        </button>
+                    </div>
+                </article>
+            </section>
+
+            <!-- QUEUE LIST -->
+            <section id="queue-view" class="view">
+
+                <div class="section-heading">
+                    <h2>Queue List</h2>
+
+                    <button id="refresh-queue"
+                            class="text-button"
+                            type="button">
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="queue-filters"
+                     role="group"
+                     aria-label="Queue status filter">
+
+                    <button class="filter-btn active"
+                            type="button"
+                            data-filter="waiting"
+                            aria-pressed="true">
+                        Waiting
+                    </button>
+
+                    <button class="filter-btn"
+                            type="button"
+                            data-filter="called"
+                            aria-pressed="false">
+                        Called
+                    </button>
+
+                    <button class="filter-btn"
+                            type="button"
+                            data-filter="standby"
+                            aria-pressed="false">
+                        Standby
+                    </button>
+
+                    <button class="filter-btn"
+                            type="button"
+                            data-filter="completed"
+                            aria-pressed="false">
+                        Completed
+                    </button>
+
+                    <button class="filter-btn"
+                            type="button"
+                            data-filter="missed"
+                            aria-pressed="false">
+                        Missed
+                    </button>
+                </div>
+
+                <article class="ui-card">
+                    <div id="queue-list"
+                         aria-live="polite">
+                        <p class="empty-state">
+                            Loading queue...
+                        </p>
+                    </div>
+                </article>
+            </section>
+
+            <!-- ACCOUNT -->
+            <section id="account-view" class="view">
+
+                <div class="section-heading">
+                    <h2>Operator Profile</h2>
+                </div>
+
+                <article class="ui-card">
+                    <div class="profile-avatar"
+                         aria-hidden="true">
+                        OP
+                    </div>
+
+                    <h3 id="operator-name">
+                        Camera Operator
+                    </h3>
+
+                    <p id="operator-email" class="muted">
+                        —
+                    </p>
+
+                    <div class="detail-row">
+                        <span>Assigned Station</span>
+
+                        <strong id="account-station">
+                            —
+                        </strong>
+                    </div>
+                </article>
+
+                <button id="operator-logout"
+                        type="button"
+                        class="ui-button ui-button-secondary logout-button">
+                    Sign Out
+                </button>
+            </section>
+
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="operator-navigation"
+             aria-label="Operator navigation">
+
+            <button class="nav-item active"
+                    type="button"
+                    data-view="dashboard"
+                    aria-current="page">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path d="m3 10 9-7 9 7v10H3z"/>
+                    <path d="M9 21v-7h6v7"/>
+                </svg>
+
+                <span>Home</span>
             </button>
 
-            <button id="confirm-arrival"
-                    class="ui-button ui-button-primary"
-                    hidden>
-              Confirm Student Arrival
+            <button class="nav-item"
+                    type="button"
+                    data-view="queue">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path d="M8 6h13M8 12h13M8 18h13"/>
+                    <path d="M3 6h1M3 12h1M3 18h1"/>
+                </svg>
+
+                <span>Queue</span>
             </button>
 
-            <button id="move-standby"
-                    class="ui-button ui-button-secondary"
-                    hidden>
-              Move to Standby
+            <button class="nav-item"
+                    type="button"
+                    data-view="account">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
+                </svg>
+
+                <span>Account</span>
             </button>
-
-            <button id="complete-service"
-                    class="ui-button ui-button-primary"
-                    hidden>
-              Complete Service
-            </button>
-          </div>
-        </article>
-      </section>
-
-      <section id="queue-view" class="view">
-        <div class="section-heading">
-          <h2>Queue List</h2>
-          <button id="refresh-queue"
-                  class="text-button"
-                  type="button">
-            Refresh
-          </button>
-        </div>
-
-        <div class="queue-filters">
-          <button class="filter-btn active"
-                  data-filter="waiting">Waiting</button>
-          <button class="filter-btn"
-                  data-filter="called">Called</button>
-          <button class="filter-btn"
-                  data-filter="standby">Standby</button>
-          <button class="filter-btn"
-                  data-filter="completed">Completed</button>
-          <button class="filter-btn"
-                  data-filter="missed">Missed</button>
-        </div>
-
-        <article class="ui-card">
-          <div id="queue-list"></div>
-        </article>
-      </section>
-
-      <section id="account-view" class="view">
-        <div class="section-heading">
-          <h2>Operator Account</h2>
-        </div>
-
-        <article class="ui-card">
-          <h3 id="operator-name">Camera Operator</h3>
-          <p id="operator-email" class="muted">—</p>
-
-          <div class="detail-row">
-            <span>Assigned Station</span>
-            <strong id="account-station">—</strong>
-          </div>
-        </article>
-
-        <button id="operator-logout"
-                class="ui-button ui-button-secondary">
-          Sign Out
-        </button>
-      </section>
-
-      <p id="operator-feedback"
-         role="status"
-         aria-live="polite"></p>
-
-    </main>
-
-    <nav class="operator-navigation">
-      <button class="nav-item active" data-view="dashboard">
-        <span>Dashboard</span>
-      </button>
-      <button class="nav-item" data-view="queue">
-        <span>Queue</span>
-      </button>
-      <button class="nav-item" data-view="account">
-        <span>Account</span>
-      </button>
-    </nav>
-  </div>
+        </nav>
+    </div>
 </body>
 </html>
