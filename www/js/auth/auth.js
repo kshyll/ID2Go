@@ -19,6 +19,8 @@
 
     const { data, error } = await db.auth.getUser();
 
+    // A signed-out visitor can use the form without seeing an error.
+    if (error?.name === "AuthSessionMissingError") return null;
     if (error) throw error;
 
     return data.user || null;
@@ -103,6 +105,7 @@
     const passwordInput = $("login-password");
     const toggleButton = $("toggle-password");
     const loginButton = $("login-button");
+    const loginButtonLabel = $("login-button-label");
     const errorMessage = $("login-error");
 
     let busy = false;
@@ -116,7 +119,7 @@
     const setLoading = (loading, label = "Sign In") => {
       busy = loading;
       loginButton.disabled = loading;
-      loginButton.textContent = label;
+      loginButtonLabel.textContent = label;
     };
 
     const navigate = async role => {
@@ -176,7 +179,9 @@
 
         await navigate(result.role);
       } catch (error) {
-        showError(error.message || "Unable to sign in.");
+        showError(error.code === "invalid_credentials"
+          ? "Email or password is incorrect. Please try again."
+          : error.message || "Unable to sign in.");
       } finally {
         if (!redirecting) setLoading(false);
       }

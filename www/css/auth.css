@@ -247,7 +247,11 @@
     background: #102f5e;
 }
 
+<<<<<<< ours
 .auth-submit span {
+=======
+.auth-submit-arrow {
+>>>>>>> theirs
     font-size: 20px;
     line-height: 1;
 }
