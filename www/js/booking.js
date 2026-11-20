@@ -2,14 +2,17 @@
 const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
 
-// Use global ID2Go client if initialized, or fallback
-const db =
-  window.ID2GoDB ||
-  (window.supabase
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null);
+function getDbClient() {
+  return (
+    window.ID2GoDB ||
+    (window.supabase
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null)
+  );
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const db = getDbClient();
   const MAX_SLOTS_PER_HOUR = 48;
 
   const TIME_SLOTS = [
@@ -27,9 +30,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentUser = null;
   if (db) {
     try {
-      const { data, error } = await db.auth.getUser();
-      if (!error && data?.user) {
-        currentUser = data.user;
+      const { data: sessionData } = await db.auth.getSession();
+      currentUser = sessionData?.session?.user || null;
+
+      if (!currentUser) {
+        const { data: userData } = await db.auth.getUser();
+        currentUser = userData?.user || null;
       }
     } catch (err) {
       console.error("Auth session check failed:", err);
