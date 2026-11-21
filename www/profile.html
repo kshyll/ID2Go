@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#102f5e">
     <title>ID2Go | Student Profile</title>
 
@@ -11,13 +11,19 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/profile.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js"></script>
+    <script defer src="js/config.js"></script>
     <script defer src="js/supabase-client.js"></script>
+    <script defer src="js/auth/guard.js"></script>
     <script defer src="js/navigation.js"></script>
     <script defer src="js/profile.js"></script>
+<link rel="stylesheet" href="css/student-nav.css">
+<script defer src="js/student-nav.js"></script>
+    <link rel="stylesheet" href="css/university.css">
 </head>
 
-<body>
+<body class="page-profile">
     <div class="app-shell">
 
         <header class="app-header">
@@ -82,8 +88,10 @@
                            placeholder="e.g. student@xu.edu.ph" required>
 
                     <label for="mobileNumber">Mobile Number</label>
-                    <input type="tel" id="mobileNumber" name="mobileNumber"
+
+                    <input type="tel" pattern="[+0-9 \(\)\-]{7,24}" title="Enter a valid contact number, including area or country code." id="mobileNumber" name="mobileNumber"
                            placeholder="e.g. 09123456789" required>
+
                 </section>
 
                 <section class="content-card">
@@ -114,10 +122,17 @@
                     </select>
 
                     <label for="emergencyPhone">Emergency Contact Number</label>
+
                     <input type="tel" id="emergencyPhone"
                            name="emergencyPhone"
                            placeholder="Enter emergency contact number"
                            required>
+
+                    <input type="tel" pattern="[+0-9 \(\)\-]{7,24}" title="Enter a valid contact number, including area or country code." id="emergencyPhone"
+                           name="emergencyPhone"
+                           placeholder="Enter emergency contact number"
+                           required>
+
                 </section>
 
                 <section class="content-card account-settings">
