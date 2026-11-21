@@ -61,6 +61,11 @@
     return data.user;
   };
 
+  function approved(item) {
+    const key = item.event_key || "";
+    if (/:morning$|:hour$|:completed$|:standby/.test(key)) return true;
+    return item.title === "Queue update" && /^Ticket [^:]+: (completed|standby)\.$/i.test(item.message);
+  }
   const loadNotifications = async () => {
     if (!currentUser) return;
     if (loading) {
@@ -71,16 +76,23 @@
     loading = true;
 
     try {
+      const owner = currentUser.id;
       const { data, error } = await db
         .from("student_notifications")
-        .select("id, title, message, type, is_read, created_at")
+        .select("*")
         .eq("student_user_id", currentUser.id)
         .order("created_at", { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
-      notifications = data || [];
+      if (currentUser?.id !== owner) return;
+      notifications = (data || []).filter(approved).map(item => {
+        if (item.title !== "Queue update") return item;
+        const completed = /completed\.$/i.test(item.message);
+        return {...item,title:completed ? "Service completed" : "You missed your call",
+          message:completed ? "Your ID service is complete." : "You were placed on standby. Open Home to check your queue status."};
+      });
       document.querySelectorAll(".filter-button").forEach(button => {
         button.disabled = false;
       });
@@ -204,8 +216,9 @@
     body.append(heading, message, time);
     card.append(icon, body);
 
-    card.addEventListener("click", () => {
-      markAsRead(notification, card);
+    card.addEventListener("click", async () => {
+      if (!notification.is_read) await markAsRead(notification, card);
+      else window.location.assign("dashboard.html");
     });
 
     return card;
@@ -284,7 +297,14 @@
     }
 
     if (!currentUser) return;
-
+    db.auth.onAuthStateChange?.((_event, session) => {
+      if (currentUser && session?.user?.id !== currentUser.id) {
+        currentUser = null; notifications = []; render();
+        clearInterval(refreshTimer);
+        if (channel) db.removeChannel(channel);
+        window.location.replace("index.html");
+      }
+    });
     document.querySelectorAll(".filter-button")
       .forEach(button => {
         button.addEventListener("click", () => {
@@ -307,6 +327,7 @@
     );
 
     await loadNotifications();
+    if (!currentUser) return;
     subscribeToUpdates();
 
     refreshTimer = setInterval(
