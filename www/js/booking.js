@@ -1,18 +1,5 @@
-// SUPABASE CONFIGURATION
-const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
-
-function getDbClient() {
-  return (
-    window.ID2GoDB ||
-    (window.supabase
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null)
-  );
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
-  const db = getDbClient();
+  const db = window.ID2GoDB;
   const MAX_SLOTS_PER_HOUR = 48;
 
   const TIME_SLOTS = [
@@ -26,29 +13,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     "4:00–5:00 PM"
   ];
 
-  // 1. VERIFY AUTHENTICATED ACCOUNT OWNER
-  let currentUser = null;
-  if (db) {
-    try {
-      const { data: sessionData } = await db.auth.getSession();
-      currentUser = sessionData?.session?.user || null;
-
-      if (!currentUser) {
-        const { data: userData } = await db.auth.getUser();
-        currentUser = userData?.user || null;
-      }
-    } catch (err) {
-      console.error("[ID2GO Booking] Auth session check failed:", err);
-    }
-  } else {
-    console.error("[ID2GO Booking] Supabase client failed to initialize.");
-  }
-
-  if (!currentUser) {
-    alert("Please log in to your student account before booking an appointment.");
-    window.location.replace("index.html");
-    return;
-  }
+  const currentUser = await window.ID2GoSession.requireRole("student");
+  if (!currentUser) return;
+  const manilaNow = () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+  const today = () => { const d = manilaNow(); return formatDateString(d.getFullYear(), d.getMonth()+1, d.getDate()); };
 
   const userProfileCacheKey = `id2go_user_profile_${currentUser.id}`;
   const userBookingCacheKey = `id2go_active_appointment_${currentUser.id}`;
@@ -68,11 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     activeBooking: null
   };
 
-  let slotBookings =
-    JSON.parse(localStorage.getItem("id2go_slot_bookings")) || {};
-
   // Calendar State
-  let currentDate = new Date();
+  let currentDate = manilaNow();
   let currentYear = currentDate.getFullYear();
   let currentMonth = currentDate.getMonth();
 
@@ -270,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!data) return;
 
     document.getElementById("generated-queue-number").textContent =
-      data.queueNumber || "001";
+      data.queueNumber || "—";
     document.getElementById("conf-service-title").textContent =
       data.service || "First-Time ID Picture Taking";
 
@@ -321,6 +286,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ==================== ACTIVE APPOINTMENT CHECK ==================== */
   async function checkExistingAppointment() {
     let activeAppointment = null;
+    const next = document.getElementById("btn-step1-next");
+    next.disabled = true;
+    try {
+      const {data, error} = await db.from("appointments").select("service").eq("user_id", currentUser.id).in("status", ["completed", "Completed"]);
+      if (error) throw error;
+      const completed = new Set((data || []).map(item => item.service));
+      const radios = [...document.querySelectorAll('input[name="id_service"]')];
+      radios.forEach(radio => {
+        radio.disabled = completed.has(radio.value);
+        radio.closest("label").title = radio.disabled ? "You have already completed this service." : "";
+        if (radio.disabled) radio.checked = false;
+      });
+      if (!radios.some(radio => radio.checked)) {
+        const available = radios.find(radio => !radio.disabled);
+        if (available) available.checked = true;
+      }
+      next.disabled = !radios.some(radio => !radio.disabled);
+      if (next.disabled) next.textContent = "All services completed";
+    } catch (error) {
+      alert("Unable to verify completed services. Please reload to retry.");
+      return;
+    }
 
     if (db) {
       try {
@@ -328,12 +315,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           .from("appointments")
           .select("*")
           .eq("user_id", currentUser.id)
-          .eq("status", "Confirmed")
+          .in("status", ["Confirmed", "confirmed", "waiting", "returned", "called", "in_service", "standby"])
+          .gte("appointment_date", today())
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (!error && data) {
+        if (error) throw error;
+        if (data) {
           activeAppointment = {
             service: data.service,
             date: data.appointment_date,
@@ -358,14 +347,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           localStorage.removeItem(userBookingCacheKey);
         }
       } catch (err) {
-        console.warn("[ID2GO Booking] Active appointment query error:", err);
-      }
-    }
-
-    if (!activeAppointment) {
-      const localActive = localStorage.getItem(userBookingCacheKey);
-      if (localActive) {
-        activeAppointment = JSON.parse(localActive);
+        alert("Unable to verify your active booking. Reload before booking again.");
+        document.getElementById("btn-step1-next").disabled = true;
+        return;
       }
     }
 
@@ -379,7 +363,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       bookingData.activeBooking = activeAppointment;
 
       document.getElementById("active-queue-no").textContent =
-        activeAppointment.queueNumber || "001";
+        activeAppointment.queueNumber || "—";
       document.getElementById("existing-service-name").textContent =
         activeAppointment.service;
 
@@ -442,21 +426,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (db) {
         try {
-          const query = active.dbId
-            ? db
-                .from("appointments")
-                .update({ status: "Cancelled" })
-                .eq("id", active.dbId)
-                .eq("user_id", currentUser.id)
-            : db
-                .from("appointments")
-                .update({ status: "Cancelled" })
-                .eq("user_id", currentUser.id)
-                .eq("status", "Confirmed");
-
-          await query;
+          const { error } = await db.rpc("cancel_appointment", { p_appointment_id: active.dbId });
+          if (error) throw error;
         } catch (err) {
-          console.error("[ID2GO Booking] Cancel error:", err);
+          alert(`Cancellation failed: ${err.message}`);
+          btnCancelBooking.disabled = false;
+          btnCancelBooking.textContent = "Cancel Booking";
+          return;
         }
       }
 
@@ -478,7 +454,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const selectedRadio = document.querySelector(
         'input[name="id_service"]:checked'
       );
-      if (selectedRadio) {
+      if (selectedRadio && !selectedRadio.disabled) {
         bookingData.service = selectedRadio.value;
         goToStep(2);
       }
@@ -653,17 +629,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     for (let day = 1; day <= totalDaysInMonth; day++) {
-      const dayEl = document.createElement("div");
+      const dayEl = document.createElement("button");
+      dayEl.type = "button";
       dayEl.classList.add("cal-day");
       dayEl.textContent = day;
 
       const fullDate = new Date(currentYear, currentMonth, day);
       const dayOfWeek = fullDate.getDay();
       const dateString = formatDateString(currentYear, currentMonth + 1, day);
+      dayEl.setAttribute("aria-label", fullDate.toLocaleDateString("en-PH", { weekday: "long", year: "numeric", month: "long", day: "numeric" }));
+      dayEl.setAttribute("aria-pressed", String(bookingData.selectedDate === dateString));
 
-      if (dayOfWeek === 0) {
+      if (dayOfWeek === 0 || dateString < today()) {
         dayEl.classList.add("sunday");
-        dayEl.title = "Closed on Sundays";
+        dayEl.disabled = true;
+        dayEl.title = dateString < today() ? "Past date" : "Closed on Sundays";
       } else {
         if (bookingData.selectedDate === dateString) {
           dayEl.classList.add("selected");
@@ -672,8 +652,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         dayEl.addEventListener("click", () => {
           document
             .querySelectorAll(".cal-day")
-            .forEach((el) => el.classList.remove("selected"));
+            .forEach((el) => { el.classList.remove("selected"); if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", "false"); });
           dayEl.classList.add("selected");
+          dayEl.setAttribute("aria-pressed", "true");
           bookingData.selectedDate = dateString;
           bookingData.selectedTimeSlot = null;
           if (btnStep3Next) btnStep3Next.disabled = true;
@@ -700,6 +681,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function renderTimeSlots(dateString, fullDate) {
     if (!timeSlotsList || !selectedDateLabel) return;
+    if (btnStep3Next) btnStep3Next.disabled = true;
 
     const formattedDateText = fullDate.toLocaleDateString("en-US", {
       weekday: "long",
@@ -713,35 +695,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       "<p class='selected-date-subtext' style='grid-column: span 2;'>Loading available slots...</p>";
 
     let dbBookings = {};
-    if (db) {
-      try {
-        const { data, error } = await db
-          .from("appointments")
-          .select("time_slot")
-          .eq("appointment_date", dateString)
-          .neq("status", "Cancelled");
-
-        if (!error && data) {
-          data.forEach((row) => {
-            dbBookings[row.time_slot] = (dbBookings[row.time_slot] || 0) + 1;
-          });
-        }
-      } catch (err) {
-        console.warn("[ID2GO Booking] Slot fetch error:", err);
-        dbBookings = slotBookings[dateString] || {};
-      }
-    } else {
-      dbBookings = slotBookings[dateString] || {};
+    try {
+      const {data, error} = await db.rpc("booking_slot_availability", {p_date: dateString});
+      if (error) throw error;
+      if (bookingData.selectedDate !== dateString) return;
+      dbBookings = data || {};
+    } catch (error) {
+      if (bookingData.selectedDate !== dateString) return;
+      timeSlotsList.textContent = "Unable to load availability. Select the date again to retry.";
+      btnStep3Next.disabled = true;
+      return;
     }
 
     timeSlotsList.innerHTML = "";
 
-    TIME_SLOTS.forEach((slotText) => {
+    TIME_SLOTS.forEach((slotText, index) => {
       const bookedCount = dbBookings[slotText] || 0;
       const remainingSlots = Math.max(0, MAX_SLOTS_PER_HOUR - bookedCount);
-      const isFull = remainingSlots === 0;
+      const isFull = remainingSlots === 0 || (dateString === today() && [8,9,10,11,13,14,15,16][index] <= manilaNow().getHours());
 
-      const slotEl = document.createElement("div");
+      const slotEl = document.createElement("button");
+      slotEl.type = "button";
+      slotEl.disabled = isFull;
+      slotEl.setAttribute("aria-pressed", String(!isFull && bookingData.selectedTimeSlot === slotText));
       slotEl.classList.add("slot-item");
 
       if (isFull) {
@@ -764,8 +740,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         slotEl.addEventListener("click", () => {
           document
             .querySelectorAll(".slot-item")
-            .forEach((el) => el.classList.remove("selected"));
+            .forEach((el) => { el.classList.remove("selected"); if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", "false"); });
           slotEl.classList.add("selected");
+          slotEl.setAttribute("aria-pressed", "true");
           bookingData.selectedTimeSlot = slotText;
           if (btnStep3Next) btnStep3Next.disabled = false;
         });
@@ -813,56 +790,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (btnConfirmBooking) {
     btnConfirmBooking.addEventListener("click", async () => {
+      if (btnConfirmBooking.disabled) return;
       btnConfirmBooking.disabled = true;
       btnConfirmBooking.textContent = "Processing...";
 
       const { selectedDate, selectedTimeSlot, studentInfo, service } =
         bookingData;
-      const generatedQueueNumber = `0${Math.floor(Math.random() * 90) + 10}`;
-      bookingData.queueNumber = generatedQueueNumber;
-
-      const newRecord = {
-        user_id: currentUser.id,
-        full_name: studentInfo.fullName,
-        student_id: studentInfo.studentId,
-        course_program: studentInfo.courseProgram,
-        year_level: studentInfo.yearLevel,
-        email: currentUser.email,
-        mobile_number: studentInfo.mobileNumber,
-        emergency_name: studentInfo.emergencyName,
-        emergency_relationship: studentInfo.emergencyRelationship,
-        emergency_phone: studentInfo.emergencyPhone,
-        service: service,
-        appointment_date: selectedDate,
-        time_slot: selectedTimeSlot,
-        queue_number: generatedQueueNumber,
-        status: "Confirmed"
-      };
-
-      let insertedId = null;
-
-      if (db) {
-        try {
-          const { data, error } = await db
-            .from("appointments")
-            .insert([newRecord])
-            .select("id")
-            .single();
-
-          if (error) throw error;
-          insertedId = data?.id || null;
-        } catch (err) {
-          console.error("[ID2GO Booking] Supabase Save Error:", err);
-          alert(
-            `Booking failed: ${
-              err.message || "Could not verify account ownership."
-            }`
-          );
-          btnConfirmBooking.disabled = false;
-          btnConfirmBooking.textContent = "Confirm Booking";
-          return;
-        }
+      let saved;
+      try {
+        const { data, error } = await db.rpc("book_appointment", {
+          p_service: service, p_date: selectedDate, p_time_slot: selectedTimeSlot
+        });
+        if (error) throw error;
+        if (!data?.id || !data.queue_number) throw new Error("Invalid booking response");
+        saved = data;
+      } catch (error) {
+        alert(`Booking failed: ${error.message || "Please try again."}`);
+        btnConfirmBooking.disabled = false;
+        btnConfirmBooking.textContent = "Confirm Booking";
+        return;
       }
+      const generatedQueueNumber = saved.queue_number;
+      const insertedId = saved.id;
+      bookingData.queueNumber = generatedQueueNumber;
 
       const activeObj = {
         service: service,
@@ -883,11 +833,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       localStorage.setItem(userBookingCacheKey, JSON.stringify(activeObj));
       bookingData.activeBooking = activeObj;
-
-      if (!slotBookings[selectedDate]) slotBookings[selectedDate] = {};
-      const currentBooked = slotBookings[selectedDate][selectedTimeSlot] || 0;
-      slotBookings[selectedDate][selectedTimeSlot] = currentBooked + 1;
-      localStorage.setItem("id2go_slot_bookings", JSON.stringify(slotBookings));
 
       btnConfirmBooking.disabled = false;
       btnConfirmBooking.textContent = "Confirm Booking";

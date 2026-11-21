@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#102f5e">
 
     <title>ID2GO | Book Appointment</title>
@@ -14,12 +14,18 @@
     <link rel="stylesheet" href="css/booking.css">
     <link rel="stylesheet" href="css/navigation.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js"></script>
+    <script defer src="js/config.js"></script>
     <script defer src="js/supabase-client.js"></script>
+    <script defer src="js/auth/guard.js"></script>
     <script defer src="js/navigation.js"></script>
+<link rel="stylesheet" href="css/student-nav.css">
+<script defer src="js/student-nav.js"></script>
+    <link rel="stylesheet" href="css/university.css">
 </head>
 
-<body>
+<body class="page-booking">
     <div class="app-shell">
 
         <!-- UNIFORM APP HEADER -->
@@ -41,9 +47,9 @@
                 </button>
             </div>
 
-            <div class="welcome" style="margin-top: 24px;">
-                <span style="font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;">APPOINTMENT SYSTEM</span>
-                <h2 style="font-size: 26px; margin: 4px 0 0;">Book ID Service</h2>
+            <div class="welcome" >
+                <span class="eyebrow">APPOINTMENT SYSTEM</span>
+                <h2 >Book ID Service</h2>
             </div>
         </header>
 
@@ -62,7 +68,7 @@
                     <div id="existing-appointment-card" class="existing-appointment-card" style="display: none;">
                         <div class="appointment-status-header">
                             <span class="status-badge-active">Active Booking</span>
-                            <span class="queue-mini-badge">Queue: <strong id="active-queue-no">001</strong></span>
+                            <span class="queue-mini-badge">Queue: <strong id="active-queue-no">—</strong></span>
                         </div>
 
                         <h3 id="existing-service-name" class="active-service-title">First-Time ID Picture Taking</h3>
@@ -94,7 +100,6 @@
                                 <span class="custom-radio"></span>
                                 <span class="option-label">First-Time ID Picture Taking</span>
                             </label>
-                        </div>
 
                         <button type="button" id="btn-step1-next" class="btn btn-primary btn-block">Next</button>
                     </div>
@@ -112,7 +117,7 @@
 
                 <form id="student-info-form" class="step-body">
                     <div style="background: #edf3ff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 12.5px; color: #102f5e;">
-                        <strong>Account Owner Verification:</strong> Appointments are strictly tied to your account. Your identity details sync automatically with your Student Profile and cannot be changed to book for another person.
+                        <strong>Your details, already connected.</strong> Your saved profile is used for this appointment. Please check your contact information before continuing.
                     </div>
 
                     <div class="form-group">
@@ -160,7 +165,7 @@
 
                     <div class="form-group">
                         <label for="mobileNumber">Mobile Number</label>
-                        <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter mobile number" required>
+                        <input type="tel" pattern="[+0-9 \(\)\-]{7,24}" title="Enter a valid contact number, including area or country code." id="mobileNumber" name="mobileNumber" placeholder="Enter mobile number" required>
                     </div>
 
                     <div class="form-section-divider">
@@ -187,7 +192,7 @@
 
                         <div class="form-group">
                             <label for="emergencyPhone">Emergency Contact Number</label>
-                            <input type="tel" id="emergencyPhone" name="emergencyPhone" placeholder="Enter number" required>
+                            <input type="tel" pattern="[+0-9 \(\)\-]{7,24}" title="Enter a valid contact number, including area or country code." id="emergencyPhone" name="emergencyPhone" placeholder="Enter number" required>
                         </div>
                     </div>
 
@@ -209,9 +214,9 @@
                 <div class="step-body">
                     <div class="calendar-wrapper">
                         <div class="calendar-header">
-                            <button type="button" id="prev-month" class="cal-nav-btn">&lt;</button>
+                            <button type="button" aria-label="Previous month" id="prev-month" class="cal-nav-btn">&lt;</button>
                             <span id="calendar-month-year" class="cal-month-title"></span>
-                            <button type="button" id="next-month" class="cal-nav-btn">&gt;</button>
+                            <button type="button" aria-label="Next month" id="next-month" class="cal-nav-btn">&gt;</button>
                         </div>
 
                         <div class="calendar-grid">
@@ -302,7 +307,11 @@
                     <!-- Queue Number Header -->
                     <div class="queue-card">
                         <p class="queue-label">Your Queue Number</p>
+<<<<<<< Updated upstream
                         <h1 id="generated-queue-number" class="queue-number">001</h1>
+=======
+                        <h1 id="generated-queue-number" class="queue-number">—</h1>
+>>>>>>> Stashed changes
                     </div>
 
                     <div class="confirmation-summary-card">
@@ -395,7 +404,7 @@
 
     </div>
 
-    <script src="js/booking.js"></script>
+    <script defer src="js/booking.js"></script>
 </body>
 
 </html>
