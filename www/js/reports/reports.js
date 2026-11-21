@@ -23,30 +23,44 @@
     "quota-remaining"
   ];
 
-  const status = (message, error = false) => {
-    $("report-status").textContent = message;
-    $("report-status").classList.toggle("error", error);
+  let requestNumber = 0;
+
+  // Show a message below the date selector.
+  const showStatus = (message, isError = false) => {
+    const element = $("report-status");
+
+    element.textContent = message;
+    element.classList.toggle("error", isError);
   };
 
+  // Clear quota values when a new report is requested.
   const resetQuota = () => {
     quotaFields.forEach(id => {
       $(id).textContent = "—";
     });
 
     $("quota-progress-fill").style.width = "0%";
-    $("quota-progress").setAttribute("aria-valuenow", "0");
+
+    $("quota-progress").setAttribute(
+      "aria-valuenow",
+      "0"
+    );
   };
 
+  // Clear previous report information.
   const resetReport = () => {
     Object.values(metrics).forEach(id => {
       $(id).textContent = "—";
     });
 
     $("station-monitoring").replaceChildren();
+    $("report-date-label").textContent = "";
+
     resetQuota();
   };
 
-  const today = () => {
+  // Get the current Philippine date.
+  const getToday = () => {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: "Asia/Manila",
       year: "numeric",
@@ -54,61 +68,49 @@
       day: "2-digit"
     }).formatToParts(new Date());
 
-    const values = Object.fromEntries(
-      parts.map(part => [part.type, part.value])
-    );
+    const year = parts.find(p => p.type === "year").value;
+    const month = parts.find(p => p.type === "month").value;
+    const day = parts.find(p => p.type === "day").value;
 
-    return `${values.year}-${values.month}-${values.day}`;
+    return `${year}-${month}-${day}`;
   };
 
-  const checkAdmin = async () => {
-    const { data, error } = await db.auth.getUser();
-
-    if (error || !data.user) {
-      window.location.replace("index.html");
-      return false;
-    }
-
-    const { data: role, error: roleError } = await db
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .single();
-
-    if (roleError || role?.role !== "admin") {
-      status("Administrator access required.", true);
-      return false;
-    }
-
-    return true;
-  };
-
-  const renderQuota = quota => {
+  // Display the daily quota.
+  const showQuota = quota => {
     if (!quota || typeof quota !== "object") {
       resetQuota();
       return;
     }
 
-    const { daily_capacity, booked, completed } = quota;
+    const capacity = quota.daily_capacity;
+    const booked = quota.booked;
+    const completed = quota.completed;
 
-    if (![daily_capacity, booked, completed].every(
-      value => Number.isInteger(value) && value >= 0
-    )) {
+    const validNumbers = [
+      capacity,
+      booked,
+      completed
+    ].every(value => {
+      return Number.isInteger(value) && value >= 0;
+    });
+
+    if (!validNumbers) {
       resetQuota();
       return;
     }
 
-    const remaining = Math.max(0, daily_capacity - booked);
+    const remaining = Math.max(0, capacity - booked);
 
-    const percentage = daily_capacity > 0
-      ? (completed / daily_capacity) * 100
+    const percentage = capacity > 0
+      ? completed / capacity * 100
       : 0;
 
     const progress = Math.min(100, percentage);
 
     $("quota-completed").textContent = completed;
-    $("quota-capacity").textContent = daily_capacity;
-    $("quota-daily-capacity").textContent = daily_capacity;
+    $("quota-capacity").textContent = capacity;
+
+    $("quota-daily-capacity").textContent = capacity;
     $("quota-booked").textContent = booked;
     $("quota-completed-count").textContent = completed;
 
@@ -118,7 +120,8 @@
     $("quota-remaining").textContent =
       `${remaining} remaining booking slots`;
 
-    $("quota-progress-fill").style.width = `${progress}%`;
+    $("quota-progress-fill").style.width =
+      `${progress}%`;
 
     $("quota-progress").setAttribute(
       "aria-valuenow",
@@ -126,15 +129,18 @@
     );
   };
 
-  const renderStations = stations => {
+  // Display the camera stations.
+  const showStations = stations => {
     const container = $("station-monitoring");
     container.replaceChildren();
 
-    if (!Array.isArray(stations) || !stations.length) {
-      const empty = document.createElement("p");
-      empty.className = "reports-muted";
-      empty.textContent = "No station records available.";
-      container.appendChild(empty);
+    if (!Array.isArray(stations) || stations.length === 0) {
+      const message = document.createElement("p");
+
+      message.className = "reports-muted";
+      message.textContent = "No station records available.";
+
+      container.appendChild(message);
       return;
     }
 
@@ -143,9 +149,11 @@
       row.className = "station-row";
 
       const name = document.createElement("strong");
-      name.textContent = String(station.name || "Station");
+      name.textContent = station.name || "Station";
 
-      const state = String(station.status || "unknown");
+      const state = String(
+        station.status || "unknown"
+      );
 
       const statusLabel = document.createElement("span");
       statusLabel.className = "station-status";
@@ -157,7 +165,11 @@
         dot.classList.add("available");
       }
 
-      if (["serving", "busy", "occupied"].includes(state)) {
+      if (
+        state === "serving" ||
+        state === "busy" ||
+        state === "occupied"
+      ) {
         dot.classList.add("busy");
       }
 
@@ -166,11 +178,13 @@
 
       statusLabel.append(dot, label);
       row.append(name, statusLabel);
+
       container.appendChild(row);
     });
   };
 
-  const renderReport = report => {
+  // Display all report values.
+  const showReport = report => {
     Object.entries(metrics).forEach(([key, id]) => {
       const value = report[key];
 
@@ -180,22 +194,29 @@
           : "—";
     });
 
-    renderQuota(report.quota);
-    renderStations(report.stations);
+    showQuota(report.quota);
+    showStations(report.stations);
   };
 
+  // Fetch a report from Supabase.
   const loadReport = async () => {
     const date = $("report-date").value;
     const button = $("refresh-report");
 
     if (!date) {
-      status("Select a reporting date.", true);
+      requestNumber++; resetReport(); button.disabled = false;
+      showStatus("Please select a date.", true);
       return;
     }
 
+    // Each request gets a number.
+    // An older request cannot replace a newer report.
+    requestNumber++;
+    const currentRequest = requestNumber;
+
     button.disabled = true;
     resetReport();
-    status("Loading report...");
+    showStatus("Loading report...");
 
     try {
       const { data, error } = await db.rpc(
@@ -203,58 +224,57 @@
         { p_report_date: date }
       );
 
-      if (error) throw error;
-
-      if (!data || Array.isArray(data) ||
-          typeof data !== "object") {
-        throw new Error("Invalid report response.");
-      }
-
-      renderReport(data);
-      $("report-date-label").textContent = date;
-      status("Report updated.");
-    } catch (error) {
-      console.error("Report error:", error);
-
-      status(
-        "Unable to load report. Check database configuration.",
-        true
-      );
-    } finally {
-      button.disabled = false;
-    }
-  };
-
-  const initialize = async () => {
-    if (!db) {
-      status("Supabase is unavailable.", true);
-      return;
-    }
-
-    $("report-date").value = today();
-
-    $("refresh-report").addEventListener("click", loadReport);
-    $("report-date").addEventListener("change", loadReport);
-
-    try {
-      const authorized = await checkAdmin();
-
-      if (!authorized) {
-        $("report-date").disabled = true;
-        $("refresh-report").disabled = true;
+      // Ignore the response if a newer request exists.
+      if (currentRequest !== requestNumber) {
         return;
       }
 
-      await loadReport();
+      if (error) {
+        throw error;
+      }
+
+      if (
+        !data ||
+        Array.isArray(data) ||
+        typeof data !== "object"
+      ) {
+        throw new Error("Invalid report response.");
+      }
+
+      showReport(data);
+      $("report-date-label").textContent = date;
+
+      showStatus("Report updated.");
+
     } catch (error) {
-      console.error(error);
-      status("Unable to verify administrator access.", true);
+      if (currentRequest !== requestNumber) {
+        return;
+      }
+
+      console.error("Report error:", error);
+
+      showStatus(
+        "Unable to load report. Please try again.",
+        true
+      );
+
+    } finally {
+      if (currentRequest === requestNumber) {
+        button.disabled = false;
+      }
     }
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialize);
-  } else {
-    initialize();
-  }
+  let initialized = false;
+  window.ID2GoReports = {
+    open() {
+      if (!initialized) {
+        $("report-date").value = getToday();
+        $("report-date").addEventListener("change", loadReport);
+        $("refresh-report").addEventListener("click", loadReport);
+        initialized = true;
+      }
+      return loadReport();
+    }
+  };
 })();
