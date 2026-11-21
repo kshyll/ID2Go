@@ -10,6 +10,7 @@
   let activeFilter = "waiting";
   let busy = false;
   let loading = false;
+  let fresh = false;
   let refreshTimer = null;
   let countdownTimer = null;
 
@@ -30,16 +31,17 @@
 
   // Change the visible screen.
   const showView = view => {
+    if (view === "dashboard") view = "workspace";
     document.querySelectorAll(".view").forEach(section => {
       section.classList.toggle(
         "active",
-        section.id === ${view}-view
+        section.id === `${view === "overview" ? "dashboard" : view}-view`
       );
     });
 
     document.querySelectorAll(".nav-item").forEach(button => {
       const active = button.dataset.view === view ||
-        (view === "workspace" &&
+        (["workspace","overview"].includes(view) &&
          button.dataset.view === "dashboard");
 
       button.classList.toggle("active", active);
@@ -52,8 +54,8 @@
     });
 
     const headings = {
-      dashboard: "Operator Dashboard",
-      workspace: "Queue Workspace",
+      overview: "Station overview",
+      workspace: "My station",
       queue: "Queue List",
       account: "Operator Profile"
     };
@@ -62,8 +64,8 @@
 
     const descriptions = {
       dashboard: "Manage student queues and ID processing.",
-      workspace: "Process the student assigned to your station.",
-      queue: "View students according to their queue status.",
+      workspace: "Today’s service queue · Manila time",
+      queue: "Today’s tickets and upcoming reservations",
       account: "View your account and assigned station."
     };
 
@@ -83,6 +85,8 @@
     $("station-status").textContent =
       station?.status || "Unavailable";
 
+    $("shift").disabled = !station || busy || !fresh;
+    $("shift").textContent = station?.status === "offline" ? "Open station for today" : "Close station";
     const available = station &&
       ["available", "serving"].includes(station.status);
 
@@ -141,7 +145,7 @@
       seconds % 60
     ).padStart(2, "0");
 
-    timer.textContent = ${minutes}:${remaining};
+    timer.textContent = `${minutes}:${remaining}`;
 
     if (seconds === 0) {
       timer.textContent = "Time expired";
@@ -154,10 +158,10 @@
       formatQueue(current?.queue_number);
 
     $("current-name").textContent =
-      current?.student_name || "No Student Called";
+      current?.student_name || (dashboard?.station?.status === "offline" ? "Station offline" : !dashboard?.station ? "No station assigned" : "Between students");
 
     $("current-service").textContent =
-      current?.service_name || "Ready for next student";
+      current?.service_name || (queue.some(s => s.eligible) ? "The next student can be called." : "Students become eligible when their booked slot starts.");
 
     $("current-id").textContent =
       current?.student_number || "—";
@@ -187,11 +191,11 @@
     $("complete-service").hidden = status !== "in_service";
 
     $("call-next").disabled =
-      busy || $("open-workspace").disabled;
+      busy || !fresh || $("open-workspace").disabled || !(queue.some(s => s.eligible) || (!queue.some(s => "eligible" in s) && dashboard?.stats?.waiting > 0));
 
-    $("confirm-arrival").disabled = busy;
-    $("move-standby").disabled = busy;
-    $("complete-service").disabled = busy;
+    $("confirm-arrival").disabled = busy || !fresh;
+    $("move-standby").disabled = busy || !fresh;
+    $("complete-service").disabled = busy || !fresh;
 
     updateCountdown();
   };
@@ -225,16 +229,16 @@
 
       const title = document.createElement("strong");
       title.textContent =
-        Queue ${formatQueue(student.queue_number)};
+        `Queue ${formatQueue(student.queue_number)}`;
 
       const name = document.createElement("p");
       name.textContent =
-        student.student_name || "Student";
+        student.student_name || "Reserved";
 
       const details = document.createElement("p");
       details.textContent = [
         student.service_name,
-        student.study_level
+        student.date, student.slot, student.status === "waiting" && student.eligible === false ? "Scheduled" : ""
       ].filter(Boolean).join(" · ");
 
       entry.append(title, name, details);
@@ -244,7 +248,7 @@
 
         button.type = "button";
         button.textContent = "Mark Returned";
-        button.disabled = busy;
+        button.disabled = busy || !fresh;
 
         button.addEventListener("click", () => {
           runAction(() => {
@@ -286,11 +290,16 @@
         throw new Error("Invalid queue information.");
       }
 
+      fresh = true;
       dashboard = dashboardData;
       queue = queueData;
       current = dashboardData.current || null;
 
       render();
+    } catch (error) {
+      fresh = false;
+      render();
+      throw error;
     } finally {
       loading = false;
     }
@@ -298,10 +307,12 @@
 
   // Run an operator action and refresh the screen.
   const runAction = async action => {
-    if (busy || loading) {
+    if (busy || !fresh) {
       return;
     }
 
+    while (loading) await new Promise(resolve => setTimeout(resolve, 30));
+    if (busy || !fresh) return;
     busy = true;
     render();
 
@@ -323,6 +334,10 @@
 
   // Connect buttons to their functions.
   const bindEvents = () => {
+    $("shift").addEventListener("click", () => {
+      const open = dashboard?.station?.status === "offline";
+      runAction(() => service.shift(open));
+    });
     document.querySelectorAll(".nav-item").forEach(button => {
       button.addEventListener("click", () => {
         showView(button.dataset.view);
@@ -355,7 +370,7 @@
     });
 
     $("workspace-back").addEventListener("click", () => {
-      showView("dashboard");
+      showView("overview");
     });
 
     $("refresh-dashboard").addEventListener("click", async () => {
@@ -397,13 +412,8 @@
         return;
       }
 
-      const confirmed = window.confirm(
-        "Complete this student's ID service?"
-      );
-
-      if (confirmed) {
-        runAction(() => service.completeService(current.id));
-      }
+      const ticket = current.id;
+      runAction(() => service.completeService(ticket));
     });
 
     $("operator-logout").addEventListener("click", async () => {
@@ -439,6 +449,7 @@
       $("operator-email").textContent =
         user.email || "—";
 
+      showView("workspace");
       await refresh();
       showMessage("");
 
