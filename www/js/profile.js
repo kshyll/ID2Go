@@ -1,7 +1,6 @@
-// SUPABASE CONFIGURATION
-const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
+const db = window.ID2GoDB;
 
+<<<<<<< Updated upstream
 // Reuse global Supabase client if available
 const db =
   window.ID2GoDB ||
@@ -9,6 +8,8 @@ const db =
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null);
 
+=======
+>>>>>>> Stashed changes
 let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initProfilePage() {
+<<<<<<< Updated upstream
   if (db) {
     try {
       const { data, error } = await db.auth.getUser();
@@ -32,6 +34,10 @@ async function initProfilePage() {
     window.location.replace("index.html");
     return;
   }
+=======
+  currentUser = await window.ID2GoSession.requireRole("student");
+  if (!currentUser) return;
+>>>>>>> Stashed changes
 
   // Clear legacy unscoped cache keys
   localStorage.removeItem("id2go_user_profile");
@@ -178,6 +184,8 @@ function setupProfileFormSubmit() {
 
   profileForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const saveButton = document.getElementById("save-profile-btn");
+    if (saveButton.disabled) return;
 
     const titleCase = (str) =>
       str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -240,6 +248,7 @@ function setupProfileFormSubmit() {
     const cacheKey = `id2go_user_profile_${currentUser.id}`;
 
     if (db) {
+      saveButton.disabled = true;
       try {
         const { error } = await db
           .from("student_profiles")
@@ -262,6 +271,11 @@ function setupProfileFormSubmit() {
       } catch (err) {
         console.error("Database save error details:", err.message || err);
         alert(`Database sync failed: ${err.message || "Check console"}`);
+<<<<<<< Updated upstream
+=======
+      } finally {
+        saveButton.disabled = false;
+>>>>>>> Stashed changes
       }
     } else {
       localStorage.setItem(cacheKey, JSON.stringify(localPayload));
@@ -292,9 +306,11 @@ function setupLogout() {
 
     if (db && db.auth) {
       try {
-        await db.auth.signOut();
+        const { error } = await db.auth.signOut();
+        if (error) throw error;
       } catch (err) {
-        console.warn("Sign out error:", err);
+        alert("Unable to sign out. Please try again.");
+        return;
       }
     }
 
