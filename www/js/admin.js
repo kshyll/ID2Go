@@ -1,6 +1,7 @@
 
 
 
+
 (() => {
   const db = window.ID2GoDB;
   const $ = id => document.getElementById(id);
@@ -79,8 +80,70 @@
     $('queue-search').dispatchEvent(new Event('input'));
   };
   document.addEventListener('DOMContentLoaded', async () => {
-    if (!await window.ID2GoSession.requireRole('admin')) return;
+    const admin = await window.ID2GoSession.requireRole('admin');
+    if (!admin) return;
+    db.auth.onAuthStateChange((_event, session) => {
+      if (session?.user?.id !== admin.id) window.location.replace('index.html');
+    });
     const links = [...document.querySelectorAll('nav a[href^="#"]')];
+    let studentOffset = 0;
+    let studentRequest = 0;
+    let searchTimer;
+    async function loadStudents() {
+      clearTimeout(searchTimer);
+      const version = ++studentRequest;
+      const rows = $('student-rows');
+      rows.replaceChildren();
+      $('students-prev').disabled = $('students-next').disabled = true;
+      $('student-message').textContent = 'Loading students…';
+      try {
+        const {data, error} = await db.rpc('admin_student_records', {
+          p_completed: $('student-completion').value ? $('student-completion').value === 'yes' : null,
+          p_search: $('student-search').value.trim(), p_offset: studentOffset
+        });
+        if (version !== studentRequest) return;
+        if (error) throw error;
+        for (const student of data.slice(0, 25)) {
+          const row = document.createElement('tr');
+          for (const key of ['full_name','student_id','email']) cell(row, student[key] || '—');
+          cell(row, student.first_id_completed ? 'Completed · ' + student.first_id_date : 'No completion recorded');
+          const details = document.createElement('details');
+          const summary = document.createElement('summary');
+          summary.textContent = 'View details';
+          details.append(summary);
+          for (const [label, value] of [
+            ['Program',student.course_program], ['Year level',student.year_level],
+            ['Mobile',student.mobile_number], ['Emergency contact',student.emergency_name],
+            ['Relationship',student.emergency_relationship], ['Emergency phone',student.emergency_phone],
+            ['Latest booking',[student.latest_service,student.latest_date,student.latest_status].filter(Boolean).join(' · ') || 'No bookings']
+          ]) {
+            const line = document.createElement('p');
+            line.textContent = label + ': ' + (value || '—');
+            details.append(line);
+          }
+          row.insertCell().append(details);
+          rows.append(row);
+        }
+        $('student-message').textContent = data.length
+          ? 'Showing students ' + (studentOffset + 1) + '–' + (studentOffset + rows.children.length)
+          : 'No students found.';
+        $('students-next').disabled = data.length <= 25;
+      } catch (error) {
+        if (version !== studentRequest) return;
+        $('student-message').textContent = 'Unable to load students. ' + error.message;
+      }
+      $('students-prev').disabled = studentOffset === 0;
+    }
+    $('student-completion').onchange = () => { studentOffset = 0; loadStudents(); };
+    $('student-search').oninput = () => {
+      studentOffset = 0;
+      studentRequest++;
+      $('students-prev').disabled = $('students-next').disabled = true;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadStudents, 200);
+    };
+    $('students-prev').onclick = () => { studentOffset -= 25; loadStudents(); };
+    $('students-next').onclick = () => { studentOffset += 25; loadStudents(); };
     function route() {
       const link = links.find(a => a.hash === location.hash) || links[0];
       for (const a of links) {
@@ -91,6 +154,7 @@
       $('view-title').textContent = reports ? 'Reports & Analytics' : link.textContent;
       $('topbar-label').textContent = reports ? 'ID2GO / Reports & Analytics' : 'ID2GO / Administration';
       $('refresh-admin').hidden = reports;
+      if (link.hash === "#students") loadStudents();
       if (reports) window.ID2GoReports.open();
       setMenu(false);
     }
@@ -122,6 +186,7 @@
       $('live-queue-body').querySelectorAll('tr').forEach(row => { row.hidden = !row.textContent.toLowerCase().includes(query) || (!!$('status-filter').value && row.dataset.status !== $('status-filter').value); });
     });
     $('refresh-admin').addEventListener('click', async () => {
+      if (location.hash === '#students') return loadStudents();
       if (busy) return; busy = true;
       try { await refresh(); feedback(''); } catch (error) { feedback(error.message); } finally { busy = false; }
     });
@@ -130,8 +195,13 @@
       try {
         const p_settings = [...$('station-toggle-list').children].map(row => ({number: Number(row.dataset.station), enabled: row.querySelector('input').checked, operator_id: row.querySelector('select').value || null}));
         const {error} = await db.rpc('admin_save_stations', {p_settings}); if (error) throw error;
-        dirty = false; await refresh(); feedback('Station settings saved.');
-      } catch (error) { feedback(`Save failed: ${error.message}`); }
+        dirty = false;
+        feedback('Station settings saved.');
+        try { await refresh(); }
+        catch { feedback('Station settings saved. Refresh to reload the dashboard.'); }
+      } catch (error) { feedback(error.code === '42501'
+          ? 'Settings were not saved. Supabase requires an administrator. Signed in as ' + admin.email + '.'
+          : 'Save failed: ' + error.message); }
       finally { busy = false; $('btn-save-stations').disabled = false; }
     });
     $('admin-logout').addEventListener('click', async () => { try { await window.ID2GoSession.logout(); } catch (error) { feedback(error.message); } });
