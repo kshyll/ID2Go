@@ -13,7 +13,7 @@
 <script defer src="js/reports/reports.js"></script><script defer src="js/admin.js"></script>
 
 </head>
-<body><aside id="admin-sidebar"><div class="identity"><img src="img/logo.png" alt=""><div>Xavier University<small>Ateneo de Cagayan</small></div></div><nav aria-label="Administration"><a href="#section-overview">Overview</a><a href="#section-live-queue">Live queue</a><a href="#appointments">Appointments</a><a href="#section-station-control">Camera stations</a><a href="#operators">Operators</a><a href="#reports">Reports</a><button id="admin-logout">Sign out</button></nav></aside><button id="drawer-dismiss" aria-label="Close navigation" hidden></button><main><header><button id="menu" aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false">☰</button><span id="topbar-label">ID2GO / Administration</span><button id="refresh-admin">Refresh</button></header><div class="content"><h1 id="view-title">Overview</h1><p id="admin-feedback" role="status">Loading…</p><section class="ui-card" id="section-overview">
+<body><aside id="admin-sidebar"><div class="identity"><img src="img/logo.png" alt=""><div>Xavier University<small>Ateneo de Cagayan</small></div></div><nav aria-label="Administration"><a href="#section-overview">Overview</a><a href="#section-live-queue">Live queue</a><a href="#appointments">Appointments</a><a href="#section-station-control">Camera stations</a><a href="#students">Students</a><a href="#operators">Operators</a><a href="#reports">Reports</a><button id="admin-logout">Sign out</button></nav></aside><button id="drawer-dismiss" aria-label="Close navigation" hidden></button><main><header><button id="menu" aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false">☰</button><span id="topbar-label">ID2GO / Administration</span><button id="refresh-admin">Refresh</button></header><div class="content"><h1 id="view-title">Overview</h1><p id="admin-feedback" role="status">Loading…</p><section class="ui-card" id="section-overview">
                 <h2>Today at a glance</h2>
                 <div class="metrics-grid">
                     <div class="metric-box">
@@ -64,6 +64,19 @@
             </section>
 
         <section id="appointments" class="ui-card"><h3>Appointments</h3><label for="appointment-day">Service date</label><input id="appointment-day" type="date"><p id="appointment-message" role="status"></p><div class="table-scroll"><table><thead><tr><th>Ticket</th><th>Student</th><th>Time slot</th><th>Service</th><th>Status</th></tr></thead><tbody id="appointment-rows"></tbody></table></div></section>
+<section hidden id="students" class="ui-card">
+  <h2>Student directory</h2>
+  <label for="student-search">Search by name, student ID, or email</label>
+  <input id="student-search" type="search" autocomplete="off">
+  <label for="student-completion">First-time ID photo</label>
+  <select id="student-completion"><option value="">All students</option><option value="yes">Completed</option><option value="no">No completion recorded</option></select>
+  <p id="student-message" role="status"></p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Student directory"><table>
+    <thead><tr><th>Name</th><th>Student ID</th><th>Email</th><th>First-time ID photo</th><th>Student record</th></tr></thead>
+    <tbody id="student-rows"></tbody>
+  </table></div>
+  <button id="students-prev" disabled>Previous</button> <button id="students-next" disabled>Next</button>
+</section>
 <section id="operators" class="ui-card"><h3>Operator directory</h3><ul id="operator-directory"></ul></section><section hidden id="reports"><section class="date-card">
                 <div class="date-card-heading">
                     <div>
