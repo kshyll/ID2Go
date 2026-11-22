@@ -157,11 +157,26 @@
     $("current-queue").textContent =
       formatQueue(current?.queue_number);
 
-    $("current-name").textContent =
-      current?.student_name || (dashboard?.station?.status === "offline" ? "Station offline" : !dashboard?.station ? "No station assigned" : "Between students");
-
-    $("current-service").textContent =
-      current?.service_name || (queue.some(s => s.eligible) ? "The next student can be called." : "Students become eligible when their booked slot starts.");
+    $("current-details").hidden = !current;
+    $("current-name").textContent = current?.student_name || "";
+    $("current-service").textContent = current?.service_name || "";
+    const station = dashboard?.station;
+    const hint = $("station-hint");
+    const ready = queue.filter(student => student.eligible).length;
+    const standby = queue.filter(student => student.status === "standby").length;
+    $("desk-ready").textContent = fresh ? ready : "—";
+    $("desk-standby").textContent = fresh ? standby : "—";
+    $("desk-done").textContent = fresh ? dashboard?.stats?.completed ?? "—" : "—";
+    $("desk-status").textContent = !fresh ? "Unavailable" : !station ? "Unassigned" :
+      station.status === "offline" ? "Closed" : current ? "Serving" : "Open";
+    const scheduled = queue.filter(s => s.status === "waiting" && s.eligible === false);
+    hint.textContent = !fresh ? "Queue information is unavailable." :
+      !station ? "Ask your administrator to assign a camera station." :
+      station.status === "offline" ? "Open your station to start calling students." :
+      ready ? "Call the next student in queue order." :
+      scheduled.length ? "Next booked slot: " + scheduled[0].slot :
+      "No students are ready to call. New arrivals appear here automatically.";
+    hint.hidden = !!current;
 
     $("current-id").textContent =
       current?.student_number || "—";
@@ -215,15 +230,18 @@
       return student.status === activeFilter;
     });
 
+    const standby = queue.filter(student => student.status === "standby");
+
+    $("standby-list").replaceChildren();
+    if (!standby.length) $("standby-list").textContent = fresh ? "No students on standby." : "Standby list unavailable.";
     if (filtered.length === 0) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
       empty.textContent = "No students in this category.";
       list.appendChild(empty);
-      return;
     }
 
-    filtered.forEach(student => {
+    [...filtered, ...standby].forEach(student => {
       const entry = document.createElement("div");
       entry.className = "queue-entry";
 
@@ -248,7 +266,7 @@
 
         button.type = "button";
         button.textContent = "Mark Returned";
-        button.disabled = busy || !fresh;
+        button.disabled = busy || !fresh || $("open-workspace").disabled;
 
         button.addEventListener("click", () => {
           runAction(() => {
@@ -259,7 +277,7 @@
         entry.appendChild(button);
       }
 
-      list.appendChild(entry);
+      (student.status === "standby" ? $("standby-list") : list).appendChild(entry);
     });
   };
 
