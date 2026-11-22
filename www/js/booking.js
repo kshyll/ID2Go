@@ -1,14 +1,5 @@
-// SUPABASE CONFIGURATION
-const SUPABASE_URL = "https://rvmhhggglfgiripeaufw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
-const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-let supabaseClient = null;
-if (window.supabase) {
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const db = window.ID2GoDB;
   const MAX_SLOTS_PER_HOUR = 48;
 
   const TIME_SLOTS = [
@@ -22,19 +13,31 @@ document.addEventListener("DOMContentLoaded", () => {
     "4:00–5:00 PM"
   ];
 
+  const currentUser = await window.ID2GoSession.requireRole("student");
+  if (!currentUser) return;
+  const manilaNow = () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+  const today = () => { const d = manilaNow(); return formatDateString(d.getFullYear(), d.getMonth()+1, d.getDate()); };
+
+  const userProfileCacheKey = `id2go_user_profile_${currentUser.id}`;
+  const userBookingCacheKey = `id2go_active_appointment_${currentUser.id}`;
+
+  // Clear legacy unscoped keys so different accounts on the same device never mix
+  localStorage.removeItem("id2go_user_profile");
+  localStorage.removeItem("id2go_active_student_id");
+  localStorage.removeItem("id2go_active_appointment");
+
   // Booking system state
-  const bookingData = {
+  let bookingData = {
     service: "First-Time ID Picture Taking",
     studentInfo: {},
     selectedDate: null,
     selectedTimeSlot: null,
-    queueNumber: ""
+    queueNumber: "",
+    activeBooking: null
   };
 
-  let slotBookings = JSON.parse(localStorage.getItem("id2go_slot_bookings")) || {};
-
   // Calendar State
-  let currentDate = new Date();
+  let currentDate = manilaNow();
   let currentYear = currentDate.getFullYear();
   let currentMonth = currentDate.getMonth();
 
@@ -49,9 +52,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function goToStep(stepNumber) {
     Object.keys(steps).forEach((key) => {
-      steps[key].classList.remove("active");
+      if (steps[key]) {
+        steps[key].classList.remove("active");
+      }
     });
-    steps[stepNumber].classList.add("active");
+    if (steps[stepNumber]) {
+      steps[stepNumber].classList.add("active");
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -65,14 +72,149 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  /* ==================== LOCK & PREFILL OWNER IDENTITY ==================== */
+  function applyReadOnlyStyle(el) {
+    if (!el) return;
+    el.readOnly = true;
+    el.style.backgroundColor = "#f1f5f9";
+    el.style.color = "#475569";
+    el.style.cursor = "not-allowed";
+  }
+
+  function setSelectValueSmart(selectId, rawValue) {
+    const el = document.getElementById(selectId);
+    if (!el || !rawValue) return;
+
+    const clean = String(rawValue).trim();
+    // Exact match first
+    for (const opt of el.options) {
+      if (opt.value.toLowerCase() === clean.toLowerCase()) {
+        el.value = opt.value;
+        return;
+      }
+    }
+
+    // Common shorthand mappings (e.g., BSIT -> BS Information Technology, 3 -> 3rd Year)
+    const aliases = {
+      bsit: "BS Information Technology",
+      bscs: "BS Computer Science",
+      bsis: "BS Information Systems",
+      bsba: "BS Business Administration",
+      bsa: "BS Accountancy",
+      bsn: "BS Nursing",
+      bsce: "BS Civil Engineering",
+      "1": "1st Year",
+      "2": "2nd Year",
+      "3": "3rd Year",
+      "4": "4th Year",
+      "5": "5th Year"
+    };
+
+    const mapped = aliases[clean.toLowerCase()];
+    if (mapped) {
+      el.value = mapped;
+    }
+  }
+
+  function lockOwnerIdentityFields(hasExistingIdentity) {
+    const emailEl = document.getElementById("email");
+    const fullNameEl = document.getElementById("fullName");
+    const studentIdEl = document.getElementById("studentId");
+
+    if (emailEl && currentUser.email) {
+      emailEl.value = currentUser.email;
+      applyReadOnlyStyle(emailEl);
+    }
+
+    if (hasExistingIdentity) {
+      if (fullNameEl && fullNameEl.value.trim()) {
+        applyReadOnlyStyle(fullNameEl);
+      }
+      if (studentIdEl && studentIdEl.value.trim()) {
+        applyReadOnlyStyle(studentIdEl);
+      }
+    }
+  }
+
+  async function loadAndPopulateOwnerProfile() {
+    let profile = null;
+
+    if (db) {
+      try {
+        const { data, error } = await db
+          .from("student_profiles")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("[ID2GO Booking] student_profiles query error:", error.message);
+        } else if (data) {
+          profile = {
+            fullName: data.full_name || "",
+            studentId: data.student_id || "",
+            courseProgram: data.course_program || "",
+            yearLevel: data.year_level || "",
+            email: currentUser.email || data.email || "",
+            mobileNumber: data.mobile_number || "",
+            emergencyName: data.emergency_name || "",
+            emergencyRelationship: data.emergency_relationship || "",
+            emergencyPhone: data.emergency_phone || ""
+          };
+          localStorage.setItem(userProfileCacheKey, JSON.stringify(profile));
+        }
+      } catch (err) {
+        console.warn("[ID2GO Booking] Profile fetch exception:", err);
+      }
+    }
+
+    // Fallback to user-scoped local cache if Supabase returned no row yet
+    if (!profile) {
+      const cached = localStorage.getItem(userProfileCacheKey);
+      if (cached) {
+        try {
+          profile = JSON.parse(cached);
+        } catch (e) {
+          console.warn("[ID2GO Booking] Invalid cached profile:", e);
+        }
+      }
+    }
+
+    const setInput = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && val) el.value = val;
+    };
+
+    if (profile) {
+      setInput("fullName", profile.fullName);
+      setInput("studentId", profile.studentId);
+      setSelectValueSmart("courseProgram", profile.courseProgram);
+      setSelectValueSmart("yearLevel", profile.yearLevel);
+      setInput("email", currentUser.email || profile.email);
+      setInput("mobileNumber", profile.mobileNumber);
+      setInput("emergencyName", profile.emergencyName);
+      setSelectValueSmart("emergencyRelationship", profile.emergencyRelationship);
+      setInput("emergencyPhone", profile.emergencyPhone);
+
+      const hasIdentity = Boolean(
+        profile.fullName?.trim() && profile.studentId?.trim()
+      );
+      lockOwnerIdentityFields(hasIdentity);
+    } else {
+      lockOwnerIdentityFields(false);
+    }
+  }
+
   /* ==================== TITLE CASE VALIDATION ==================== */
-  // Capitalizes the first letter of every word automatically as user types or on blur
   function setupTitleCaseValidation(inputElement) {
+    if (!inputElement) return;
+
     function formatTitleCase(value) {
       return value.replace(/\b\w/g, (char) => char.toUpperCase());
     }
 
     inputElement.addEventListener("input", (e) => {
+      if (e.target.readOnly) return;
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
       e.target.value = formatTitleCase(e.target.value);
@@ -80,51 +222,348 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     inputElement.addEventListener("blur", (e) => {
+      if (e.target.readOnly) return;
       e.target.value = formatTitleCase(e.target.value.trim());
     });
   }
 
-  const fullNameInput = document.getElementById("fullName");
-  const emergencyNameInput = document.getElementById("emergencyName");
-  setupTitleCaseValidation(fullNameInput);
-  setupTitleCaseValidation(emergencyNameInput);
+  setupTitleCaseValidation(document.getElementById("fullName"));
+  setupTitleCaseValidation(document.getElementById("emergencyName"));
+
+  /* ==================== RENDER FULL DETAILS IN STEP 5 ==================== */
+  function renderDetailsStep(data) {
+    if (!data) return;
+
+    document.getElementById("generated-queue-number").textContent =
+      data.queueNumber || "—";
+    document.getElementById("conf-service-title").textContent =
+      data.service || "First-Time ID Picture Taking";
+
+    document.getElementById("conf-student-name").textContent =
+      data.fullName || data.studentInfo?.fullName || "-";
+    document.getElementById("conf-student-id").textContent =
+      data.studentId || data.studentInfo?.studentId || "-";
+
+    const course = data.courseProgram || data.studentInfo?.courseProgram || "";
+    const year = data.yearLevel || data.studentInfo?.yearLevel || "";
+    document.getElementById("conf-student-course").textContent =
+      course && year ? `${course} (${year})` : course || year || "-";
+
+    document.getElementById("conf-student-email").textContent =
+      data.email || data.studentInfo?.email || "-";
+    document.getElementById("conf-student-mobile").textContent =
+      data.mobileNumber || data.studentInfo?.mobileNumber || "-";
+
+    const rawDate = data.date || data.appointment_date || data.selectedDate;
+    if (rawDate) {
+      const [y, m, d] = rawDate.split("-").map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      document.getElementById("conf-date-display").textContent =
+        dateObj.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        });
+    } else {
+      document.getElementById("conf-date-display").textContent = "-";
+    }
+
+    document.getElementById("conf-time-display").textContent =
+      data.time || data.selectedTimeSlot || "-";
+
+    const emerName =
+      data.emergencyName || data.studentInfo?.emergencyName || "";
+    const emerRel =
+      data.emergencyRelationship ||
+      data.studentInfo?.emergencyRelationship ||
+      "";
+    document.getElementById("conf-emergency-name").textContent =
+      emerName && emerRel ? `${emerName} (${emerRel})` : emerName || "-";
+    document.getElementById("conf-emergency-phone").textContent =
+      data.emergencyPhone || data.studentInfo?.emergencyPhone || "-";
+  }
+
+  /* ==================== ACTIVE APPOINTMENT CHECK ==================== */
+  async function checkExistingAppointment() {
+    let activeAppointment = null;
+    const next = document.getElementById("btn-step1-next");
+    next.disabled = true;
+    try {
+      const {data, error} = await db.from("appointments").select("service").eq("user_id", currentUser.id).in("status", ["completed", "Completed"]);
+      if (error) throw error;
+      const completed = new Set((data || []).map(item => item.service));
+      const radios = [...document.querySelectorAll('input[name="id_service"]')];
+      radios.forEach(radio => {
+        radio.disabled = completed.has(radio.value);
+        radio.closest("label").title = radio.disabled ? "You have already completed this service." : "";
+        if (radio.disabled) radio.checked = false;
+      });
+      if (!radios.some(radio => radio.checked)) {
+        const available = radios.find(radio => !radio.disabled);
+        if (available) available.checked = true;
+      }
+      next.disabled = !radios.some(radio => !radio.disabled);
+      if (next.disabled) next.textContent = "All services completed";
+    } catch (error) {
+      alert("Unable to verify completed services. Please reload to retry.");
+      return;
+    }
+
+    if (db) {
+      try {
+        const { data, error } = await db
+          .from("appointments")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .in("status", ["Confirmed", "confirmed", "waiting", "returned", "called", "in_service", "standby"])
+          .gte("appointment_date", today())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (data) {
+          activeAppointment = {
+            service: data.service,
+            date: data.appointment_date,
+            time: data.time_slot,
+            queueNumber: data.queue_number,
+            fullName: data.full_name,
+            studentId: data.student_id,
+            courseProgram: data.course_program,
+            yearLevel: data.year_level,
+            email: data.email,
+            mobileNumber: data.mobile_number,
+            emergencyName: data.emergency_name,
+            emergencyRelationship: data.emergency_relationship,
+            emergencyPhone: data.emergency_phone,
+            dbId: data.id
+          };
+          localStorage.setItem(
+            userBookingCacheKey,
+            JSON.stringify(activeAppointment)
+          );
+        } else if (!error && !data) {
+          localStorage.removeItem(userBookingCacheKey);
+        }
+      } catch (err) {
+        alert("Unable to verify your active booking. Reload before booking again.");
+        document.getElementById("btn-step1-next").disabled = true;
+        return;
+      }
+    }
+
+    const existingCard = document.getElementById("existing-appointment-card");
+    const newBookingContainer = document.getElementById(
+      "new-booking-container"
+    );
+    const step1Indicator = document.getElementById("step1-indicator");
+
+    if (activeAppointment && existingCard && newBookingContainer) {
+      bookingData.activeBooking = activeAppointment;
+
+      document.getElementById("active-queue-no").textContent =
+        activeAppointment.queueNumber || "—";
+      document.getElementById("existing-service-name").textContent =
+        activeAppointment.service;
+
+      if (activeAppointment.date) {
+        const [y, m, d] = activeAppointment.date.split("-").map(Number);
+        const dateObj = new Date(y, m - 1, d);
+        document.getElementById("active-booking-date").textContent =
+          dateObj.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+          });
+      }
+
+      document.getElementById("active-booking-time").textContent =
+        activeAppointment.time;
+
+      if (step1Indicator) {
+        step1Indicator.textContent = "Active Appointment Details";
+      }
+
+      existingCard.style.display = "block";
+      newBookingContainer.style.display = "none";
+    } else if (existingCard && newBookingContainer) {
+      existingCard.style.display = "none";
+      newBookingContainer.style.display = "block";
+      if (step1Indicator) {
+        step1Indicator.textContent = "Step 1 of 4: Select Service";
+      }
+    }
+  }
+
+  // View Details Click Handler
+  const btnViewActiveDetails = document.getElementById(
+    "btn-view-appointment-details"
+  );
+  if (btnViewActiveDetails) {
+    btnViewActiveDetails.addEventListener("click", () => {
+      if (bookingData.activeBooking) {
+        renderDetailsStep(bookingData.activeBooking);
+        goToStep(5);
+      }
+    });
+  }
+
+  // Cancel Booking Click Handler
+  const btnCancelBooking = document.getElementById("btn-cancel-booking");
+  if (btnCancelBooking) {
+    btnCancelBooking.addEventListener("click", async () => {
+      const active = bookingData.activeBooking;
+      if (!active) return;
+
+      const confirmCancel = confirm(
+        "Are you sure you want to cancel your active appointment?"
+      );
+      if (!confirmCancel) return;
+
+      btnCancelBooking.disabled = true;
+      btnCancelBooking.textContent = "Cancelling...";
+
+      if (db) {
+        try {
+          const { error } = await db.rpc("cancel_appointment", { p_appointment_id: active.dbId });
+          if (error) throw error;
+        } catch (err) {
+          alert(`Cancellation failed: ${err.message}`);
+          btnCancelBooking.disabled = false;
+          btnCancelBooking.textContent = "Cancel Booking";
+          return;
+        }
+      }
+
+      localStorage.removeItem(userBookingCacheKey);
+      bookingData.activeBooking = null;
+
+      btnCancelBooking.disabled = false;
+      btnCancelBooking.textContent = "Cancel Booking";
+
+      alert("Your appointment has been cancelled.");
+      await checkExistingAppointment();
+    });
+  }
 
   /* ==================== STEP 1 ==================== */
   const btnStep1Next = document.getElementById("btn-step1-next");
-  btnStep1Next.addEventListener("click", () => {
-    const selectedRadio = document.querySelector('input[name="id_service"]:checked');
-    if (selectedRadio) {
-      bookingData.service = selectedRadio.value;
-      goToStep(2);
-    }
-  });
+  if (btnStep1Next) {
+    btnStep1Next.addEventListener("click", () => {
+      const selectedRadio = document.querySelector(
+        'input[name="id_service"]:checked'
+      );
+      if (selectedRadio && !selectedRadio.disabled) {
+        bookingData.service = selectedRadio.value;
+        goToStep(2);
+      }
+    });
+  }
 
-  /* ==================== STEP 2 ==================== */
+  /* ==================== STEP 2: SYNC WITH STUDENT PROFILE ==================== */
   const studentInfoForm = document.getElementById("student-info-form");
+  if (studentInfoForm) {
+    studentInfoForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-  studentInfoForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    
-    // Auto-capitalize on submit to guarantee proper casing
-    const titleCase = (str) => str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
+      const btnStep2Next = document.getElementById("btn-step2-next");
+      const titleCase = (str) =>
+        str.trim().replace(/\b\w/g, (c) => c.toUpperCase());
 
-    bookingData.studentInfo = {
-      fullName: titleCase(document.getElementById("fullName").value),
-      studentId: document.getElementById("studentId").value.trim(),
-      courseProgram: document.getElementById("courseProgram").value,
-      yearLevel: document.getElementById("yearLevel").value,
-      email: document.getElementById("email").value.trim(),
-      mobileNumber: document.getElementById("mobileNumber").value.trim(),
-      emergencyName: titleCase(document.getElementById("emergencyName").value),
-      emergencyRelationship: document.getElementById("emergencyRelationship").value,
-      emergencyPhone: document.getElementById("emergencyPhone").value.trim()
-    };
+      const studentIdVal = document.getElementById("studentId").value.trim();
+      if (!/^[0-9A-Za-z-]{4,15}$/.test(studentIdVal)) {
+        alert("Please enter a valid Student ID (e.g., 2023-0001).");
+        document.getElementById("studentId").focus();
+        return;
+      }
 
-    renderCalendar();
-    goToStep(3);
-  });
+      const info = {
+        fullName: titleCase(document.getElementById("fullName").value),
+        studentId: studentIdVal,
+        courseProgram: document.getElementById("courseProgram").value,
+        yearLevel: document.getElementById("yearLevel").value,
+        email: currentUser.email,
+        mobileNumber: document.getElementById("mobileNumber").value.trim(),
+        emergencyName: titleCase(
+          document.getElementById("emergencyName").value
+        ),
+        emergencyRelationship: document.getElementById(
+          "emergencyRelationship"
+        ).value,
+        emergencyPhone: document.getElementById("emergencyPhone").value.trim()
+      };
 
-  /* ==================== STEP 3: CALENDAR & SLOTS ==================== */
+      if (btnStep2Next) {
+        btnStep2Next.disabled = true;
+        btnStep2Next.textContent = "Syncing Profile...";
+      }
+
+      // Sync booking details to student_profiles so Profile page matches
+      if (db) {
+        try {
+          const profilePayload = {
+            user_id: currentUser.id,
+            student_id: info.studentId,
+            full_name: info.fullName,
+            course_program: info.courseProgram,
+            year_level: info.yearLevel,
+            email: info.email,
+            mobile_number: info.mobileNumber,
+            emergency_name: info.emergencyName,
+            emergency_relationship: info.emergencyRelationship,
+            emergency_phone: info.emergencyPhone,
+            updated_at: new Date().toISOString()
+          };
+
+          const { error } = await db
+            .from("student_profiles")
+            .upsert(profilePayload, { onConflict: "user_id" });
+
+          if (error) {
+            if (error.code === "23505") {
+              alert(
+                "This Student ID is already registered to another account. Each student must book using their own account."
+              );
+              if (btnStep2Next) {
+                btnStep2Next.disabled = false;
+                btnStep2Next.textContent = "Save and Continue";
+              }
+              return;
+            }
+            throw error;
+          }
+        } catch (err) {
+          console.error("[ID2GO Booking] Profile sync error:", err);
+          alert(
+            `Unable to verify and save your student profile: ${
+              err.message || "Please try again."
+            }`
+          );
+          if (btnStep2Next) {
+            btnStep2Next.disabled = false;
+            btnStep2Next.textContent = "Save and Continue";
+          }
+          return;
+        }
+      }
+
+      localStorage.setItem(userProfileCacheKey, JSON.stringify(info));
+      bookingData.studentInfo = info;
+
+      lockOwnerIdentityFields(true);
+
+      if (btnStep2Next) {
+        btnStep2Next.disabled = false;
+        btnStep2Next.textContent = "Save and Continue";
+      }
+
+      renderCalendar();
+      goToStep(3);
+    });
+  }
+
+  /* ==================== STEP 3: CALENDAR & TIME SLOTS ==================== */
   const monthYearLabel = document.getElementById("calendar-month-year");
   const calendarDaysContainer = document.getElementById("calendar-days");
   const prevMonthBtn = document.getElementById("prev-month");
@@ -133,35 +572,55 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectedDateLabel = document.getElementById("selected-date-label");
   const btnStep3Next = document.getElementById("btn-step3-next");
 
-  prevMonthBtn.addEventListener("click", () => {
-    currentMonth--;
-    if (currentMonth < 0) {
-      currentMonth = 11;
-      currentYear--;
-    }
-    renderCalendar();
-  });
+  if (prevMonthBtn) {
+    prevMonthBtn.addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    });
+  }
 
-  nextMonthBtn.addEventListener("click", () => {
-    currentMonth++;
-    if (currentMonth > 11) {
-      currentMonth = 0;
-      currentYear++;
-    }
-    renderCalendar();
-  });
+  if (nextMonthBtn) {
+    nextMonthBtn.addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    });
+  }
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
   ];
 
   function renderCalendar() {
+    if (!monthYearLabel || !calendarDaysContainer) return;
+
     monthYearLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
     calendarDaysContainer.innerHTML = "";
 
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-    const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const totalDaysInMonth = new Date(
+      currentYear,
+      currentMonth + 1,
+      0
+    ).getDate();
 
     for (let i = 0; i < firstDayIndex; i++) {
       const emptyDiv = document.createElement("div");
@@ -170,28 +629,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     for (let day = 1; day <= totalDaysInMonth; day++) {
-      const dayEl = document.createElement("div");
+      const dayEl = document.createElement("button");
+      dayEl.type = "button";
       dayEl.classList.add("cal-day");
       dayEl.textContent = day;
 
       const fullDate = new Date(currentYear, currentMonth, day);
       const dayOfWeek = fullDate.getDay();
       const dateString = formatDateString(currentYear, currentMonth + 1, day);
+      dayEl.setAttribute("aria-label", fullDate.toLocaleDateString("en-PH", { weekday: "long", year: "numeric", month: "long", day: "numeric" }));
+      dayEl.setAttribute("aria-pressed", String(bookingData.selectedDate === dateString));
 
-      if (dayOfWeek === 0) {
+      if (dayOfWeek === 0 || dateString < today()) {
         dayEl.classList.add("sunday");
-        dayEl.title = "Closed on Sundays";
+        dayEl.disabled = true;
+        dayEl.title = dateString < today() ? "Past date" : "Closed on Sundays";
       } else {
         if (bookingData.selectedDate === dateString) {
           dayEl.classList.add("selected");
         }
 
         dayEl.addEventListener("click", () => {
-          document.querySelectorAll(".cal-day").forEach(el => el.classList.remove("selected"));
+          document
+            .querySelectorAll(".cal-day")
+            .forEach((el) => { el.classList.remove("selected"); if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", "false"); });
           dayEl.classList.add("selected");
+          dayEl.setAttribute("aria-pressed", "true");
           bookingData.selectedDate = dateString;
           bookingData.selectedTimeSlot = null;
-          btnStep3Next.disabled = true;
+          if (btnStep3Next) btnStep3Next.disabled = true;
 
           renderTimeSlots(dateString, fullDate);
         });
@@ -204,12 +670,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const [y, m, d] = bookingData.selectedDate.split("-").map(Number);
       renderTimeSlots(bookingData.selectedDate, new Date(y, m - 1, d));
     } else {
-      timeSlotsList.innerHTML = `<p class="no-slots-notice">Please click a date on the calendar above.</p>`;
-      selectedDateLabel.textContent = "Select a date from the calendar";
+      if (timeSlotsList) {
+        timeSlotsList.innerHTML = `<p class="selected-date-subtext" style="grid-column: span 2;">Please select a date from the calendar above.</p>`;
+      }
+      if (selectedDateLabel) {
+        selectedDateLabel.textContent = "Select a date from the calendar";
+      }
     }
   }
 
   async function renderTimeSlots(dateString, fullDate) {
+    if (!timeSlotsList || !selectedDateLabel) return;
+    if (btnStep3Next) btnStep3Next.disabled = true;
+
     const formattedDateText = fullDate.toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
@@ -218,37 +691,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     selectedDateLabel.textContent = `Schedule for ${formattedDateText}`;
-    timeSlotsList.innerHTML = "<p class='no-slots-notice'>Loading slots...</p>";
+    timeSlotsList.innerHTML =
+      "<p class='selected-date-subtext' style='grid-column: span 2;'>Loading available slots...</p>";
 
     let dbBookings = {};
-    if (db) {
-      try {
-        const { data, error } = await db
-          .from("appointments")
-          .select("time_slot")
-          .eq("appointment_date", dateString);
-
-        if (!error && data) {
-          data.forEach((row) => {
-            dbBookings[row.time_slot] = (dbBookings[row.time_slot] || 0) + 1;
-          });
-        }
-      } catch (err) {
-        console.warn("Supabase fetch error, using local fallback:", err);
-        dbBookings = slotBookings[dateString] || {};
-      }
-    } else {
-      dbBookings = slotBookings[dateString] || {};
+    try {
+      const {data, error} = await db.rpc("booking_slot_availability", {p_date: dateString});
+      if (error) throw error;
+      if (bookingData.selectedDate !== dateString) return;
+      dbBookings = data || {};
+    } catch (error) {
+      if (bookingData.selectedDate !== dateString) return;
+      timeSlotsList.textContent = "Unable to load availability. Select the date again to retry.";
+      btnStep3Next.disabled = true;
+      return;
     }
 
     timeSlotsList.innerHTML = "";
 
-    TIME_SLOTS.forEach((slotText) => {
+    TIME_SLOTS.forEach((slotText, index) => {
       const bookedCount = dbBookings[slotText] || 0;
       const remainingSlots = Math.max(0, MAX_SLOTS_PER_HOUR - bookedCount);
-      const isFull = remainingSlots === 0;
+      const isFull = remainingSlots === 0 || (dateString === today() && [8,9,10,11,13,14,15,16][index] <= manilaNow().getHours());
 
-      const slotEl = document.createElement("div");
+      const slotEl = document.createElement("button");
+      slotEl.type = "button";
+      slotEl.disabled = isFull;
+      slotEl.setAttribute("aria-pressed", String(!isFull && bookingData.selectedTimeSlot === slotText));
       slotEl.classList.add("slot-item");
 
       if (isFull) {
@@ -260,7 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         if (bookingData.selectedTimeSlot === slotText) {
           slotEl.classList.add("selected");
-          btnStep3Next.disabled = false;
+          if (btnStep3Next) btnStep3Next.disabled = false;
         }
 
         slotEl.innerHTML = `
@@ -269,10 +738,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         slotEl.addEventListener("click", () => {
-          document.querySelectorAll(".slot-item").forEach(el => el.classList.remove("selected"));
+          document
+            .querySelectorAll(".slot-item")
+            .forEach((el) => { el.classList.remove("selected"); if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", "false"); });
           slotEl.classList.add("selected");
+          slotEl.setAttribute("aria-pressed", "true");
           bookingData.selectedTimeSlot = slotText;
-          btnStep3Next.disabled = false;
+          if (btnStep3Next) btnStep3Next.disabled = false;
         });
       }
 
@@ -280,105 +752,111 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  btnStep3Next.addEventListener("click", () => {
-    populateReviewStep();
-    goToStep(4);
-  });
+  if (btnStep3Next) {
+    btnStep3Next.addEventListener("click", () => {
+      populateReviewStep();
+      goToStep(4);
+    });
+  }
 
-  /* ==================== STEP 4 ==================== */
+  /* ==================== STEP 4: REVIEW & CONFIRM ==================== */
   const btnConfirmBooking = document.getElementById("btn-confirm-booking");
 
   function populateReviewStep() {
     document.getElementById("review-service").textContent = bookingData.service;
-    document.getElementById("review-student-name").textContent = bookingData.studentInfo.fullName || "N/A";
-    document.getElementById("review-student-course").textContent = `${bookingData.studentInfo.courseProgram || ""} (${bookingData.studentInfo.yearLevel || ""})`;
+    document.getElementById("review-student-name").textContent =
+      bookingData.studentInfo.fullName || "N/A";
+    document.getElementById("review-student-course").textContent = `${
+      bookingData.studentInfo.courseProgram || ""
+    } (${bookingData.studentInfo.yearLevel || ""})`;
 
     if (bookingData.selectedDate) {
       const [y, m, d] = bookingData.selectedDate.split("-").map(Number);
       const dateObj = new Date(y, m - 1, d);
-      document.getElementById("review-date").textContent = dateObj.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-      });
+      document.getElementById("review-date").textContent =
+        dateObj.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        });
     }
 
-    document.getElementById("review-time").textContent = bookingData.selectedTimeSlot;
-    document.getElementById("review-emergency").textContent = `${bookingData.studentInfo.emergencyName || ""} (${bookingData.studentInfo.emergencyRelationship || ""})`;
+    document.getElementById("review-time").textContent =
+      bookingData.selectedTimeSlot || "N/A";
+    document.getElementById("review-emergency").textContent = `${
+      bookingData.studentInfo.emergencyName || ""
+    } (${bookingData.studentInfo.emergencyRelationship || ""})`;
   }
 
-  btnConfirmBooking.addEventListener("click", async () => {
-    btnConfirmBooking.disabled = true;
-    btnConfirmBooking.textContent = "Processing...";
+  if (btnConfirmBooking) {
+    btnConfirmBooking.addEventListener("click", async () => {
+      if (btnConfirmBooking.disabled) return;
+      btnConfirmBooking.disabled = true;
+      btnConfirmBooking.textContent = "Processing...";
 
-    const { selectedDate, selectedTimeSlot, studentInfo, service } = bookingData;
-    const generatedQueueNumber = `0${Math.floor(Math.random() * 90) + 10}`;
-    bookingData.queueNumber = generatedQueueNumber;
-
-    if (db) {
+      const { selectedDate, selectedTimeSlot, studentInfo, service } =
+        bookingData;
+      let saved;
       try {
-        const { data, error } = await db.from("appointments").insert([
-          {
-            full_name: studentInfo.fullName,
-            student_id: studentInfo.studentId,
-            course_program: studentInfo.courseProgram,
-            year_level: studentInfo.yearLevel,
-            email: studentInfo.email,
-            mobile_number: studentInfo.mobileNumber,
-            emergency_name: studentInfo.emergencyName,
-            emergency_relationship: studentInfo.emergencyRelationship,
-            emergency_phone: studentInfo.emergencyPhone,
-            service: service,
-            appointment_date: selectedDate,
-            time_slot: selectedTimeSlot,
-            queue_number: generatedQueueNumber,
-            status: "Confirmed"
-          }
-        ]);
-
+        const { data, error } = await db.rpc("book_appointment", {
+          p_service: service, p_date: selectedDate, p_time_slot: selectedTimeSlot
+        });
         if (error) throw error;
-      } catch (err) {
-        console.error("Supabase Save Error:", err);
+        if (!data?.id || !data.queue_number) throw new Error("Invalid booking response");
+        saved = data;
+      } catch (error) {
+        alert(`Booking failed: ${error.message || "Please try again."}`);
+        btnConfirmBooking.disabled = false;
+        btnConfirmBooking.textContent = "Confirm Booking";
+        return;
       }
-    }
+      const generatedQueueNumber = saved.queue_number;
+      const insertedId = saved.id;
+      bookingData.queueNumber = generatedQueueNumber;
 
-    if (!slotBookings[selectedDate]) slotBookings[selectedDate] = {};
-    const currentBooked = slotBookings[selectedDate][selectedTimeSlot] || 0;
-    slotBookings[selectedDate][selectedTimeSlot] = currentBooked + 1;
-    localStorage.setItem("id2go_slot_bookings", JSON.stringify(slotBookings));
+      const activeObj = {
+        service: service,
+        date: selectedDate,
+        time: selectedTimeSlot,
+        queueNumber: generatedQueueNumber,
+        fullName: studentInfo.fullName,
+        studentId: studentInfo.studentId,
+        courseProgram: studentInfo.courseProgram,
+        yearLevel: studentInfo.yearLevel,
+        email: currentUser.email,
+        mobileNumber: studentInfo.mobileNumber,
+        emergencyName: studentInfo.emergencyName,
+        emergencyRelationship: studentInfo.emergencyRelationship,
+        emergencyPhone: studentInfo.emergencyPhone,
+        dbId: insertedId
+      };
 
-    btnConfirmBooking.disabled = false;
-    btnConfirmBooking.textContent = "Confirm Booking";
+      localStorage.setItem(userBookingCacheKey, JSON.stringify(activeObj));
+      bookingData.activeBooking = activeObj;
 
-    document.getElementById("generated-queue-number").textContent = bookingData.queueNumber;
-    document.getElementById("conf-service-title").textContent = bookingData.service;
+      btnConfirmBooking.disabled = false;
+      btnConfirmBooking.textContent = "Confirm Booking";
 
-    if (selectedDate) {
-      const [y, m, d] = selectedDate.split("-").map(Number);
-      const dateObj = new Date(y, m - 1, d);
-      document.getElementById("conf-date-display").textContent = dateObj.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-      });
-    }
-    document.getElementById("conf-time-display").textContent = selectedTimeSlot;
+      renderDetailsStep(activeObj);
+      goToStep(5);
+    });
+  }
 
-    goToStep(5);
-  });
-
-  /* ==================== STEP 5 ==================== */
-  document.getElementById("btn-go-dashboard").addEventListener("click", () => {
-    alert("Navigating to Home Dashboard...");
-  });
-
-  document.getElementById("btn-view-details").addEventListener("click", () => {
-    alert(`Appointment Details:\nQueue #: ${bookingData.queueNumber}\nService: ${bookingData.service}\nDate: ${bookingData.selectedDate}\nTime: ${bookingData.selectedTimeSlot}`);
-  });
-
+  /* ==================== HELPER FUNCTIONS & LISTENERS ==================== */
   function formatDateString(year, month, day) {
     const m = month < 10 ? `0${month}` : month;
     const d = day < 10 ? `0${day}` : day;
     return `${year}-${m}-${d}`;
   }
+
+  const btnBackHome = document.getElementById("btn-back-home");
+  if (btnBackHome) {
+    btnBackHome.addEventListener("click", () => {
+      window.location.href = "dashboard.html";
+    });
+  }
+
+  // Initial Load: Pre-fill Owner Profile first, then check Active Appointment
+  await loadAndPopulateOwnerProfile();
+  await checkExistingAppointment();
 });

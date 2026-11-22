@@ -1,0 +1,277 @@
+/* Shared university theme. Loaded after the page styles; no remote assets. */
+:root {
+ --ink:#102b4c; --navy:#102f50; --blue:#2456a4; --gold:#b68a42;
+ --paper:#f5f5f1; --line:#dce3e8; --soft:#edf2f7; --secondary:#56677b;
+ --primary:var(--blue); --primary-dark:var(--navy); --text:var(--ink);
+ --background:var(--paper); --border:var(--line); --muted:var(--secondary);
+ --dash-navy:var(--navy); --dash-blue:var(--blue); --dash-bg:var(--paper);
+ --dash-text:var(--ink); --dash-muted:var(--secondary); --dash-border:var(--line);
+ --xu-blue:var(--navy); --xu-blue-dark:var(--navy); --text-muted:var(--secondary);
+ --ui-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+* {box-sizing:border-box}
+html {color-scheme:light;scroll-padding-bottom:110px}
+body {background:var(--paper);color:var(--ink);font-family:var(--ui-font);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea {font-family:inherit}
+button,a,input,select {touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+[hidden] {display:none!important}
+button {transition:background-color .18s,border-color .18s,box-shadow .18s}
+button:disabled {cursor:not-allowed;opacity:.55}
+:is(button,a,input,select,textarea):focus-visible {outline:3px solid #af7926;outline-offset:3px}
+p {line-height:1.65}
+h1,h2,h3,h4 {line-height:1.25;overflow-wrap:break-word}
+.app-shell,.auth-shell,.operator-shell,.reports-shell,.notifications-shell {
+ width:100%;max-width:520px;min-height:100dvh;margin:0 auto;background:var(--paper);font-family:var(--ui-font);
+}
+body.has-student-nav {padding-bottom:0}
+.app-shell,.operator-shell,.notifications-shell {padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+.app-header,.operator-header,.reports-header,.notifications-header {
+ padding:calc(24px + env(safe-area-inset-top)) 24px 24px;background:var(--navy);color:#fff;
+ border-radius:0;border-bottom:3px solid var(--gold);box-shadow:none;
+}
+.brand,.operator-brand,.reports-brand,.brand-row {gap:13px}
+.brand img,.operator-brand img,.reports-brand img,.brand-row img,.university-brand img {width:43px;height:50px;object-fit:contain}
+.brand h1,.operator-brand h1,.reports-brand h1,.brand-copy h1,.university-brand h1 {font-family:Georgia,"Times New Roman",serif;font-size:22px;font-weight:400;letter-spacing:-.35px;color:#fff}
+.brand p,.operator-brand p,.reports-brand p,.brand-copy p,.university-brand p {font-size:9px;letter-spacing:1.8px;color:#d6e1ed}
+.notification-button {width:44px;height:44px;border-radius:50%;background:#ffffff0d;border-color:#ffffff40}
+.dashboard-content,.operator-content,.reports-content,.notifications-content,.profile-content {padding:28px 22px 24px;gap:28px}
+.page-intro,.reports-intro {margin-bottom:24px}
+.welcome-section h2,.page-intro h2,.reports-intro h2 {font-size:30px;letter-spacing:-1.1px;font-weight:750}
+.welcome-section p:last-child,.page-intro p,.reports-intro p {font-size:14px;color:var(--secondary)}
+.eyebrow,.page-eyebrow,.welcome-section .eyebrow,.auth-eyebrow {font-size:10px;letter-spacing:1.8px;font-weight:750;color:var(--blue)}
+.app-header .welcome {margin-top:26px}
+.app-header .welcome h2 {font-size:29px;letter-spacing:-.7px;margin:7px 0;color:#fff}
+.app-header .welcome p,.app-header .welcome .eyebrow {color:#d5e1ed}
+.section-heading {margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.section-heading h2,.ui-card h3 {font-size:17px;font-weight:700;letter-spacing:-.35px}
+.section-caption {font-size:11px;color:var(--secondary)}
+.content-card,.ui-card,.station-card,.appointment-card,.date-card,.report-card,.stat-card,.station-panel,.auth-card,.notification-card,.notification-section {
+ border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 3px 12px #16365304;
+}
+.queue-card {background:var(--navy);border:1px solid #173b60;border-radius:22px;box-shadow:0 12px 24px #102f5012;color:#fff}
+.queue-card-top {padding:22px 22px 0}
+.queue-card-main {padding:28px 22px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.queue-card-main strong {font-size:clamp(38px,11vw,62px);font-weight:650;letter-spacing:-2px;overflow-wrap:anywhere}
+.queue-card-main p,.queue-progress p {font-size:12px}
+.queue-card-label,.queue-progress span {font-size:10px;letter-spacing:1.4px;color:#d7e4f1}
+.queue-status {border:1px solid #ffffff36;border-radius:99px;background:#ffffff12;font-size:10px;padding:7px 11px}
+.queue-card-footer {background:#ffffff08;border-color:#ffffff20;padding:15px 22px;font-size:12px}
+.station-grid {gap:12px}
+.station-card {padding:20px 18px;box-shadow:none}
+.station-header span:first-child {font-size:10px;letter-spacing:1px;color:var(--secondary)}
+.station-card strong {font-size:32px;font-weight:650;margin:16px 0 8px;color:var(--navy)}
+.station-card p {font-size:12px;color:var(--secondary)}
+.station-notice {background:#eaf0f5;border-radius:12px;padding:14px;margin-top:14px}
+.station-notice p {font-size:12px;color:#425b75}
+.appointment-card {padding:20px;align-items:flex-start}
+.appointment-icon {background:#edf2f8;border-radius:12px;width:44px;height:44px}
+.appointment-info h3 {font-size:14px;line-height:1.4}
+.appointment-info p {font-size:12px;color:var(--secondary)}
+.booking-button,.auth-submit,.btn-primary,.ui-button-primary {
+ min-height:50px;background:var(--blue);color:#fff;border:1px solid var(--blue);border-radius:12px;
+ font-size:14px;font-weight:650;box-shadow:none;padding:13px 18px;
+}
+:where(.booking-button,.auth-submit,.btn-primary,.ui-button-primary):hover:not(:disabled) {background:var(--navy);border-color:var(--navy)}
+.btn-secondary,.ui-button-secondary,#logout-button,#refresh-admin {background:#fff;color:var(--navy);border:1px solid #ced9e4;box-shadow:none;min-height:48px;border-radius:12px}
+.btn-danger {background:#fff7f6;color:#a33832;border:1px solid #f0d0cc;box-shadow:none}
+button.btn,button.ui-button {font-size:14px;min-height:48px}
+.back-link,.text-button,.mark-all-button {color:var(--blue);font-size:13px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.student-bottom-nav,.operator-navigation,.id2go-bottom-nav {
+ max-width:520px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 24px #17365305;
+ padding:9px 16px calc(9px + env(safe-area-inset-bottom));height:auto;min-height:78px;
+}
+.student-bottom-nav .student-nav-link,.operator-navigation .nav-item,.id2go-bottom-nav a,.id2go-bottom-nav button {
+ border:0;min-height:52px;border-radius:12px;color:var(--secondary);font-family:var(--ui-font);font-size:11px;font-weight:600;
+}
+.student-bottom-nav .student-nav-link.active,.operator-navigation .nav-item.active,.id2go-bottom-nav a.active {background:#edf2f8;color:var(--navy);font-weight:750}
+.student-bottom-nav .student-nav-link svg {width:22px;height:22px}
+.id2go-bottom-nav {align-items:center;gap:10px}
+.id2go-bottom-nav a,.id2go-bottom-nav button {display:flex;align-items:center;justify-content:center;flex:1;padding:10px;background:transparent}
+/* University sign-in */
+.auth-shell {background:#fff}
+.auth-hero {background:var(--navy);border-bottom:3px solid var(--gold);padding:calc(30px + env(safe-area-inset-top)) 26px 30px;min-height:370px}
+.hero-shape {border:1px solid #ffffff14;background:transparent;border-radius:50%}
+.hero-shape-one {width:330px;height:330px;right:-200px;top:30px}
+.hero-shape-two {width:240px;height:240px;left:auto;right:-155px;bottom:-130px}
+.hero-content {margin-top:42px;max-width:100%}
+.hero-eyebrow {font-size:10px;letter-spacing:1.8px;color:#e5c68c}
+.hero-content h2 {font-family:Georgia,"Times New Roman",serif;font-size:43px;font-weight:400;line-height:1.1;letter-spacing:-1.5px;margin:16px 0;max-width:340px}
+.hero-content p {font-size:13px;color:#d4e1ef;max-width:350px;line-height:1.8}
+.campus-signature {display:flex;align-items:center;gap:12px;margin-top:32px;color:#fff}
+.campus-signature span {font-size:17px;font-weight:750;letter-spacing:2px}
+.campus-signature small {font-size:8px;letter-spacing:1.6px;border-left:1px solid #ffffff35;padding-left:12px}
+.auth-content {padding:32px 24px 20px}
+.auth-heading h2 {font-size:29px;letter-spacing:-.8px}
+.auth-heading p {font-size:14px;color:var(--secondary)}
+.auth-card {padding:0;border:0;border-radius:0;box-shadow:none}
+.auth-help {background:var(--paper);border:0;border-radius:10px;margin-top:20px}
+.auth-help p,.auth-note,.auth-footer p {color:var(--secondary);font-size:12px}
+.auth-footer {border-top:1px solid var(--line);margin:12px 24px 0;padding:20px 0 24px}
+.auth-footer span {color:var(--secondary);font-size:10px}
+/* Forms and booking */
+.form-group label,.profile-content label {font-size:12px;font-weight:650;color:var(--ink);margin-bottom:8px}
+input:not([type=radio]):not([type=checkbox]),select,textarea {
+ width:100%;max-width:100%;min-height:50px;padding:12px 14px;font-size:16px;line-height:1.4;border:1px solid #ccd6e0;
+ border-radius:10px;color:var(--ink);background:#fff;box-shadow:none;
+}
+input::placeholder,textarea::placeholder {color:#6a7889;opacity:1;font-size:14px}
+input[readonly] {background:#f1f4f7!important;color:#526278!important}
+input[type=checkbox],input[type=radio] {accent-color:var(--blue)}
+.password-field input {padding-right:76px!important}
+.password-field button {min-height:44px;min-width:54px}
+.form-group {margin-bottom:21px}
+.profile-content .content-card {padding:24px;margin-bottom:20px}
+.profile-content h2 {font-size:18px;letter-spacing:-.4px;margin-bottom:20px}
+.section-description {font-size:13px;color:var(--secondary)}
+.account-settings .booking-button {justify-content:center;margin-top:12px}
+.step-card {padding:0;overflow:hidden}
+.step-header {padding:22px 22px 18px;border-bottom:1px solid var(--line);background:#fff}
+.step-header .page-title {font-size:21px;letter-spacing:-.6px}
+.step-indicator {color:var(--secondary);font-size:12px;line-height:1.6}
+.step-body {padding:22px}
+.section-title {font-size:21px;letter-spacing:-.6px;margin-top:0}
+.service-options {display:grid;gap:12px;margin:20px 0 26px}
+.service-option,.service-option.selected {margin:0;padding:20px 16px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);min-height:72px}
+.service-option:has(input:checked) {background:#eef3fa;border-color:var(--blue);box-shadow:inset 3px 0 var(--blue)}
+.service-option:has(input:disabled) {opacity:.55;cursor:not-allowed}
+.service-option:focus-within {outline:3px solid #af7926;outline-offset:3px}
+.option-label {font-size:14px;line-height:1.45}
+.button-group {gap:12px;margin-top:24px}
+.calendar-wrapper {border:1px solid var(--line);border-radius:14px;padding:14px}
+.calendar-header {margin-bottom:14px;gap:6px}
+.cal-nav-btn {width:44px;height:44px;border:1px solid var(--line);background:#fff;border-radius:10px;color:var(--navy)}
+.cal-month-title {font-size:15px;font-weight:650}
+.cal-day {border:0;background:transparent;font:inherit;color:var(--ink);min-width:0;min-height:40px;aspect-ratio:1;border-radius:8px;padding:0}
+.cal-day.selected {background:var(--blue);color:#fff}
+.cal-day:disabled {color:#758294;background:#f5f6f8;opacity:.6}
+.slot-item {font:inherit;text-align:left;min-height:66px;border-radius:11px;padding:12px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.slot-item.selected {background:#edf3fb;border-color:var(--blue);color:var(--navy)}
+.slot-time {font-size:12px;font-weight:650}.slot-count {font-size:11px}
+.review-item,.detail-row {padding:15px 0;border-color:var(--line);gap:18px}
+.review-label,.detail-row span {font-size:12px;color:var(--secondary)}
+.review-value,.detail-row strong {font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.step-body .queue-card {padding:26px;text-align:center}
+.step-body .queue-number {color:#fff;font-size:52px;margin:8px 0}
+/* Staff and reporting */
+.operator-content .ui-card {padding:24px}
+.operator-content .station-card {border-top:3px solid var(--gold)}
+#assigned-station {font-size:28px;margin:12px 0;color:var(--navy);letter-spacing:-.8px}
+.statistics-grid,.metrics-grid,.reports-grid {gap:12px}
+.stat-card,.report-card,.metric-box {padding:18px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.stat-card strong,.report-card strong,.metric-box strong,.metric-box strong span {font-size:30px;line-height:1.2;font-weight:650;color:var(--navy);font-variant-numeric:tabular-nums;display:block}
+.stat-card span,.report-card span,.metric-box>span {font-size:12px;color:var(--secondary)}
+.queue-filters,.notification-filters {display:flex;gap:8px;flex-wrap:wrap;background:transparent;padding:0;margin:18px 0}
+.filter-btn,.filter-button {min-height:44px;border:1px solid var(--line);border-radius:99px;background:#fff;font-size:12px;padding:9px 15px;color:var(--secondary)}
+.filter-btn.active,.filter-button.active {background:var(--navy);color:#fff;border-color:var(--navy)}
+.queue-entry {padding:18px 0;border-bottom:1px solid var(--line)}
+.empty-state,.empty-notifications {padding:32px 18px;color:var(--secondary);font-size:14px;text-align:center}
+.student-panel {padding:26px 16px;background:#edf2f7;border-radius:14px;margin:20px 0}
+#current-queue {font-size:58px;color:var(--navy);font-variant-numeric:tabular-nums}
+#current-name {font-size:23px}
+.operator-feedback,.report-feedback,.notification-feedback,#admin-feedback {font-size:13px;color:var(--secondary);overflow-wrap:anywhere}
+.operator-feedback.error,.report-feedback.error {color:#a33832;background:#fff3f1;border:1px solid #f0d0cc;padding:14px;border-radius:10px}
+.notification-card {padding:20px;text-align:left;margin-bottom:12px}
+.notification-card.unread {border-left:3px solid var(--blue);background:#f5f8fd}
+.notification-name {font-size:14px}.notification-message {font-size:13px;line-height:1.65}.notification-time {font-size:11px;color:var(--secondary)}
+.notifications-toolbar {gap:12px;flex-wrap:wrap}
+.quota-card {background:var(--navy);border-radius:18px;box-shadow:none}
+.table-scroll {max-width:100%;overflow-x:auto}
+.table-scroll table {min-width:360px}
+.table-scroll th {font-size:10px;letter-spacing:.8px;padding:14px 10px}
+.table-scroll td {font-size:12px;padding:16px 10px;cursor:default;overflow-wrap:anywhere}
+.toggle-row {display:grid;grid-template-columns:1fr;gap:10px;padding:16px 0}
+.toggle-row label {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle-row input[type=checkbox] {width:20px;height:20px}
+@media(min-width:760px) {
+ body {padding:32px 24px}
+ .app-shell,.operator-shell,.reports-shell,.notifications-shell {max-width:1040px;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 20px 60px #102f5008}
+ .app-header,.operator-header,.reports-header,.notifications-header {padding:26px 36px}
+ .dashboard-content,.operator-content,.reports-content,.notifications-content,.profile-content {padding:36px}
+ .student-bottom-nav,.operator-navigation,.id2go-bottom-nav {max-width:1040px;width:calc(100% - 48px);border-inline:1px solid var(--line)}
+ .page-dashboard .dashboard-content {display:grid;grid-template-columns:1.1fr 1fr;align-items:start;gap:28px}
+ .page-dashboard .welcome-section {grid-column:1/-1}
+ .page-dashboard .queue-section {grid-column:1;grid-row:2}
+ .page-dashboard .stations-section {grid-column:2;grid-row:2/5}
+ .page-dashboard .appointment-section {grid-column:1}
+ .page-booking .dashboard-content {max-width:730px;margin:auto}
+ .page-profile #profile-form {display:grid;grid-template-columns:1fr 1fr;gap:22px}
+ .page-profile .account-settings {grid-column:1/-1}
+ .page-profile .content-card {margin:0}
+ .auth-shell {max-width:1040px;display:grid;grid-template-columns:1fr 1fr;min-height:700px;margin:5vh auto;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 24px 70px #102f5010}
+ .auth-hero {grid-row:1/3;border-bottom:0;border-right:3px solid var(--gold);padding:42px;min-height:100%}
+ .hero-content h2 {font-size:60px;line-height:1.08;max-width:360px}
+ .hero-content p {font-size:15px;max-width:310px}
+ .auth-content {padding:60px 42px 20px;align-self:center}
+ .auth-footer {grid-column:2;margin:0 42px;align-self:end}
+ .statistics-grid,.metrics-grid {grid-template-columns:repeat(4,minmax(0,1fr))}
+ .toggle-row {grid-template-columns:1fr 1fr;gap:24px}
+}
+@media(max-width:360px) {
+ .dashboard-content,.profile-content,.operator-content,.reports-content,.notifications-content {padding-inline:16px}
+ .app-header,.operator-header,.reports-header,.notifications-header {padding-inline:18px}
+ .brand h1,.brand-copy h1,.operator-brand h1 {font-size:19px}
+ .step-body,.step-header {padding:18px 14px}
+ .hero-content h2 {font-size:38px}
+}
+@media(prefers-reduced-motion:reduce) {* {scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Native service radios remain keyboard and screen-reader accessible. */
+.service-option input[type=radio] {display:block;width:20px;height:20px;flex:0 0 20px;margin:0}
+.service-option .custom-radio {display:none}
+.form-group :is(input,select):focus-visible {outline:3px solid #af7926;outline-offset:3px}
+.step-header {margin-bottom:0}
+
+:root {--navy:#102d55;--blue:#174985;--paper:#f4f7fa;--gold:#91b5d6}
+.page-operator .operator-content {padding-top:18px}
+.page-operator .page-intro {margin-bottom:12px}
+.page-operator #workspace-back {float:right;margin:0}
+.page-operator #workspace-view>.section-heading h2 {display:none}
+.page-operator .student-panel {background:var(--navy);color:white;text-align:left;padding:18px 20px;margin:14px 0}
+.page-operator .student-panel :is(.eyebrow,#current-queue,#current-name,#current-service) {color:white}
+.page-operator .detail-row:has(strong:empty) {display:none}
+.page-operator .workspace-actions {display:grid;gap:10px}
+.page-operator .operator-feedback:empty {display:none}
+.page-operator .detail-row {padding:9px 0}
+.page-operator .ui-card {padding:18px}
+.page-operator .queue-entry button {min-height:44px}
+:root {--paper:#f7faff;--line:#d8e3ee;--soft:#edf4fb}
+.page-operator #shift {display:block;margin:0 0 12px auto;padding:8px 16px;border:1px solid var(--line);border-radius:10px;background:white}
+.page-operator .student-panel {background:#edf4fb;border-left:4px solid var(--blue)}
+.page-operator .student-panel :is(.eyebrow,#current-queue,#current-name,#current-service) {color:var(--navy)}
+
+/* Phone layout: let content length determine card height and column count. */
+.app-shell :is(section,article,form),.operator-shell :is(section,article),.notifications-shell article {min-width:0}
+.app-shell :is(p,strong),.operator-shell :is(p,strong),.notifications-shell p {overflow-wrap:anywhere}
+@media(max-width:759px){
+ .app-shell,.operator-shell,.auth-shell,.notifications-shell,.student-bottom-nav,.operator-navigation {max-width:none}
+ .auth-hero {min-height:0;padding:calc(18px + env(safe-area-inset-top)) 20px 20px}
+ .hero-content {margin-top:20px}.hero-content h2 {font-size:clamp(28px,7vw,38px);margin:8px 0}.campus-signature{display:none}
+ .dashboard-content,.operator-content,.profile-content,.notifications-content {padding-inline:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right))}
+ .queue-card-main {gap:12px;padding:18px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .queue-card-main strong {font-size:clamp(28px,8vw,40px)}
+ .station-card {padding:14px}.station-grid {gap:8px}
+ .calendar-grid,.calendar-days-container {grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+ .cal-day {width:100%;min-height:38px;aspect-ratio:auto}
+ .slot-item,.service-option {min-width:0}
+ .page-operator #workspace-back {float:none;margin:0 0 8px}
+ .operator-navigation,.student-bottom-nav {padding-inline:max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-right))}
+}
+@media(max-width:349px){
+ .station-grid,.slots-list {grid-template-columns:1fr}
+ .queue-card-main {grid-template-columns:1fr}
+ .calendar-wrapper,.step-body {padding-inline:8px}
+}
+
+.page-operator .desk-summary {color:white;background:#102d55;border-top:4px solid #d0af65;border-radius:16px;padding:clamp(18px,3vw,28px);margin-bottom:14px}
+.desk-top,.desk-toolbar {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.desk-top h2 {margin:4px 0 0;color:white;font-size:clamp(24px,4vw,34px)}
+.desk-label {font-size:13px;color:#c9daed}
+#desk-status {border:1px solid #829ab6;border-radius:20px;padding:5px 14px;color:white}
+.desk-counts {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:20px;border-top:1px solid #486080;padding-top:14px}
+.desk-counts div+div {border-left:1px solid #486080;padding-left:14px}
+.desk-counts strong,.desk-counts span {display:block;color:white}
+.desk-counts strong {font-size:26px;line-height:1.2}
+.desk-counts span {font-size:13px;color:#d7e4f4;margin-top:3px}
+.page-operator .desk-toolbar #shift {margin:0;min-height:44px}
+.page-operator #station-hint,.page-operator #standby-list {margin:12px 0;color:#435875}
+.page-operator #workspace-back {float:none;margin:4px 0 16px}

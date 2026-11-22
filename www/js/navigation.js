@@ -67,19 +67,6 @@
     window.location.href = "profile.html";
   };
 
-  const featureAvailable = async page => {
-    try {
-      const response = await fetch(page, {
-        method: "HEAD",
-        cache: "no-store"
-      });
-
-      return response.ok;
-    } catch (error) {
-      return false;
-    }
-  };
-
   const showUnavailable = name => {
     let message = document.getElementById(
       "feature-unavailable-message"
@@ -113,14 +100,8 @@
       `${name} is not available right now.`;
   };
 
-  const openFeature = async (page, name) => {
-    const available = await featureAvailable(page);
-
-    if (available) {
-      window.location.href = page;
-    } else {
-      showUnavailable(name);
-    }
+  const openFeature = page => {
+    if ([...studentPages, "index.html"].includes(page)) window.location.href = page;
   };
 
   const initializeNavigation = async () => {
@@ -200,7 +181,7 @@
       "logout-button"
     );
 
-    if (logoutButton) {
+    if (logoutButton && currentPage !== "profile.html") {
       logoutButton.addEventListener("click", async () => {
         logoutButton.disabled = true;
 

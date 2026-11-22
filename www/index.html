@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#102f5e">
 
     <title>ID2Go | Sign In</title>
@@ -12,63 +12,124 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/auth.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js">
+    </script>
+    <script defer src="js/config.js"></script>
     <script defer src="js/supabase-client.js"></script>
     <script defer src="js/auth/auth.js"></script>
+    <link rel="stylesheet" href="css/university.css">
 </head>
 
-<body>
+<body class="page-index">
     <main class="auth-shell">
 
-        <header class="auth-header">
-            <img src="img/logo.png" alt="Xavier University">
+        <header class="auth-hero">
+            <div class="hero-shape hero-shape-one"></div>
+            <div class="hero-shape hero-shape-two"></div>
 
-            <h1>Xavier University</h1>
-            <p>STUDENT ID SERVICES</p>
+            <div class="university-brand">
+                <img src="img/logo.png" alt="Xavier University seal">
+
+                <div>
+                    <h1>Xavier University</h1>
+                    <p>STUDENT ID SERVICES</p>
+                </div>
+            </div>
+
+            <div class="hero-content">
+                <span class="hero-eyebrow">
+                    YOUR CAMPUS. YOUR TIME.
+                </span>
+
+                <h2>
+                    Your ID.
+                    Your next chapter.
+                </h2>
+
+                <p>
+                    A simpler way to book your ID appointment,
+                    follow your queue, and get on with university life.
+                </p>
+            </div>
+            <div class="campus-signature"><span>ID2GO</span><small>STUDENT ID SERVICES</small></div>
         </header>
 
         <section class="auth-content">
 
             <div class="auth-heading">
-                <span class="auth-eyebrow">ID2GO PORTAL</span>
-                <h2>Sign in to your account</h2>
+                <span class="auth-eyebrow">
+                    ACCOUNT ACCESS
+                </span>
+
+                <h2>Welcome back.</h2>
+
                 <p>
-                    Access your student ID services using
-                    your registered account.
+                    Sign in to continue to your ID2Go account.
                 </p>
             </div>
 
-            <form id="login-form" class="auth-card">
-                <h3>Account Login</h3>
+            <form id="login-form" class="auth-card" method="post">
 
-                <label for="login-email">
-                    Email Address
-                </label>
+                <div class="form-group">
+                    <label for="login-email">
+                        Email Address
+                    </label>
 
-                <input id="login-email" type="email" placeholder="Enter your registered email" autocomplete="username"
-                    required>
-
-                <label for="login-password">
-                    Password
-                </label>
-
-                <div class="password-field">
-                    <input id="login-password" type="password" placeholder="Enter your password"
-                        autocomplete="current-password" required>
-
-                    <button id="toggle-password" type="button" aria-label="Show password">
-                        Show
-                    </button>
+                    <input id="login-email" name="email" type="email" placeholder="Enter your email address"
+                        autocomplete="username" required>
                 </div>
 
-                <p id="login-error" class="auth-error" role="alert" hidden></p>
+                <div class="form-group">
+                    <label for="login-password">
+                        Password
+                    </label>
 
-                <button id="login-button" type="submit" class="ui-button ui-button-primary">
-                    Sign In
+                    <div class="password-field">
+                        <input id="login-password" name="password" type="password" placeholder="Enter your password"
+                            autocomplete="current-password" required>
+
+                        <button id="toggle-password" type="button" aria-label="Show password">
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <p id="login-error" class="auth-error" role="alert" hidden>
+                </p>
+
+                <button id="login-button" class="auth-submit" type="submit">
+                    <span id="login-button-label">Sign In</span>
+                    <span class="auth-submit-arrow" aria-hidden="true">→</span>
                 </button>
+
             </form>
 
+            <div class="auth-help">
+                <div class="auth-help-icon" aria-hidden="true">
+                    i
+                </div>
+
+                <p>
+                    Use your registered ID2Go account
+                    credentials to sign in.
+                </p>
+            </div>
+
+            <p class="auth-note">
+                Account access is managed by the
+                ID2Go system administrator.
+            </p>
+
         </section>
+
+        <footer class="auth-footer">
+            <p>
+                Xavier University – Ateneo de Cagayan
+            </p>
+            <span>ID2Go Student ID Services</span>
+        </footer>
+
     </main>
 </body>
 

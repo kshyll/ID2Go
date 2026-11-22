@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#102f5e">
 
     <title>ID2Go | Student Dashboard</title>
@@ -12,12 +12,18 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/dashboard.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js"></script>
+    <script defer src="js/config.js"></script>
     <script defer src="js/supabase-client.js"></script>
     <script defer src="js/navigation.js"></script>
+    <script defer src="js/dashboard.js"></script>
+<link rel="stylesheet" href="css/student-nav.css">
+<script defer src="js/student-nav.js"></script>
+    <link rel="stylesheet" href="css/university.css">
 </head>
 
-<body>
+<body class="page-dashboard">
     <div class="app-shell">
 
         <header class="app-header">

@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
 :root {
     --dash-navy: #102f5e;
@@ -149,9 +148,7 @@ body {
 .queue-card {
     overflow: hidden;
     border-radius: 18px;
-    background: linear-gradient(135deg,
-            #173f95 0%,
-            #315ccb 100%);
+    background: #102F5E;
     color: white;
     box-shadow: 0 9px 20px rgba(49, 92, 203, .15);
 }

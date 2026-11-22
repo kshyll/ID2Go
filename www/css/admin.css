@@ -1,0 +1,29 @@
+*{box-sizing:border-box}body{margin:0;display:grid;grid-template-columns:238px minmax(0,1fr);font:15px/1.55 system-ui,sans-serif;color:#18304a;background:#f6f8fb}aside{position:sticky;top:0;align-self:start;height:100vh;background:#102f50;color:white;padding:24px 16px}.identity{display:flex;align-items:center;gap:12px;font:19px Georgia,serif;padding:0 4px 24px;border-bottom:1px solid #486080}.identity img{width:36px}.identity small{display:block;font:12px system-ui;color:#d4deed;margin-top:4px}nav{display:grid;gap:4px;padding-top:24px}nav a,nav button{padding:12px 16px;border-radius:8px;color:white;text-decoration:none;background:none;text-align:left;border:0;font:inherit}nav a:hover,nav a[aria-current]{background:#294c72}button,select,input{font:inherit}button{cursor:pointer;background:white;border:1px solid #ccd6e0;border-radius:8px;padding:9px 16px;min-height:44px}header{background:white;display:flex;align-items:center;justify-content:space-between;padding:12px clamp(16px,4vw,48px);border-bottom:1px solid #dce3ea;color:#52647b}.content{padding:24px clamp(16px,4vw,48px);max-width:1440px;margin:auto}h1{font-size:32px;margin:0 0 20px}h2,h3{font-size:17px;margin:0 0 16px}.metrics-grid,.split,#station-toggle-list{display:grid;gap:16px}.metrics-grid{grid-template-columns:repeat(4,1fr)}.metric-box,article,.ui-card:not(#section-overview){border:1px solid #dce3ea;border-radius:14px;background:white;padding:20px}.metric-box>span{display:block;color:#52647b}.metric-box strong{font-size:34px}.split,#station-toggle-list{grid-template-columns:repeat(2,minmax(0,1fr));margin:20px 0}.split ul,#operator-directory{padding:0;list-style:none}li,.toggle-row{padding:12px 0;border-bottom:1px solid #e4e9ee}a{color:#204f8c}input,select{padding:10px;border:1px solid #bac8d5;border-radius:8px;max-width:100%}.toggle-row label{display:flex;justify-content:space-between}.toggle-row select{width:100%;margin-top:8px}.controls-bar{display:flex;gap:12px;flex-wrap:wrap}.table-scroll{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:12px;border-bottom:1px solid #e4e9ee}th{color:#52647b;font-size:12px}#btn-save-stations{background:#194880;color:white}#menu,[hidden],#admin-feedback:empty{display:none}dialog{border:1px solid #ccd6e0;border-radius:14px;max-width:min(90vw,480px)}@media(max-width:760px){body{display:block}aside{height:auto;padding:12px 16px;position:relative}.identity{padding:0;border:0}#menu{display:block;position:absolute;right:16px;top:12px}nav{display:none}.menu-open nav{display:grid}.metrics-grid{grid-template-columns:1fr 1fr}.split,#station-toggle-list{grid-template-columns:1fr}.content{padding:18px 12px}}
+
+#reports>section{margin-bottom:24px}
+#reports .date-card{padding:18px;background:white;border:1px solid #dce3ea;border-radius:14px}
+#reports .date-input-row,#reports .quota-progress-labels,#reports .station-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+#reports .quota-statistics,#reports .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px}
+#reports article strong{display:block;font-size:26px}
+#reports .section-heading{display:flex;align-items:baseline;gap:12px}
+#reports .quota-progress{height:8px;background:#e5ebf2;border-radius:5px;overflow:hidden;margin:12px 0}
+#quota-progress-fill{height:100%;background:#24568f}
+#reports .station-row{background:white;border-bottom:1px solid #dce3ea;padding:12px}
+
+/* On phones, the navigation drawer leaves the full width for the active task. */
+#drawer-dismiss {display:none}
+main,.content,article,.ui-card {min-width:0}
+td,li,article {overflow-wrap:anywhere}
+@media(max-width:760px){
+ #admin-sidebar {position:fixed;inset:0 auto 0 0;width:min(18rem,82vw);height:100dvh;overflow:auto;visibility:hidden;z-index:4;padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom))}
+ .menu-open #admin-sidebar {visibility:visible}
+ #menu {position:static;flex:none;min-width:44px}
+ header {gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+ #topbar-label {flex:1;min-width:0}
+ #drawer-dismiss:not([hidden]) {display:block;position:fixed;inset:0;width:100%;height:100%;background:#102f5066;z-index:3;border:0;border-radius:0}
+ .content {padding:16px max(12px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+ .metric-box,.ui-card:not(#section-overview),article {padding:14px}
+ .controls-bar>* {width:100%}
+ .table-scroll {max-width:100%}
+ dialog {max-height:80dvh;overflow:auto}
+}

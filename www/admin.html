@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ID2GO | Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin.css">
+<script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js"></script>
+<script defer src="js/config.js"></script>
+    <script defer src="js/supabase-client.js"></script>
+<script defer src="js/auth/guard.js"></script>
+<script defer src="js/reports/reports.js"></script><script defer src="js/admin.js"></script>
+
+</head>
+<body><aside id="admin-sidebar"><div class="identity"><img src="img/logo.png" alt=""><div>Xavier University<small>Ateneo de Cagayan</small></div></div><nav aria-label="Administration"><a href="#section-overview">Overview</a><a href="#section-live-queue">Live queue</a><a href="#appointments">Appointments</a><a href="#section-station-control">Camera stations</a><a href="#students">Students</a><a href="#operators">Operators</a><a href="#reports">Reports</a><button id="admin-logout">Sign out</button></nav></aside><button id="drawer-dismiss" aria-label="Close navigation" hidden></button><main><header><button id="menu" aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false">☰</button><span id="topbar-label">ID2GO / Administration</span><button id="refresh-admin">Refresh</button></header><div class="content"><h1 id="view-title">Overview</h1><p id="admin-feedback" role="status">Loading…</p><section class="ui-card" id="section-overview">
+                <h2>Today at a glance</h2>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <span>Appointments today</span>
+                        <strong><span id="total_appointments">—</span></strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Active Stations</span>
+                        <strong><span id="active-stations">—</span></strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Waiting Queue</span>
+                        <strong><span id="waiting">—</span></strong>
+                    </div>
+                    <div class="metric-box">
+                        <span>Completed</span>
+                        <strong><span id="completed">—</span></strong>
+                    </div>
+                </div>
+
+<div class="split"><article><h2>Station availability</h2><ul id="station-summary"></ul><a href="#section-station-control">Manage stations →</a></article><article><h2>Queue preview</h2><ul id="queue-preview"></ul><a href="#section-live-queue">View live queue →</a></article></div></section>
+
+            <!-- Section 2: Live Queue Management -->
+            <section class="ui-card" id="section-live-queue">
+                <h3>Live Queue Management</h3>
+                <div class="controls-bar"><label>Status <select id="status-filter"><option value="">All statuses</option></select></label>
+                    <input type="text" aria-label="Search the queue by student or ticket" id="queue-search" placeholder="Search student name or ID...">
+                </div>
+                <div class="table-scroll" tabindex="0" role="region" aria-label="Today’s appointments"><table id="table-live-queue">
+                    <thead>
+                        <tr>
+                            <th>Queue</th>
+                            <th>Student</th>
+                            <th>Station</th>
+                            <th>Status</th><th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="live-queue-body">
+                    </tbody>
+                </table></div>
+            </section>
+
+            <!-- Section 4: Station Availability Controls -->
+            <section class="ui-card" id="section-station-control">
+                <h3>Station Availability Controls</h3>
+                <div id="station-toggle-list"></div>
+                <button id="btn-save-stations" class="ui-button ui-button-primary">Save Station Settings</button>
+            </section>
+
+        <section id="appointments" class="ui-card"><h3>Appointments</h3><label for="appointment-day">Service date</label><input id="appointment-day" type="date"><p id="appointment-message" role="status"></p><div class="table-scroll"><table><thead><tr><th>Ticket</th><th>Student</th><th>Time slot</th><th>Service</th><th>Status</th></tr></thead><tbody id="appointment-rows"></tbody></table></div></section>
+<section hidden id="students" class="ui-card">
+  <h2>Student directory</h2>
+  <label for="student-search">Search by name, student ID, or email</label>
+  <input id="student-search" type="search" autocomplete="off">
+  <label for="student-completion">First-time ID photo</label>
+  <select id="student-completion"><option value="">All students</option><option value="yes">Completed</option><option value="no">No completion recorded</option></select>
+  <p id="student-message" role="status"></p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Student directory"><table>
+    <thead><tr><th>Name</th><th>Student ID</th><th>Email</th><th>First-time ID photo</th><th>Student record</th></tr></thead>
+    <tbody id="student-rows"></tbody>
+  </table></div>
+  <button id="students-prev" disabled>Previous</button> <button id="students-next" disabled>Next</button>
+</section>
+<section id="operators" class="ui-card"><h3>Operator directory</h3><ul id="operator-directory"></ul></section><section hidden id="reports"><section class="date-card">
+                <div class="date-card-heading">
+                    <div>
+                        <h3>Reporting Period</h3>
+                        <p>Choose a date to view its report.</p>
+                    </div>
+                </div>
+
+                <div class="date-controls">
+                    <label for="report-date">
+                        Select Date
+                    </label>
+
+                    <div class="date-input-row">
+                        <input id="report-date" type="date">
+
+                        <button id="refresh-report" type="button">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <p id="report-status" class="report-feedback" role="status" aria-live="polite">
+                Loading report...
+            </p>
+
+            <section class="quota-section">
+                <div class="section-heading">
+                    <h2>Daily Service Quota</h2>
+                    <span>All Stations</span>
+                </div>
+
+                <article class="quota-card">
+                    <div class="quota-top">
+                        <div>
+                            <span class="quota-eyebrow">
+                                SERVICE PERFORMANCE
+                            </span>
+                            <h3>Completed Services</h3>
+                        </div>
+                    </div>
+
+                    <div class="quota-total">
+                        <strong id="quota-completed">—</strong>
+
+                        <span>
+                            / <span id="quota-capacity">—</span>
+                            capacity
+                        </span>
+                    </div>
+
+                    <div id="quota-progress" class="quota-progress" role="progressbar"
+                        aria-label="Daily quota completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+
+                        <div id="quota-progress-fill"></div>
+                    </div>
+
+                    <div class="quota-progress-labels">
+                        <span id="quota-percentage">—</span>
+                        <span id="quota-remaining">—</span>
+                    </div>
+                </article>
+
+                <div class="quota-statistics">
+                    <article>
+                        <span>Daily Capacity</span>
+                        <strong id="quota-daily-capacity">—</strong>
+                    </article>
+
+                    <article>
+                        <span>Booked</span>
+                        <strong id="quota-booked">—</strong>
+                    </article>
+
+                    <article>
+                        <span>Completed</span>
+                        <strong id="quota-completed-count">—</strong>
+                    </article>
+                </div>
+            </section>
+
+            <section class="overview-section">
+                <div class="section-heading">
+                    <h2>Daily Overview</h2>
+                    <span id="report-date-label"></span>
+                </div>
+
+                <div class="reports-grid">
+                    <article class="report-card">
+                        <span>Appointments</span>
+                        <strong id="total-appointments">—</strong>
+                        <small>Total scheduled bookings</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>Waiting</span>
+                        <strong id="total-waiting">—</strong>
+                        <small>Students awaiting service</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>In Service</span>
+                        <strong id="total-serving">—</strong>
+                        <small>Currently being processed</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>Completed</span>
+                        <strong id="total-completed">—</strong>
+                        <small>Finished ID services</small>
+                    </article>
+
+                    <article class="report-card">
+                        <span>Missed</span>
+                        <strong id="total-missed">—</strong>
+                        <small>Missed appointments</small>
+                    </article>
+                </div>
+            </section>
+
+            <section class="stations-section">
+                <div class="section-heading">
+                    <h2>Current station status</h2>
+                    <span>Camera Stations</span>
+                </div>
+
+                <div id="station-monitoring" class="station-panel" aria-label="Station monitoring">
+
+                    <p class="reports-muted">
+                        Loading station information...
+                    </p>
+                </div>
+            </section>
+
+        </section></div></main><dialog id="detail"><h2>Ticket details</h2><p></p><form method="dialog"><button>Close</button></form></dialog></body></html>
