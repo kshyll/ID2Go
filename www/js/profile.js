@@ -1,15 +1,5 @@
 const db = window.ID2GoDB;
 
-<<<<<<< Updated upstream
-// Reuse global Supabase client if available
-const db =
-  window.ID2GoDB ||
-  (window.supabase
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null);
-
-=======
->>>>>>> Stashed changes
 let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -17,27 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initProfilePage() {
-<<<<<<< Updated upstream
-  if (db) {
-    try {
-      const { data, error } = await db.auth.getUser();
-      if (!error && data?.user) {
-        currentUser = data.user;
-      }
-    } catch (err) {
-      console.error("Auth check failed:", err);
-    }
-  }
-
-  if (!currentUser) {
-    alert("Please log in to view or edit your student profile.");
-    window.location.replace("index.html");
-    return;
-  }
-=======
   currentUser = await window.ID2GoSession.requireRole("student");
   if (!currentUser) return;
->>>>>>> Stashed changes
 
   // Clear legacy unscoped cache keys
   localStorage.removeItem("id2go_user_profile");
@@ -271,11 +242,8 @@ function setupProfileFormSubmit() {
       } catch (err) {
         console.error("Database save error details:", err.message || err);
         alert(`Database sync failed: ${err.message || "Check console"}`);
-<<<<<<< Updated upstream
-=======
       } finally {
         saveButton.disabled = false;
->>>>>>> Stashed changes
       }
     } else {
       localStorage.setItem(cacheKey, JSON.stringify(localPayload));
