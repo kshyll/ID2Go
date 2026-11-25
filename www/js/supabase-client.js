@@ -2,11 +2,9 @@
 (() => {
   "use strict";
 
-  const SUPABASE_URL =
-    "https://rvmhhggglfgiripeaufw.supabase.co";
+  const SUPABASE_URL = window.ID2GO_CONFIG?.supabaseUrl;
 
-  const SUPABASE_KEY =
-    "sb_publishable_S-RGE0NTsajME2hnJ1QGGw_H0SUtj-m";
+  const SUPABASE_KEY = window.ID2GO_CONFIG?.supabasePublishableKey;
 
   if (!window.supabase) {
     throw new Error("Supabase library is unavailable.");
