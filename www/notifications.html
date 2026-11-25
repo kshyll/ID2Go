@@ -3,60 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#102f5e">
 
     <title>ID2Go | Notifications</title>
 
     <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/notifications.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js"></script>
+    <script defer src="js/config.js"></script>
     <script defer src="js/supabase-client.js"></script>
     <script defer src="js/notifications/notifications.js"></script>
+<link rel="stylesheet" href="css/student-nav.css">
+<script defer src="js/student-nav.js"></script>
+    <link rel="stylesheet" href="css/university.css">
+<link rel="stylesheet" href="css/notifications.css">
 </head>
 
-<body>
+<body class="page-notifications">
     <div class="notifications-shell">
 
-        <header class="notifications-header">
-            <div class="brand-row">
-                <img src="img/logo.png" alt="Xavier University">
-                <div class="brand-copy">
-                    <h1>Xavier University</h1>
-                    <p>STUDENT ID SERVICES</p>
-                </div>
-            </div>
-        </header>
-
-        <main class="notifications-content">
-            <a href="dashboard.html" class="back-link">
-                <span aria-hidden="true">←</span>
-                Back to Dashboard
-            </a>
-
-            <section class="page-intro">
-                <span class="page-eyebrow">STUDENT SERVICES</span>
-                <h2>Notifications</h2>
-                <p>
-                    Stay updated on your appointments,
-                    queue status, and ID services.
-                </p>
-            </section>
-
-            <section class="notification-section">
-                <div class="notifications-toolbar">
-                    <div class="notifications-heading">
-                        <h3>My Notifications</h3>
-                        <span id="unread-badge" class="unread-badge" hidden>0</span>
-                    </div>
-
-                    <button id="mark-all-read" class="mark-all-button" type="button" disabled>
-                        Mark shown as read
-                    </button>
-                </div>
-
+        <header class="inbox-header"><a href="dashboard.html" aria-label="Back to dashboard">←</a><h1>Notifications</h1><span id="unread-badge" aria-label="Unread notifications" hidden></span></header>
+        <main class="inbox-content"><div class="inbox-toolbar">
                 <div class="notification-filters" role="group" aria-label="Filter notifications">
                     <button type="button" class="filter-button active" data-filter="all" aria-pressed="true" disabled>
                         All
@@ -67,7 +38,7 @@
                     </button>
                 </div>
 
-                <p id="notification-feedback" class="notification-feedback" role="status" aria-live="polite"></p>
+                <button id="mark-all-read" type="button" disabled>Mark all as read</button></div><p id="notification-feedback" class="notification-feedback" role="status" aria-live="polite"></p>
 
                 <section id="notifications-list" class="notifications-list" aria-label="Student notifications">
                 </section>
@@ -87,7 +58,6 @@
                         updates will appear here.
                     </p>
                 </div>
-            </section>
         </main>
     </div>
 </body>
