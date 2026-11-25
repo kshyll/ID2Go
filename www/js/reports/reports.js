@@ -75,29 +75,6 @@
     return `${year}-${month}-${day}`;
   };
 
-  // Only administrators may view these reports.
-  const checkAdmin = async () => {
-    const { data, error } = await db.auth.getUser();
-
-    if (error || !data.user) {
-      window.location.replace("index.html");
-      return false;
-    }
-
-    const { data: role, error: roleError } = await db
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .single();
-
-    if (roleError || role?.role !== "admin") {
-      showStatus("Administrator access required.", true);
-      return false;
-    }
-
-    return true;
-  };
-
   // Display the daily quota.
   const showQuota = quota => {
     if (!quota || typeof quota !== "object") {
@@ -227,6 +204,7 @@
     const button = $("refresh-report");
 
     if (!date) {
+      requestNumber++; resetReport(); button.disabled = false;
       showStatus("Please select a date.", true);
       return;
     }
@@ -287,49 +265,16 @@
     }
   };
 
-  // Initialize the reports screen.
-  const initialize = async () => {
-    if (!db) {
-      showStatus("Supabase is unavailable.", true);
-      return;
-    }
-
-    $("report-date").value = getToday();
-
-    $("refresh-report").addEventListener(
-      "click",
-      loadReport
-    );
-
-    $("report-date").addEventListener(
-      "change",
-      loadReport
-    );
-
-    try {
-      const authorized = await checkAdmin();
-
-      if (!authorized) {
-        $("report-date").disabled = true;
-        $("refresh-report").disabled = true;
-        return;
+  let initialized = false;
+  window.ID2GoReports = {
+    open() {
+      if (!initialized) {
+        $("report-date").value = getToday();
+        $("report-date").addEventListener("change", loadReport);
+        $("refresh-report").addEventListener("click", loadReport);
+        initialized = true;
       }
-
-      await loadReport();
-
-    } catch (error) {
-      console.error(error);
-
-      showStatus(
-        "Unable to verify administrator access.",
-        true
-      );
+      return loadReport();
     }
   };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initialize);
-  } else {
-    initialize();
-  }
 })();
