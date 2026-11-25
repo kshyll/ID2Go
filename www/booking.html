@@ -235,7 +235,14 @@
                     <div class="time-slots-container">
                         <h4 class="subsection-title">Available Time Slots</h4>
                         <p id="selected-date-label" class="selected-date-subtext">Select a date from the calendar</p>
+                        <div class="availability-bar">
+                            <p id="slot-availability-help" class="selected-date-subtext" aria-live="polite">
+                                Today and the current hour are bookable while spaces and staffed stations remain available.
+                            </p>
+                            <button type="button" id="btn-refresh-slots" class="availability-refresh">Refresh slots</button>
+                        </div>
                         <div id="time-slots-list" class="slots-list"></div>
+                        <p id="slot-last-updated" class="selected-date-subtext" aria-live="polite"></p>
                     </div>
 
                     <div class="button-group">

@@ -492,3 +492,50 @@
 .btn-danger:hover:not(:disabled) {
     background: #fee2e2;
 }
+
+/* Same-day, live slot availability */
+.availability-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.availability-bar .selected-date-subtext {
+    flex: 1 1 200px;
+    margin: 0;
+    line-height: 1.5;
+}
+.availability-refresh {
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: #102f5e;
+    background: #ffffff;
+    border: 1px solid #a6b9d6;
+    border-radius: 9px;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+.availability-refresh:focus-visible,
+.slot-item:focus-visible {
+    outline: 3px solid #3568af;
+    outline-offset: 2px;
+}
+.slot-in-progress:not(.selected) {
+    border-color: #256c50;
+    background: #f4faf7;
+}
+.slot-live-label {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #256c50;
+}
+.slot-item.selected .slot-live-label { color: #ffffff; }
+.slot-item.disabled { opacity: .73; }
+@media (max-width: 360px) {
+    .slots-list { grid-template-columns: 1fr; }
+}

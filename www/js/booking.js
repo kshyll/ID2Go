@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const db = window.ID2GoDB;
-  const MAX_SLOTS_PER_HOUR = 48;
 
   const TIME_SLOTS = [
     "8:00–9:00 AM",
@@ -679,81 +678,158 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  async function renderTimeSlots(dateString, fullDate) {
+  // Every RPC response is server-authoritative; never calculate availability
+  // from device time, because an appointment may be cancelled at any moment.
+  let availabilityRequestId = 0;
+  let lastSlotSignature = null;
+
+  async function renderTimeSlots(dateString, fullDate, options = {}) {
     if (!timeSlotsList || !selectedDateLabel) return;
-    if (btnStep3Next) btnStep3Next.disabled = true;
+    const requestId = ++availabilityRequestId;
 
-    const formattedDateText = fullDate.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric"
+    // Avoid clearing a selected slot during background refresh.
+    if (!options.silent) {
+      timeSlotsList.innerHTML =
+        '<p class="selected-date-subtext">Checking live availability...</p>';
+    }
+
+    const formattedDateText = fullDate.toLocaleDateString("en-PH", {
+      weekday: "long", month: "long", day: "numeric", year: "numeric"
     });
-
     selectedDateLabel.textContent = `Schedule for ${formattedDateText}`;
-    timeSlotsList.innerHTML =
-      "<p class='selected-date-subtext' style='grid-column: span 2;'>Loading available slots...</p>";
 
-    let dbBookings = {};
+    let response;
     try {
-      const {data, error} = await db.rpc("booking_slot_availability", {p_date: dateString});
+      const { data, error } = await db.rpc("booking_slot_status", {
+        p_date: dateString
+      });
       if (error) throw error;
-      if (bookingData.selectedDate !== dateString) return;
-      dbBookings = data || {};
+      if (!data || !Array.isArray(data.slots)) {
+        throw new Error("Booking availability response is invalid.");
+      }
+      response = data;
     } catch (error) {
-      if (bookingData.selectedDate !== dateString) return;
-      timeSlotsList.textContent = "Unable to load availability. Select the date again to retry.";
-      btnStep3Next.disabled = true;
+      if (requestId !== availabilityRequestId || bookingData.selectedDate !== dateString) return;
+      console.error("Booking availability failed:", error);
+      timeSlotsList.textContent =
+        "Live availability is unavailable. Check your connection and try again.";
+      bookingData.selectedTimeSlot = null;
+      if (btnStep3Next) btnStep3Next.disabled = true;
       return;
     }
 
-    timeSlotsList.innerHTML = "";
+    if (requestId !== availabilityRequestId || bookingData.selectedDate !== dateString) return;
+    const signature = `${dateString}:${JSON.stringify(response.slots)}`;
+    if (options.silent && signature === lastSlotSignature) return;
+    lastSlotSignature = signature;
+    const statusFor = {
+      available: "Available",
+      in_progress: "Accepting now",
+      full: "Fully booked",
+      closed: "Booking closed",
+      stations_closed: "Stations closed",
+      past: "Already ended",
+      sunday: "Closed Sunday",
+      invalid: "Unavailable"
+    };
 
-    TIME_SLOTS.forEach((slotText, index) => {
-      const bookedCount = dbBookings[slotText] || 0;
-      const remainingSlots = Math.max(0, MAX_SLOTS_PER_HOUR - bookedCount);
-      const isFull = remainingSlots === 0 || (dateString === today() && [8,9,10,11,13,14,15,16][index] <= manilaNow().getHours());
+    const chosen = bookingData.selectedTimeSlot;
+    timeSlotsList.replaceChildren();
+    const serverSlots = new Map(response.slots.map(slot => [slot.slot, slot]));
 
+    TIME_SLOTS.forEach(slotText => {
+      const slot = serverSlots.get(slotText);
+      const selectable = Boolean(slot?.bookable);
+      const remaining = Number(slot?.remaining ?? 0);
+      const state = String(slot?.status || "invalid");
       const slotEl = document.createElement("button");
       slotEl.type = "button";
-      slotEl.disabled = isFull;
-      slotEl.setAttribute("aria-pressed", String(!isFull && bookingData.selectedTimeSlot === slotText));
-      slotEl.classList.add("slot-item");
+      slotEl.className = "slot-item";
+      slotEl.disabled = !selectable;
+      slotEl.dataset.status = state;
+      slotEl.setAttribute("aria-pressed", String(selectable && chosen === slotText));
+      slotEl.setAttribute("aria-label",
+        `${slotText}, ${selectable ? `${remaining} spaces available` : (statusFor[state] || "Unavailable")}`);
 
-      if (isFull) {
-        slotEl.classList.add("disabled");
-        slotEl.innerHTML = `
-          <span class="slot-time">${slotText}</span>
-          <span class="slot-count">Full</span>
-        `;
-      } else {
-        if (bookingData.selectedTimeSlot === slotText) {
-          slotEl.classList.add("selected");
-          if (btnStep3Next) btnStep3Next.disabled = false;
+      const title = document.createElement("span");
+      title.className = "slot-time";
+      title.textContent = slotText;
+      const count = document.createElement("span");
+      count.className = "slot-count";
+      count.textContent = selectable ? `${remaining} left` : (statusFor[state] || "Unavailable");
+      slotEl.append(title, count);
+
+      if (selectable) {
+        if (state === "in_progress") {
+          slotEl.classList.add("slot-in-progress");
+          const label = document.createElement("span");
+          label.className = "slot-live-label";
+          label.textContent = "Ongoing hour";
+          slotEl.appendChild(label);
         }
-
-        slotEl.innerHTML = `
-          <span class="slot-time">${slotText}</span>
-          <span class="slot-count">${remainingSlots} left</span>
-        `;
-
+        if (chosen === slotText) slotEl.classList.add("selected");
         slotEl.addEventListener("click", () => {
-          document
-            .querySelectorAll(".slot-item")
-            .forEach((el) => { el.classList.remove("selected"); if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", "false"); });
-          slotEl.classList.add("selected");
-          slotEl.setAttribute("aria-pressed", "true");
           bookingData.selectedTimeSlot = slotText;
+          timeSlotsList.querySelectorAll(".slot-item").forEach(el => {
+            el.classList.toggle("selected", el === slotEl);
+            el.setAttribute("aria-pressed", String(el === slotEl));
+          });
           if (btnStep3Next) btnStep3Next.disabled = false;
         });
+      } else {
+        slotEl.classList.add("disabled");
       }
-
       timeSlotsList.appendChild(slotEl);
     });
+
+    // A booking could be taken or a window could close while this screen is open.
+    if (chosen && !response.slots.some(s => s.slot === chosen && s.bookable)) {
+      bookingData.selectedTimeSlot = null;
+    }
+    if (btnStep3Next) btnStep3Next.disabled = !bookingData.selectedTimeSlot;
+
+    const availabilityMessage = document.getElementById("slot-availability-help");
+    if (availabilityMessage) {
+      availabilityMessage.textContent =
+        `Today's ongoing hour can be booked until ${response.cutoff_minutes} minutes before it ends, ` +
+        "while a station is accepting students. Spaces update automatically.";
+    }
+    const refreshedAt = document.getElementById("slot-last-updated");
+    if (refreshedAt) refreshedAt.textContent = "Live slots checked";
   }
 
+  async function refreshSelectedDay(options = {}) {
+    if (!bookingData.selectedDate) return;
+    const [y, m, d] = bookingData.selectedDate.split("-").map(Number);
+    await renderTimeSlots(bookingData.selectedDate, new Date(y, m - 1, d), options);
+  }
+
+  const slotRefreshButton = document.getElementById("btn-refresh-slots");
+  slotRefreshButton?.addEventListener("click", () => refreshSelectedDay());
+  // Keeps cancelled/filled spaces fresh without relying on the database
+  // publication configuration. Booking itself still rechecks atomically.
+  const availabilityInterval = setInterval(() => {
+    if (steps[3]?.classList.contains("active") && !document.hidden) {
+      refreshSelectedDay({silent: true});
+    }
+  }, 15000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && steps[3]?.classList.contains("active")) {
+      refreshSelectedDay({silent: true});
+    }
+  });
+  window.addEventListener("pagehide", () => clearInterval(availabilityInterval), {once: true});
+
   if (btnStep3Next) {
-    btnStep3Next.addEventListener("click", () => {
+    btnStep3Next.addEventListener("click", async () => {
+      if (!bookingData.selectedDate || !bookingData.selectedTimeSlot) return;
+      btnStep3Next.disabled = true;
+      const chosen = bookingData.selectedTimeSlot;
+      await refreshSelectedDay({silent: true});
+      if (bookingData.selectedTimeSlot !== chosen) {
+        alert("That time slot has just closed or filled. Please choose another.");
+        return;
+      }
       populateReviewStep();
       goToStep(4);
     });
@@ -808,6 +884,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert(`Booking failed: ${error.message || "Please try again."}`);
         btnConfirmBooking.disabled = false;
         btnConfirmBooking.textContent = "Confirm Booking";
+        // The server is authoritative, especially when another student just
+        // claimed the last remaining slot or the cutoff has passed.
+        bookingData.selectedTimeSlot = null;
+        goToStep(3);
+        await refreshSelectedDay();
         return;
       }
       const generatedQueueNumber = saved.queue_number;
