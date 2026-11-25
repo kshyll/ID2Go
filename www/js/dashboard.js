@@ -21,7 +21,7 @@
       parts.map(part => [part.type, part.value])
     );
 
-    return ${values.year}-${values.month}-${values.day};
+    return `${values.year}-${values.month}-${values.day}`;
   };
 
   const formatQueue = value => {
@@ -77,7 +77,15 @@
   };
 
   // Set the initial state without using fake data.
+  const setStandbyLayout = active => {
+    $("progress-label").textContent = active ? "Return within" : "Queue progress";
+    $("students-ahead").classList.toggle("return-countdown", active);
+    $("estimated-wait").closest(".queue-card-footer").hidden = active;
+  };
+
   const resetQueue = () => {
+    clearInterval(graceTimer);
+    setStandbyLayout(false);
     $("queue-number").textContent = "—";
     $("queue-status").textContent = "No Active Queue";
     $("students-ahead").textContent = "No active queue";
@@ -87,8 +95,8 @@
 
   const resetStations = () => {
     for (let number = 1; number <= 4; number++) {
-      $(station-${number}-number).textContent = "—";
-      $(station-${number}-status).textContent =
+      $(`station-${number}-number`).textContent = "-";
+      $(`station-${number}-status`).textContent =
         "Not available";
     }
   };
@@ -116,7 +124,7 @@
     const time = appointment.time_slot || "Time not specified";
 
     $("appointment-schedule").textContent =
-      ${date} · ${time};
+      `${date} · ${time}`;
 
     // This number comes from the saved booking.
     // Live queue progress is handled separately.
@@ -165,7 +173,10 @@
   };
 
   // Display the student's real queue information.
+  let graceTimer;
   const renderQueue = queue => {
+    clearInterval(graceTimer);
+    setStandbyLayout(false);
     if (!queue || typeof queue !== "object") {
       return;
     }
@@ -191,9 +202,22 @@
     $("queue-status").textContent =
       labels[status] || "Queue Status Unavailable";
 
-    if (status === "called") {
+    if (status === "standby" && Number.isFinite(Date.parse(queue.deadline))) {
+      setStandbyLayout(true);
+      const tick = () => {
+        const left = Math.max(0, Math.ceil((Date.parse(queue.deadline) - Date.now()) / 1000));
+        if (!left) setStandbyLayout(false);
+        $("students-ahead").textContent = left
+          ? Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0")
+          : "Grace period ended. Book a new appointment.";
+      };
+      tick();
+      graceTimer = setInterval(tick, 1000);
+    } else if (status === "missed") {
+      $("students-ahead").textContent = "Your grace period ended. Book a new appointment.";
+    } else if (status === "called") {
       $("students-ahead").textContent =
-        "Please proceed to your assigned station.";
+        "Please proceed to Station " + queue.station + ".";
     } else if (status === "in_service") {
       $("students-ahead").textContent =
         "Your ID service is in progress.";
@@ -206,7 +230,7 @@
       $("students-ahead").textContent =
         count === 0
           ? "You're next in line."
-          : ${count} student${count === 1 ? "" : "s"} ahead of you;
+          : `${count} student${count === 1 ? "" : "s"} ahead of you`;
     } else {
       $("students-ahead").textContent =
         "Live queue position unavailable.";
@@ -242,8 +266,8 @@
         return;
       }
 
-      const currentNumber = $(station-${number}-number);
-      const currentStatus = $(station-${number}-status);
+      const currentNumber = $(`station-${number}-number`);
+      const currentStatus = $(`station-${number}-status`);
 
       currentNumber.textContent =
         formatQueue(station.queue_number);
@@ -318,6 +342,8 @@
 
         // Retain booking details but never invent
         // station values or waiting estimates.
+        clearInterval(graceTimer);
+        setStandbyLayout(false);
         resetStations();
 
         $("students-ahead").textContent =
@@ -365,6 +391,7 @@
 
   // Clear the timer when leaving the screen.
   window.addEventListener("pagehide", () => {
+    clearInterval(graceTimer);
     if (refreshTimer) {
       clearInterval(refreshTimer);
     }
