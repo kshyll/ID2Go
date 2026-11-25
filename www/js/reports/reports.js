@@ -2,10 +2,10 @@
 (() => {
   "use strict";
 
-  const $ = id => document.getElementById(id);
   const db = window.ID2GoDB;
+  const $ = id => document.getElementById(id);
 
-  const metricIds = {
+  const metrics = {
     total_appointments: "total-appointments",
     waiting: "total-waiting",
     in_service: "total-serving",
@@ -13,103 +13,7 @@
     missed: "total-missed"
   };
 
-  const setStatus = (message, error = false) => {
-    const element = $("report-status");
-    element.textContent = message;
-    element.classList.toggle("error", error);
-  };
-
-  const clearReport = () => {
-    Object.values(metricIds).forEach(id => {
-      $(id).textContent = "—";
-    });
-
-    $("station-monitoring").replaceChildren();
-  };
-
-  const getToday = () => {
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Manila",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }).formatToParts(new Date());
-
-    const values = Object.fromEntries(
-      parts.map(part => [part.type, part.value])
-    );
-
-    return `${values.year}-${values.month}-${values.day}`;
-  };
-
-  const checkAccess = async () => {
-    const { data, error } = await db.auth.getUser();
-
-    if (error || !data.user) {
-      window.location.replace("index.html");
-      return false;
-    }
-
-    const { data: roleData, error: roleError } = await db
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", data.user.id)
-      .single();
-
-    if (roleError || roleData?.role !== "admin") {
-      setStatus("You are not authorized to view reports.", true);
-      return false;
-    }
-
-    return true;
-  };
-
-  const renderStations = stations => {
-    const container = $("station-monitoring");
-    container.replaceChildren();
-
-    if (!Array.isArray(stations) || stations.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "reports-muted";
-      empty.textContent = "No station records available.";
-      container.appendChild(empty);
-      return;
-    }
-
-    stations.forEach(station => {
-      const row = document.createElement("div");
-      row.className = "station-row";
-
-      const name = document.createElement("strong");
-      name.textContent = station.name;
-
-      const status = document.createElement("span");
-      status.className = "station-status";
-
-      const dot = document.createElement("span");
-      dot.className = "status-dot";
-
-      if (station.status === "available") {
-        dot.classList.add("available");
-      }
-
-      if (station.status === "serving") {
-        dot.classList.add("busy");
-      }
-
-      const label = document.createElement("span");
-      label.textContent = station.status
-        .replaceAll("_", " ");
-
-      status.append(dot, label);
-      row.append(name, status);
-      container.appendChild(row);
-    });
-  };
-
-
-const renderQuota = quota => {
-  const fields = [
+  const quotaFields = [
     "quota-completed",
     "quota-capacity",
     "quota-daily-capacity",
@@ -119,125 +23,274 @@ const renderQuota = quota => {
     "quota-remaining"
   ];
 
-  const reset = () => {
-    fields.forEach(id => {
+  let requestNumber = 0;
+
+  // Show a message below the date selector.
+  const showStatus = (message, isError = false) => {
+    const element = $("report-status");
+
+    element.textContent = message;
+    element.classList.toggle("error", isError);
+  };
+
+  // Clear quota values when a new report is requested.
+  const resetQuota = () => {
+    quotaFields.forEach(id => {
       $(id).textContent = "—";
     });
 
     $("quota-progress-fill").style.width = "0%";
-    $("quota-progress").setAttribute("aria-valuenow", "0");
+
+    $("quota-progress").setAttribute(
+      "aria-valuenow",
+      "0"
+    );
   };
 
-  if (!quota || typeof quota !== "object") {
-    reset();
-    return;
-  }
-
-  const capacity = quota.daily_capacity;
-  const booked = quota.booked;
-  const completed = quota.completed;
-
-  if (
-    !Number.isInteger(capacity) ||
-    !Number.isInteger(booked) ||
-    !Number.isInteger(completed) ||
-    capacity < 0 ||
-    booked < 0 ||
-    completed < 0
-  ) {
-    reset();
-    return;
-  }
-
-  const remaining = Math.max(0, capacity - booked);
-
-  const percentage = capacity > 0
-    ? (completed / capacity) * 100
-    : 0;
-
-  const displayedPercentage = Math.min(
-    100,
-    Math.max(0, percentage)
-  );
-
-  $("quota-completed").textContent = completed;
-  $("quota-capacity").textContent = capacity;
-  $("quota-daily-capacity").textContent = capacity;
-  $("quota-booked").textContent = booked;
-  $("quota-completed-count").textContent = completed;
-
-  $("quota-percentage").textContent =
-    `${percentage.toFixed(1)}% completed`;
-
-  $("quota-remaining").textContent =
-    `${remaining} remaining booking slots`;
-
-  $("quota-progress-fill").style.width =
-    `${displayedPercentage}%`;
-
-  $("quota-progress").setAttribute(
-    "aria-valuenow",
-    String(displayedPercentage)
-  );
-};
-
-
-  const renderReport = report => {
-    Object.entries(metricIds).forEach(([key, id]) => {
-      const value = report[key];
-
-      $(id).textContent =
-        Number.isFinite(value) ? String(value) : "—";
+  // Clear previous report information.
+  const resetReport = () => {
+    Object.values(metrics).forEach(id => {
+      $(id).textContent = "—";
     });
 
-    renderStations(report.stations);
+    $("station-monitoring").replaceChildren();
+    $("report-date-label").textContent = "";
+
+    resetQuota();
   };
 
-  const loadReport = async () => {
-    const selectedDate = $("report-date").value;
-    const button = $("refresh-report");
+  // Get the current Philippine date.
+  const getToday = () => {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
 
-    if (!selectedDate) {
-      setStatus("Please select a reporting date.", true);
+    const year = parts.find(p => p.type === "year").value;
+    const month = parts.find(p => p.type === "month").value;
+    const day = parts.find(p => p.type === "day").value;
+
+    return `${year}-${month}-${day}`;
+  };
+
+  // Only administrators may view these reports.
+  const checkAdmin = async () => {
+    const { data, error } = await db.auth.getUser();
+
+    if (error || !data.user) {
+      window.location.replace("index.html");
+      return false;
+    }
+
+    const { data: role, error: roleError } = await db
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .single();
+
+    if (roleError || role?.role !== "admin") {
+      showStatus("Administrator access required.", true);
+      return false;
+    }
+
+    return true;
+  };
+
+  // Display the daily quota.
+  const showQuota = quota => {
+    if (!quota || typeof quota !== "object") {
+      resetQuota();
       return;
     }
 
+    const capacity = quota.daily_capacity;
+    const booked = quota.booked;
+    const completed = quota.completed;
+
+    const validNumbers = [
+      capacity,
+      booked,
+      completed
+    ].every(value => {
+      return Number.isInteger(value) && value >= 0;
+    });
+
+    if (!validNumbers) {
+      resetQuota();
+      return;
+    }
+
+    const remaining = Math.max(0, capacity - booked);
+
+    const percentage = capacity > 0
+      ? completed / capacity * 100
+      : 0;
+
+    const progress = Math.min(100, percentage);
+
+    $("quota-completed").textContent = completed;
+    $("quota-capacity").textContent = capacity;
+
+    $("quota-daily-capacity").textContent = capacity;
+    $("quota-booked").textContent = booked;
+    $("quota-completed-count").textContent = completed;
+
+    $("quota-percentage").textContent =
+      `${percentage.toFixed(1)}% completed`;
+
+    $("quota-remaining").textContent =
+      `${remaining} remaining booking slots`;
+
+    $("quota-progress-fill").style.width =
+      `${progress}%`;
+
+    $("quota-progress").setAttribute(
+      "aria-valuenow",
+      String(progress)
+    );
+  };
+
+  // Display the camera stations.
+  const showStations = stations => {
+    const container = $("station-monitoring");
+    container.replaceChildren();
+
+    if (!Array.isArray(stations) || stations.length === 0) {
+      const message = document.createElement("p");
+
+      message.className = "reports-muted";
+      message.textContent = "No station records available.";
+
+      container.appendChild(message);
+      return;
+    }
+
+    stations.forEach(station => {
+      const row = document.createElement("div");
+      row.className = "station-row";
+
+      const name = document.createElement("strong");
+      name.textContent = station.name || "Station";
+
+      const state = String(
+        station.status || "unknown"
+      );
+
+      const statusLabel = document.createElement("span");
+      statusLabel.className = "station-status";
+
+      const dot = document.createElement("span");
+      dot.className = "status-dot";
+
+      if (state === "available") {
+        dot.classList.add("available");
+      }
+
+      if (
+        state === "serving" ||
+        state === "busy" ||
+        state === "occupied"
+      ) {
+        dot.classList.add("busy");
+      }
+
+      const label = document.createElement("span");
+      label.textContent = state.replaceAll("_", " ");
+
+      statusLabel.append(dot, label);
+      row.append(name, statusLabel);
+
+      container.appendChild(row);
+    });
+  };
+
+  // Display all report values.
+  const showReport = report => {
+    Object.entries(metrics).forEach(([key, id]) => {
+      const value = report[key];
+
+      $(id).textContent =
+        Number.isFinite(value) && value >= 0
+          ? String(value)
+          : "—";
+    });
+
+    showQuota(report.quota);
+    showStations(report.stations);
+  };
+
+  // Fetch a report from Supabase.
+  const loadReport = async () => {
+    const date = $("report-date").value;
+    const button = $("refresh-report");
+
+    if (!date) {
+      showStatus("Please select a date.", true);
+      return;
+    }
+
+    // Each request gets a number.
+    // An older request cannot replace a newer report.
+    requestNumber++;
+    const currentRequest = requestNumber;
+
     button.disabled = true;
-    setStatus("Loading report...");
-    clearReport();
+    resetReport();
+    showStatus("Loading report...");
 
     try {
       const { data, error } = await db.rpc(
         "get_daily_report",
-        { p_report_date: selectedDate }
+        { p_report_date: date }
       );
+
+      // Ignore the response if a newer request exists.
+      if (currentRequest !== requestNumber) {
+        return;
+      }
 
       if (error) {
         throw error;
       }
 
-      if (!data || typeof data !== "object" ||
-          Array.isArray(data)) {
+      if (
+        !data ||
+        Array.isArray(data) ||
+        typeof data !== "object"
+      ) {
         throw new Error("Invalid report response.");
       }
 
-      renderReport(data);
-      $("report-date-label").textContent = selectedDate;
-      setStatus("Report updated successfully.");
+      showReport(data);
+      $("report-date-label").textContent = date;
+
+      showStatus("Report updated.");
+
     } catch (error) {
-      console.error("Report loading failed:", error);
-      setStatus(
-        "Unable to load the report. Check database configuration and permissions.",
+      if (currentRequest !== requestNumber) {
+        return;
+      }
+
+      console.error("Report error:", error);
+
+      showStatus(
+        "Unable to load report. Please try again.",
         true
       );
+
     } finally {
-      button.disabled = false;
+      if (currentRequest === requestNumber) {
+        button.disabled = false;
+      }
     }
   };
 
+  // Initialize the reports screen.
   const initialize = async () => {
     if (!db) {
-      setStatus("Supabase connection is unavailable.", true);
+      showStatus("Supabase is unavailable.", true);
       return;
     }
 
@@ -254,26 +307,28 @@ const renderQuota = quota => {
     );
 
     try {
-      const authorized = await checkAccess();
+      const authorized = await checkAdmin();
 
       if (!authorized) {
-        $("refresh-report").disabled = true;
         $("report-date").disabled = true;
+        $("refresh-report").disabled = true;
         return;
       }
 
       await loadReport();
+
     } catch (error) {
       console.error(error);
-      setStatus("Unable to verify account access.", true);
+
+      showStatus(
+        "Unable to verify administrator access.",
+        true
+      );
     }
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      initialize
-    );
+    document.addEventListener("DOMContentLoaded", initialize);
   } else {
     initialize();
   }

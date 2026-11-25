@@ -77,6 +77,7 @@
   };
 
   window.OperatorQueueService = {
+    shift: open => execute("operator_shift", {p_open: open}),
     getOperator,
     getDashboard,
     getQueue,

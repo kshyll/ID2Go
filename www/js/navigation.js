@@ -2,26 +2,56 @@
 (() => {
   "use strict";
 
+  const db = window.ID2GoDB;
+
   const currentPage =
-    window.location.pathname.split("/").pop() || "index.html";
+    window.location.pathname.split("/").pop() ||
+    "index.html";
 
   const studentPages = [
     "dashboard.html",
     "booking.html",
-    "profile.html"
+    "profile.html",
+    "notifications.html"
   ];
 
-  const getStudent = () => {
-    try {
-      const data = localStorage.getItem("id2go_student");
-      return data ? JSON.parse(data) : null;
-    } catch (error) {
+  const getStudent = async () => {
+    if (!db) {
+      throw new Error("Supabase client is unavailable.");
+    }
+
+    const { data, error } = await db.auth.getUser();
+
+    if (error || !data.user) {
       return null;
     }
+
+    const { data: roleData, error: roleError } = await db
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .single();
+
+    if (roleError) {
+      throw new Error("Unable to verify student role.");
+    }
+
+    return roleData?.role === "student"
+      ? data.user
+      : null;
   };
 
-  const logout = () => {
-    localStorage.removeItem("id2go_student");
+  const logout = async () => {
+    if (!db) {
+      throw new Error("Supabase client is unavailable.");
+    }
+
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
     window.location.replace("index.html");
   };
 
@@ -37,10 +67,10 @@
     window.location.href = "profile.html";
   };
 
-  const featureAvailable = async (page) => {
+  const featureAvailable = async page => {
     try {
       const response = await fetch(page, {
-        method: "GET",
+        method: "HEAD",
         cache: "no-store"
       });
 
@@ -50,7 +80,7 @@
     }
   };
 
-  const showUnavailable = (name) => {
+  const showUnavailable = name => {
     let message = document.getElementById(
       "feature-unavailable-message"
     );
@@ -62,16 +92,16 @@
       Object.assign(message.style, {
         position: "fixed",
         left: "50%",
-        bottom: "105px",
+        bottom: "100px",
         transform: "translateX(-50%)",
         width: "calc(100% - 32px)",
         maxWidth: "420px",
-        padding: "16px",
-        background: "#103675",
+        padding: "14px 18px",
+        background: "#102f5e",
         color: "#ffffff",
-        borderRadius: "12px",
+        borderRadius: "9px",
         textAlign: "center",
-        fontSize: "14px",
+        fontSize: "13px",
         zIndex: "9999"
       });
 
@@ -80,7 +110,7 @@
     }
 
     message.textContent =
-      `${name} is not available yet.`;
+      `${name} is not available right now.`;
   };
 
   const openFeature = async (page, name) => {
@@ -93,35 +123,38 @@
     }
   };
 
-  window.ID2Go = {
-    getStudent,
-    logout,
-    goToHome,
-    goToQueue: goToHome,
-    goToBooking,
-    goToProfile,
-    openFeature
-  };
+  const initializeNavigation = async () => {
+    if (studentPages.includes(currentPage)) {
+      let student;
 
-  if (studentPages.includes(currentPage) && !getStudent()) {
-    window.location.replace("index.html");
-    return;
-  }
+      try {
+        student = await getStudent();
+      } catch (error) {
+        console.error("Authentication error:", error);
+        showUnavailable("Authentication");
+        return;
+      }
 
-  const initializeNavigation = () => {
-    const student = getStudent();
+      if (!student) {
+        window.location.replace("index.html");
+        return;
+      }
 
-    const welcomeName = document.getElementById(
-      "welcome-name"
-    );
+      const welcomeName = document.getElementById(
+        "welcome-name"
+      );
 
-    if (welcomeName && student) {
-      const firstName =
-        String(student.name || "Student")
-          .trim()
-          .split(/\s+/)[0];
+      if (welcomeName) {
+        const fullName =
+          student.user_metadata?.full_name ||
+          student.email?.split("@")[0] ||
+          "Student";
 
-      welcomeName.textContent = `${firstName}!`;
+        const firstName =
+          fullName.trim().split(/\s+/)[0];
+
+        welcomeName.textContent = `${firstName}!`;
+      }
     }
 
     const bookingButton = document.getElementById(
@@ -130,7 +163,10 @@
 
     if (bookingButton) {
       bookingButton.addEventListener("click", () => {
-        openFeature("booking.html", "Appointment Booking");
+        openFeature(
+          "booking.html",
+          "Appointment Booking"
+        );
       });
     }
 
@@ -153,7 +189,10 @@
 
     if (notificationButton) {
       notificationButton.addEventListener("click", () => {
-        showUnavailable("Notifications");
+        openFeature(
+          "notifications.html",
+          "Notifications"
+        );
       });
     }
 
@@ -162,8 +201,28 @@
     );
 
     if (logoutButton) {
-      logoutButton.addEventListener("click", logout);
+      logoutButton.addEventListener("click", async () => {
+        logoutButton.disabled = true;
+
+        try {
+          await logout();
+        } catch (error) {
+          console.error("Logout error:", error);
+          showUnavailable("Logout");
+          logoutButton.disabled = false;
+        }
+      });
     }
+  };
+
+  window.ID2Go = {
+    getStudent,
+    logout,
+    goToHome,
+    goToQueue: goToHome,
+    goToBooking,
+    goToProfile,
+    openFeature
   };
 
   if (document.readyState === "loading") {

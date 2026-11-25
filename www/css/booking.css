@@ -1,0 +1,494 @@
+/* Step Card Visibility */
+.step-card {
+    display: none;
+}
+
+.step-card.active {
+    display: block;
+}
+
+/* Step Header */
+.step-header {
+    margin-bottom: 20px;
+}
+
+.back-link {
+    background: none;
+    border: none;
+    color: var(--muted, #6b7890);
+    font-size: 13px;
+    padding: 0;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.back-link:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.step-indicator {
+    font-size: 12px;
+    color: var(--muted, #6b7890);
+    margin: 4px 0 0;
+}
+
+.section-title, .page-title {
+    font-size: 20px;
+    color: var(--text, #172b4d);
+    margin: 0 0 16px;
+    font-weight: bold;
+}
+
+/* Form Controls */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text, #172b4d);
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 12px;
+    background: #ffffff;
+    font-size: 14px;
+    color: var(--text, #172b4d);
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #102f5e;
+}
+
+.form-section-divider {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border, #dce3ed);
+}
+
+.subsection-title {
+    font-size: 15px;
+    color: #102f5e;
+    margin: 0 0 14px;
+}
+
+/* Radio Service Selection */
+.service-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.service-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 14px;
+    background: #f8fafe;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.service-option.selected {
+    background: #edf3ff;
+    border-color: #102f5e;
+}
+
+.service-option input[type="radio"] {
+    display: none;
+}
+
+.custom-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--muted, #6b7890);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.service-option.selected .custom-radio {
+    border-color: #102f5e;
+}
+
+.service-option.selected .custom-radio::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #102f5e;
+}
+
+.option-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text, #172b4d);
+}
+
+/* Button Component Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-primary {
+    background: #102f5e;
+    color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #0c2448;
+}
+
+.btn-secondary {
+    background: #e8efff;
+    color: #102f5e;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+/* ==================== 1. FIXED CALENDAR GRID ==================== */
+.calendar-wrapper {
+    background: #f8fafe;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cal-month-title {
+    font-weight: bold;
+    font-size: 15px;
+    color: #102f5e;
+}
+
+.cal-nav-btn {
+    background: #ffffff;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #102f5e;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+}
+
+.cal-day-header {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--muted, #6b7890);
+    padding-bottom: 6px;
+}
+
+/* Key Fix: Ensures dates span across 7 grid columns */
+.calendar-days-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-column: span 7;
+    gap: 6px;
+}
+
+.cal-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text, #172b4d);
+    background: #ffffff;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.cal-day:hover:not(.sunday):not(.empty) {
+    background: #e7efff;
+    border-color: #102f5e;
+    color: #102f5e;
+}
+
+.cal-day.selected {
+    background: #102f5e !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.cal-day.sunday {
+    color: #c5cdd9;
+    cursor: not-allowed;
+    background: transparent;
+    opacity: 0.5;
+}
+
+.cal-day.empty {
+    cursor: default;
+    background: transparent;
+}
+
+/* ==================== 2. FIXED TIME SLOTS & CLICK FEEDBACK ==================== */
+.time-slots-container {
+    margin-bottom: 20px;
+}
+
+.selected-date-subtext {
+    font-size: 12px;
+    color: var(--muted, #6b7890);
+    margin: 4px 0 12px;
+}
+
+.slots-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.slot-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    border: 1.5px solid var(--border, #dce3ed);
+    border-radius: 12px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.slot-item:hover:not(.disabled) {
+    border-color: #102f5e;
+    background: #f0f5ff;
+}
+
+/* Selected state with strong visual feedback */
+.slot-item.selected {
+    background: #102f5e !important;
+    border-color: #102f5e !important;
+    box-shadow: 0 4px 12px rgba(16, 47, 94, 0.25);
+}
+
+.slot-item.selected .slot-time,
+.slot-item.selected .slot-count {
+    color: #ffffff !important;
+}
+
+.slot-time {
+    font-size: 13px;
+    font-weight: 700;
+    color: #102f5e;
+    margin-bottom: 2px;
+}
+
+.slot-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted, #6b7890);
+}
+
+.slot-item.disabled {
+    opacity: 0.5;
+    background: #f4f6fa;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
+/* Review Step */
+.review-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8fafe;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border, #dce3ed);
+    margin-bottom: 16px;
+}
+
+.review-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.review-label {
+    color: var(--muted, #6b7890);
+}
+
+.review-value {
+    font-weight: bold;
+    color: var(--text, #172b4d);
+}
+
+.disclaimer-text {
+    font-size: 12px;
+    color: var(--muted, #6b7890);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Confirmation Step */
+.confirmation-summary-card {
+    background: #edf3ff;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    margin: 16px 0 24px;
+}
+
+.summary-service-title {
+    margin: 0 0 6px;
+    font-size: 15px;
+    color: #102f5e;
+}
+
+.summary-text {
+    margin: 4px 0;
+    font-size: 13px;
+    color: var(--muted, #6b7890);
+}
+
+.status-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #258b35;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Existing Active Appointment Card */
+.existing-appointment-card {
+    background: #edf3ff;
+    border: 1px solid var(--border, #dce3ed);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.appointment-status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.status-badge-active {
+    background: #258b35;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.queue-mini-badge {
+    font-size: 13px;
+    color: #102f5e;
+}
+
+.active-service-title {
+    font-size: 18px;
+    color: #102f5e;
+    margin: 0 0 14px;
+    font-weight: bold;
+}
+
+.active-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #ffffff;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #dce3ed;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.info-label {
+    color: var(--muted, #6b7890);
+}
+
+.info-val {
+    font-weight: bold;
+    color: var(--text, #172b4d);
+}
+
+/* Danger / Cancel Button */
+.btn-danger {
+    background: #fff0f0;
+    color: #d93838;
+    border: 1px solid #fecaca;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #fee2e2;
+}

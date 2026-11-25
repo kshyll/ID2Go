@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, initial-scale=1">
+          content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#102f5e">
 
     <title>ID2Go | Camera Operator</title>
@@ -12,13 +12,16 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/operator.css">
 
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="cordova.js"></script>
+    <script defer src="vendor/supabase.js"></script>
+    <script defer src="js/config.js"></script>
     <script defer src="js/supabase-client.js"></script>
     <script defer src="js/operator/queue-service.js"></script>
     <script defer src="js/operator/app.js"></script>
+    <link rel="stylesheet" href="css/university.css">
 </head>
 
-<body>
+<body class="page-operator">
     <div class="operator-shell">
 
         <header class="operator-header">
@@ -115,23 +118,14 @@
             <!-- QUEUE WORKSPACE -->
             <section id="workspace-view" class="view">
 
-                <button id="workspace-back"
-                        class="text-button back-button"
-                        type="button">
-                    ← Back to Dashboard
-                </button>
-
-                <div class="section-heading">
-                    <h2>Queue Workspace</h2>
-
-                    <span id="workspace-station"
-                          class="status-badge">
-                        —
-                    </span>
-                </div>
-
+                <article class="desk-summary">
+                    <div class="desk-top"><div><span class="desk-label">Assigned station</span><h2 id="workspace-station">Loading…</h2></div><span id="desk-status">Connecting</span></div>
+                    <div class="desk-counts"><div><strong id="desk-ready">—</strong><span>Ready to call</span></div><div><strong id="desk-standby">—</strong><span>On standby</span></div><div><strong id="desk-done">—</strong><span>Completed today</span></div></div>
+                </article>
                 <article class="ui-card">
-                    <div class="section-heading">
+                    <div class="desk-toolbar"><h3>Service controls</h3><button id="shift" type="button" class="text-button" disabled>Station shift</button></div>
+                    <div id="current-details" hidden>
+<div class="section-heading">
                         <h3>Current Student</h3>
 
                         <span id="student-status"
@@ -171,8 +165,10 @@
                         <strong id="arrival-timer">—</strong>
                     </div>
 
+                    </div>
+                    <p id="station-hint"></p>
                     <div class="workspace-actions">
-                        <button id="call-next"
+                        <button disabled id="call-next"
                                 type="button"
                                 class="ui-button ui-button-primary">
                             Call Next Student
@@ -200,6 +196,8 @@
                         </button>
                     </div>
                 </article>
+                <article class="ui-card" id="station-standby"><h3>On standby</h3><div id="standby-list"></div></article>
+                <button id="workspace-back" class="text-button" type="button">Station overview →</button>
             </section>
 
             <!-- QUEUE LIST -->
@@ -233,12 +231,9 @@
                         Called
                     </button>
 
-                    <button class="filter-btn"
-                            type="button"
-                            data-filter="standby"
-                            aria-pressed="false">
-                        Standby
-                    </button>
+                    <button class="filter-btn" type="button" data-filter="in_service" aria-pressed="false">In service</button>
+<button class="filter-btn" type="button" data-filter="upcoming" aria-pressed="false">Upcoming</button>
+
 
                     <button class="filter-btn"
                             type="button"
@@ -321,7 +316,7 @@
                     <path d="M9 21v-7h6v7"/>
                 </svg>
 
-                <span>Home</span>
+                <span>Station</span>
             </button>
 
             <button class="nav-item"

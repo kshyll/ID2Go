@@ -13,13 +13,21 @@
   const $ = id => document.getElementById(id);
 
   const getCurrentUser = async () => {
+    if (!db) {
+      throw new Error("Supabase is unavailable.");
+    }
+
     const { data, error } = await db.auth.getUser();
 
-    if (error || !data.user) {
+    if (error?.name === "AuthSessionMissingError") {
       return null;
     }
 
-    return data.user;
+    if (error) {
+      throw error;
+    }
+
+    return data.user || null;
   };
 
   const getUserRole = async userId => {
@@ -31,29 +39,33 @@
 
     if (error || !data) {
       throw new Error(
-        "Your account has no assigned role. Contact the administrator."
+        "No role is assigned to this account. Contact the administrator."
       );
     }
 
-    if (!Object.prototype.hasOwnProperty.call(routes, data.role)) {
-      throw new Error("Your account has an invalid role.");
+    if (!routes[data.role]) {
+      throw new Error("Invalid account role.");
     }
 
     return data.role;
   };
 
   const login = async (email, password) => {
+    if (!db) {
+      throw new Error("Supabase is unavailable.");
+    }
+
     const { data, error } = await db.auth.signInWithPassword({
       email,
       password
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
 
     if (!data.user) {
-      throw new Error("Authentication failed.");
+      throw new Error("Unable to sign in.");
     }
 
     try {
@@ -61,7 +73,7 @@
 
       return {
         user: data.user,
-        role
+        role: role
       };
     } catch (error) {
       await db.auth.signOut();
@@ -70,10 +82,14 @@
   };
 
   const logout = async () => {
+    if (!db) {
+      throw new Error("Supabase is unavailable.");
+    }
+
     const { error } = await db.auth.signOut();
 
     if (error) {
-      throw new Error(error.message);
+      throw error;
     }
 
     window.location.replace("index.html");
@@ -83,11 +99,12 @@
     const destination = routes[role];
 
     if (!destination) {
-      throw new Error("Unknown user role.");
+      throw new Error("Invalid account role.");
     }
 
     window.location.replace(destination);
   };
+
 
   window.ID2GoAuth = {
     login,
@@ -108,27 +125,40 @@
     const passwordInput = $("login-password");
     const toggleButton = $("toggle-password");
     const loginButton = $("login-button");
+    const loginButtonLabel = $("login-button-label");
     const errorMessage = $("login-error");
+
+    let busy = false;
+    let redirecting = false;
 
     const showError = message => {
       errorMessage.textContent = message;
       errorMessage.hidden = false;
     };
 
-    const setLoading = (loading, message = "Sign In") => {
+    const setLoading = (loading, label = "Sign In") => {
+      busy = loading;
       loginButton.disabled = loading;
-      loginButton.textContent = message;
+      loginButtonLabel.textContent = label;
     };
 
     toggleButton.addEventListener("click", () => {
-      const hidden = passwordInput.type === "password";
+      const isHidden = passwordInput.type === "password";
 
-      passwordInput.type = hidden ? "text" : "password";
-      toggleButton.textContent = hidden ? "Hide" : "Show";
+      passwordInput.type = isHidden ? "text" : "password";
+      toggleButton.textContent = isHidden ? "Hide" : "Show";
+      toggleButton.setAttribute(
+        "aria-label",
+        isHidden ? "Hide password" : "Show password"
+      );
     });
 
     form.addEventListener("submit", async event => {
       event.preventDefault();
+
+      if (busy || redirecting) {
+        return;
+      }
 
       errorMessage.hidden = true;
       setLoading(true, "Signing in...");
@@ -139,11 +169,21 @@
           passwordInput.value
         );
 
+        redirecting = true;
         redirectByRole(result.role);
+
       } catch (error) {
-        showError(error.message || "Unable to sign in.");
+        if (error.code === "invalid_credentials") {
+          showError(
+            "Email or password is incorrect. Please try again."
+          );
+        } else {
+          showError(error.message || "Unable to sign in.");
+        }
       } finally {
-        setLoading(false);
+        if (!redirecting) {
+          setLoading(false);
+        }
       }
     });
 
@@ -154,12 +194,21 @@
 
       if (user) {
         const role = await getUserRole(user.id);
+
+        redirecting = true;
         redirectByRole(role);
       }
+
     } catch (error) {
-      showError(error.message || "Unable to verify session.");
+      console.error("Session check:", error);
+
+      showError(
+        "Unable to verify your session. Please try signing in."
+      );
     } finally {
-      setLoading(false);
+      if (!redirecting) {
+        setLoading(false);
+      }
     }
   };
 
